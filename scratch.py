@@ -120,7 +120,12 @@ def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
     return abs(exp_vacc_1 - obs_vacc_1) + abs(exp_vacc_2 - obs_vacc_2)
 
 
-# TODO This will need to be updated to do a stochastic simulation.
+# TODO This will need to be updated to do a stochastic simulation. The
+# GillesPy2 package allows you to switch between stochastic and
+# deterministic simulations of the same model:
+# https://gillespy2.readthedocs.io/en/latest/tutorials/tut_toggle_switch/tut_toggle_switch.html
+# This seems like it would be a sensible replacement for the current
+# ODE based approach.
 def sir_vacc(params: SIRParams, sir_0: SIRInitialConditions, ts) -> SIRSolution:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
 
