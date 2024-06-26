@@ -157,7 +157,9 @@ def optimal_initial_conditions(params: SIRParams,
      opt_result = scipy.optimize.minimize(
           objective,
           [0.5, 0.5],
-          bounds=[(0, vacc_upper_bound_1), (0, vacc_upper_bound_2)])
+          bounds=[(0, vacc_upper_bound_1), (0, vacc_upper_bound_2)],
+         method='Nelder-Mead'
+     )
      if opt_result.success:
          return {"opt_init_cond": initial_cond_from_vacc(opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2),
                  "obejctive_value": opt_result.fun}
