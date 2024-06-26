@@ -3,6 +3,7 @@ import scipy.integrate
 import scipy.optimize
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import numpy as np
 
 
 @dataclass
@@ -37,12 +38,20 @@ class SIRSolution:
 def total_infections(sir_sol: SIRSolution) -> dict:
     ttl_vacc = total_vaccinated(sir_sol)
     return {"inf_in_1": sir_sol.i1[-1] + sir_sol.r1[-1] - ttl_vacc["vacc_1"],
-            "inf_in_2": sir_sol.i2[-1] + sir_sol.r2[-1] - ttl_vacc["vacc_2"]}
+            "inf_in_2": sir_sol.i2[-1] + sir_sol.r2[-1] - ttl_vacc["vacc_2"],
+            "total": sir_sol.i1[-1] + sir_sol.r1[-1] - ttl_vacc["vacc_1"] + sir_sol.i2[-1] + sir_sol.r2[-1] - ttl_vacc["vacc_2"]}
 
 
 def total_vaccinated(sir_sol: SIRSolution) -> dict:
     return {"vacc_1": sir_sol.r1[0],
-            "vacc_2": sir_sol.r2[0]}
+            "vacc_2": sir_sol.r2[0],
+            "total": sir_sol.r1[0] + sir_sol.r2[0]}
+
+
+def total_population(sir_sol: SIRSolution) -> dict:
+    return {"pop_1": sir_sol.s1[0] + sir_sol.i1[0] + sir_sol.r1[0],
+            "pop_2": sir_sol.s2[0] + sir_sol.i2[0] + sir_sol.r2[0],
+            "total": sir_sol.s1[0] + sir_sol.i1[0] + sir_sol.r1[0] + sir_sol.s2[0] + sir_sol.i2[0] + sir_sol.r2[0]}
 
 
 def initial_cond_from_vacc(vacc_prop_1: float,
@@ -58,18 +67,30 @@ def initial_cond_from_vacc(vacc_prop_1: float,
         pop_size_2 * vacc_prop_2)
 
 
-def clinical_burden(sir_sol: SIRSolution) -> float:
+def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = total_infections(sir_sol)
-    return ttl_infs["inf_in_1"] + ttl_infs["inf_in_2"]
-
-
-def vaccinated_propotions(sir_sol: SIRSolution) -> dict:
     ttl_vacc = total_vaccinated(sir_sol)
-    ttl_pop = {"pop_1": sir_sol.s1[0] + sir_sol.i1[0] + sir_sol.r1[0],
-               "pop_2": sir_sol.s2[0] + sir_sol.i2[0] + sir_sol.r2[0]}
-    return {"vacc_prop_1": ttl_vacc["vacc_1"] / ttl_pop["pop_1"],
-            "vacc_prop_2": ttl_vacc["vacc_2"] / ttl_pop["pop_2"]}
+    return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
+
+def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
+    ttl_infs = total_infections(sir_sol)
+    ttl_pop = total_population(sir_sol)
+    exp_burden_1 = ttl_infs["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
+    exp_burden_2 = ttl_infs["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
+    obs_burden_1 = ttl_infs["inf_in_1"]
+    obs_burden_2 = ttl_infs["inf_in_2"]
+    return abs(exp_burden_1 - obs_burden_1) + abs(exp_burden_2 - obs_burden_2)
+
+
+def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
+    ttl_vacc = total_vaccinated(sir_sol)
+    ttl_pop = total_population(sir_sol)
+    exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
+    exp_vacc_2 = ttl_vacc["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
+    obs_vacc_1 = ttl_vacc["vacc_1"]
+    obs_vacc_2 = ttl_vacc["vacc_2"]
+    return abs(exp_vacc_1 - obs_vacc_1) + abs(exp_vacc_2 - obs_vacc_2)
 
 
 
@@ -114,26 +135,35 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
 
 def objective_func_factory(params: SIRParams,
                            pop_size_1: float,
-                           pop_size_2: float) -> float:
+                           pop_size_2: float,
+                           a : float,
+                           b : float) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = initial_cond_from_vacc(vacc_props[0], vacc_props[1], pop_size_1, pop_size_2)
         sir_sol = sir_vacc(params, init_cond, ts)
-        return clinical_burden(sir_sol)
+        return (1 - a - b) * loss_clinical_burden(sir_sol) + a * loss_equity_of_burden(sir_sol) + b * loss_equity_of_vaccination(sir_sol)
     return objective
 
 
 
 def optimal_initial_conditions(params: SIRParams,
                                pop_size_1: float,
-                               pop_size_2: float) -> SIRInitialConditions:
-     objective = objective_func_factory(params, pop_size_1, pop_size_2)
+                               pop_size_2: float,
+                               a: float,
+                               b: float) -> SIRInitialConditions:
+     objective = objective_func_factory(params, pop_size_1, pop_size_2, a, b)
      vacc_upper_bound_1 = 1 - (1 / pop_size_1)
      vacc_upper_bound_2 = 1 - (1 / pop_size_2)
-     optimal_vacc_props = scipy.optimize.minimize(
+     opt_result = scipy.optimize.minimize(
           objective,
-          [0.91, 0.91],
+          [0.5, 0.5],
           bounds=[(0, vacc_upper_bound_1), (0, vacc_upper_bound_2)])
-     return initial_cond_from_vacc(optimal_vacc_props.x[0], optimal_vacc_props.x[1], pop_size_1, pop_size_2)
+     if opt_result.success:
+         return {"opt_init_cond": initial_cond_from_vacc(opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2),
+                 "obejctive_value": opt_result.fun}
+     else:
+         import pdb; pdb.set_trace()
+         raise ValueError("Optimization failed with message: " + opt_result.message)
 
 
 # ================================
@@ -144,19 +174,60 @@ vacc_prop_2 = 0.1
 pop_size_1 = 500
 pop_size_2 = 500
 init_cond = initial_cond_from_vacc(vacc_prop_1, vacc_prop_2, pop_size_1, pop_size_2)
-ts = np.arange(0, final_time, time_step)
+ts = np.arange(0, 100, 1 / 24)
 result = sir_vacc(params, init_cond, ts)
+
+
+
+
 print("======================================================================")
 print("Demo Results:")
 print("Total Infections: " + str(total_infections(result)))
 print("Total Vaccinated: " + str(total_vaccinated(result)))
-print("Vaccination Proportions: " + str(vaccinated_propotions(result)))
-print("Clinical Burden: " + str(clinical_burden(result)))
+print("Clinical Burden: " + str(loss_clinical_burden(result)))
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (1,0,0):")
-optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2)
-result_optimal = sir_vacc(params, optimal_init_cond, ts)
+optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0, 0)
+result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
+print("Objective Value: " + str(optimal_init_cond["obejctive_value"]))
 print("Total Infections: " + str(total_infections(result_optimal)))
 print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
-print("Vaccination Proportions: " + str(vaccinated_propotions(result_optimal)))
-print("Clinical Burden: " + str(clinical_burden(result_optimal)))
+print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
+print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
+print("Loss -- equity of vaccination: " + str(loss_equity_of_vaccination(result_optimal)))
+print("======================================================================")
+print("Results with optimal vaccination proportions for ethics: (0.5,0.5,0.0):")
+optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.5, 0.0)
+result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
+print("Total Infections: " + str(total_infections(result_optimal)))
+print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
+print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
+print("Loss -- equity of vaccination: " + str(loss_equity_of_vaccination(result_optimal)))
+print("======================================================================")
+print("Results with optimal vaccination proportions for ethics: (0.5,0.0,0.5):")
+optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.0, 0.5)
+result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
+print("Total Infections: " + str(total_infections(result_optimal)))
+print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
+print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
+print("Loss -- equity of vaccination: " + str(loss_equity_of_vaccination(result_optimal)))
+print("======================================================================")
+print("Results with optimal vaccination proportions for ethics: (0.6,0.2,0.2):")
+optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.2, 0.2)
+result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
+print("Total Infections: " + str(total_infections(result_optimal)))
+print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
+print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
+print("Loss -- equity of vaccination: " + str(loss_equity_of_vaccination(result_optimal)))
+print("======================================================================")
+print("Results with optimal vaccination proportions for ethics: (0.4,0.3,0.3):")
+optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.3, 0.3)
+result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
+print("Total Infections: " + str(total_infections(result_optimal)))
+print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
+print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
+print("Loss -- equity of vaccination: " + str(loss_equity_of_vaccination(result_optimal)))
