@@ -36,9 +36,16 @@ class SIRSolution:
     r2: [float]
     times: [float]
 
+    def total_vaccinated(self) -> dict:
+        return {
+            "vacc_1": self.r1[0],
+            "vacc_2": self.r2[0],
+            "total": self.r1[0] + self.r2[0],
+        }
+
 
 def total_infections(sir_sol: SIRSolution) -> dict:
-    ttl_vacc = total_vaccinated(sir_sol)
+    ttl_vacc = sir_sol.total_vaccinated()
     return {
         "inf_in_1": sir_sol.i1[-1] + sir_sol.r1[-1] - ttl_vacc["vacc_1"],
         "inf_in_2": sir_sol.i2[-1] + sir_sol.r2[-1] - ttl_vacc["vacc_2"],
@@ -48,14 +55,6 @@ def total_infections(sir_sol: SIRSolution) -> dict:
         + sir_sol.i2[-1]
         + sir_sol.r2[-1]
         - ttl_vacc["vacc_2"],
-    }
-
-
-def total_vaccinated(sir_sol: SIRSolution) -> dict:
-    return {
-        "vacc_1": sir_sol.r1[0],
-        "vacc_2": sir_sol.r2[0],
-        "total": sir_sol.r1[0] + sir_sol.r2[0],
     }
 
 
@@ -91,7 +90,7 @@ def initial_cond_from_vacc(
 # as clinical burden.
 def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = total_infections(sir_sol)
-    ttl_vacc = total_vaccinated(sir_sol)
+    ttl_vacc = sir_sol.total_vaccinated()
     return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
 
@@ -114,7 +113,7 @@ def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
 # random per vaccination cost (zero-inflated) and should be calculated
 # in the stochastic simulation.
 def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
-    ttl_vacc = total_vaccinated(sir_sol)
+    ttl_vacc = sir_sol.total_vaccinated()
     ttl_pop = total_population(sir_sol)
     exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
     exp_vacc_2 = ttl_vacc["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
@@ -230,7 +229,7 @@ result = sir_vacc(params, init_cond, ts)
 print("======================================================================")
 print("Demo Results:")
 print("Total Infections: " + str(total_infections(result)))
-print("Total Vaccinated: " + str(total_vaccinated(result)))
+print("Total Vaccinated: " + str(result.total_vaccinated()))
 print("Clinical Burden: " + str(loss_clinical_burden(result)))
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (1,0,0):")
@@ -238,7 +237,7 @@ optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Objective Value: " + str(optimal_init_cond["obejctive_value"]))
 print("Total Infections: " + str(total_infections(result_optimal)))
-print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
 print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
 print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
 print(
@@ -249,7 +248,7 @@ print("Results with optimal vaccination proportions for ethics: (0.5,0.5,0.0):")
 optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.5, 0.0)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(total_infections(result_optimal)))
-print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
 print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
 print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
 print(
@@ -260,7 +259,7 @@ print("Results with optimal vaccination proportions for ethics: (0.5,0.0,0.5):")
 optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.0, 0.5)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(total_infections(result_optimal)))
-print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
 print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
 print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
 print(
@@ -271,7 +270,7 @@ print("Results with optimal vaccination proportions for ethics: (0.6,0.2,0.2):")
 optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.2, 0.2)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(total_infections(result_optimal)))
-print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
 print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
 print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
 print(
@@ -282,7 +281,7 @@ print("Results with optimal vaccination proportions for ethics: (0.4,0.3,0.3):")
 optimal_init_cond = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0.3, 0.3)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(total_infections(result_optimal)))
-print("Total Vaccinated: " + str(total_vaccinated(result_optimal)))
+print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
 print("Loss -- clinical burden: " + str(loss_clinical_burden(result_optimal)))
 print("Loss -- equity of burden: " + str(loss_equity_of_burden(result_optimal)))
 print(
