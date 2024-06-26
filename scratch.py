@@ -16,22 +16,24 @@ class SIRParams:
 
 @dataclass
 class SIRInitialConditions:
-    s0_1: float
-    s0_2: float
-    i0_1: float
-    i0_2: float
-    r0_1: float
-    r0_2: float
+    s0_1: int
+    s0_2: int
+    i0_1: int
+    i0_2: int
+    r0_1: int
+    r0_2: int
 
+# TODO This needs to include a slot for the cost of an infection.
+# TODO This needs to include a slot for the cost of vaccination.
 @dataclass
 class SIRSolution:
-    s1: float
-    s2: float
-    i1: float
-    i2: float
-    r1: float
-    r2: float
-    times: float
+    s1: [float]
+    s2: [float]
+    i1: [float]
+    i2: [float]
+    r1: [float]
+    r2: [float]
+    times: [float]
 
 
 
@@ -54,10 +56,13 @@ def total_population(sir_sol: SIRSolution) -> dict:
             "total": sir_sol.s1[0] + sir_sol.i1[0] + sir_sol.r1[0] + sir_sol.s2[0] + sir_sol.i2[0] + sir_sol.r2[0]}
 
 
+
+# TODO Make sure that this returns an integer for the initial
+# conditions so it works with the stochastic model.
 def initial_cond_from_vacc(vacc_prop_1: float,
                            vacc_prop_2: float,
-                           pop_size_1: float,
-                           pop_size_2: float) -> SIRInitialConditions:
+                           pop_size_1: int,
+                           pop_size_2: int) -> SIRInitialConditions:
     return SIRInitialConditions(
         pop_size_1 * (1 - vacc_prop_1) - 1,
         pop_size_2 * (1 - vacc_prop_2) - 1,
@@ -67,12 +72,18 @@ def initial_cond_from_vacc(vacc_prop_1: float,
         pop_size_2 * vacc_prop_2)
 
 
+# TODO This needs to include the cost of vaccination in the same units
+# as clinical burden.
 def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = total_infections(sir_sol)
     ttl_vacc = total_vaccinated(sir_sol)
     return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
 
+# TODO This needs to be updated use the stochastic burden of the cost
+# of an infection. Recall the $ C_{I}^{i} $ is random per infection
+# (zero-inflated), although this should be calculated in the stochastic
+# simulation.
 def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = total_infections(sir_sol)
     ttl_pop = total_population(sir_sol)
@@ -83,6 +94,10 @@ def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
     return abs(exp_burden_1 - obs_burden_1) + abs(exp_burden_2 - obs_burden_2)
 
 
+# TODO This needs to make use of the cost of vaccination (which is
+# stored in the SIRSolution object). Recall that $ C_{V}^{i} $ is
+# random per vaccination cost (zero-inflated) and should be calculated
+# in the stochastic simulation.
 def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
     ttl_vacc = total_vaccinated(sir_sol)
     ttl_pop = total_population(sir_sol)
@@ -94,6 +109,7 @@ def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
 
 
 
+# TODO This will need to be updated to do a stochastic simulation.
 def sir_vacc(params: SIRParams, sir_0: SIRInitialConditions, ts) -> SIRSolution:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
 
@@ -111,10 +127,12 @@ def sir_vacc(params: SIRParams, sir_0: SIRInitialConditions, ts) -> SIRSolution:
         dr_2 = params.gamma * i_2
         return [ds_1, ds_2, di_1, di_2, dr_1, dr_2]
 
-    result = scipy.integrate.odeint(deriv, y0, ts, args=(params,))
+    result = scipy.integrate.odeint(deriv, y0, ts, args=(params,)) # This needs to change probably.
     return SIRSolution(s1=result[:, 0], s2=result[:, 1], i1=result[:, 2], i2=result[:, 3], r1=result[:, 4], r2=result[:, 5], times=ts)
 
 
+# TODO This needs to be extended to include some sort of visualisation
+# of the cost associated with infections and vaccnations.
 def plot_SIRSolution(sir_sol: SIRSolution) -> None:
     plt.figure(figsize=(12, 8))
     plt.plot(sir_sol.times, sir_sol.s1, label='Susceptible 1')
@@ -133,6 +151,7 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
 
 
 
+# TODO Make a consistent naming between "objective" and "loss".
 def objective_func_factory(params: SIRParams,
                            pop_size_1: float,
                            pop_size_2: float,
@@ -164,7 +183,6 @@ def optimal_initial_conditions(params: SIRParams,
          return {"opt_init_cond": initial_cond_from_vacc(opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2),
                  "obejctive_value": opt_result.fun}
      else:
-         import pdb; pdb.set_trace()
          raise ValueError("Optimization failed with message: " + opt_result.message)
 
 
