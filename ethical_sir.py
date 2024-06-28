@@ -87,8 +87,12 @@ def initial_cond_from_vacc(
 def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = sir_sol.total_infections()
     ttl_vacc = sir_sol.total_vaccinated()
-    net_days_hosp_for_inf = 0.02 * (2.918 * ttl_infs["inf_in_1"] + 7.613 * ttl_infs["inf_in_2"])
-    net_days_hosp_for_vacc = 0.002 * (17.6 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"])
+    net_days_hosp_for_inf = 0.02 * (
+        2.918 * ttl_infs["inf_in_1"] + 7.613 * ttl_infs["inf_in_2"]
+    )
+    net_days_hosp_for_vacc = 0.002 * (
+        17.6 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"]
+    )
     return net_days_hosp_for_inf + net_days_hosp_for_vacc
 
 
@@ -175,7 +179,7 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
 
 # TODO Make a consistent naming between "objective" and "loss".
 def objective_func_factory(
-        params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
+    params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = initial_cond_from_vacc(
@@ -192,7 +196,7 @@ def objective_func_factory(
 
 
 def optimal_initial_conditions(
-        params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
+    params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
 ) -> SIRInitialConditions:
     objective = objective_func_factory(params, ts, pop_size_1, pop_size_2, a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
