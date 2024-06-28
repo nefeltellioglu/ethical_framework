@@ -12,10 +12,10 @@ from ethical_sir import SIRParams, SIRInitialConditions, SIRSolution, optimal_in
 # ================================
 
 # TODO This still needs to be fixed to include the values from conmat.
-params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.2)
-pop_size_1 = 900
-pop_size_2 = 100
-ts = np.arange(0, 100, 1 / 24)
+params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.125)
+pop_size_1 = 4450000
+pop_size_2 = 550000
+ts = np.arange(0, 200, 1 / 24)
 
 # tmp_ic = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0, 0)
 # tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)

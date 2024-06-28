@@ -84,52 +84,29 @@ def initial_cond_from_vacc(
     )
 
 
-# TODO This needs to include the cost of vaccination in the same units
-# as clinical burden.
 def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = sir_sol.total_infections()
     ttl_vacc = sir_sol.total_vaccinated()
-    net_days_hosp_for_inf = 0.02 * (3.075 * ttl_infs["inf_in_1"] + 7.60 * ttl_infs["inf_in_2"])
-    net_days_hosp_for_vacc = 0.002 * (6.0 * 2 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"])
+    net_days_hosp_for_inf = 0.02 * (2.918 * ttl_infs["inf_in_1"] + 7.613 * ttl_infs["inf_in_2"])
+    net_days_hosp_for_vacc = 0.002 * (17.6 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"])
     return net_days_hosp_for_inf + net_days_hosp_for_vacc
-    # return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
 
-# TODO This needs to be updated use the stochastic burden of the cost
-# of an infection. Recall the $ C_{I}^{i} $ is random per infection
-# (zero-inflated), although this should be calculated in the stochastic
-# simulation.
 def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
-    # ttl_infs = sir_sol.total_infections()
-    # ttl_pop = sir_sol.total_population()
-    # exp_burden_1 = ttl_infs["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
-    # exp_burden_2 = ttl_infs["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
-    # obs_burden_1 = ttl_infs["inf_in_1"]
-    # obs_burden_2 = ttl_infs["inf_in_2"]
     ttl_infs = sir_sol.total_infections()
     ttl_pop = sir_sol.total_population()
-    obs_burden_1 = 0.02 * 3.075 * ttl_infs["inf_in_1"]
-    obs_burden_2 = 0.02 * 7.60 * ttl_infs["inf_in_2"]
+    obs_burden_1 = 0.02 * 2.918 * ttl_infs["inf_in_1"]
+    obs_burden_2 = 0.02 * 7.613 * ttl_infs["inf_in_2"]
     total_inf_burden = obs_burden_1 + obs_burden_2
     exp_burden_1 = total_inf_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
     exp_burden_2 = total_inf_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
     return abs(exp_burden_1 - obs_burden_1) + abs(exp_burden_2 - obs_burden_2)
 
 
-# TODO This needs to make use of the cost of vaccination (which is
-# stored in the SIRSolution object). Recall that $ C_{V}^{i} $ is
-# random per vaccination cost (zero-inflated) and should be calculated
-# in the stochastic simulation.
 def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
-    # ttl_vacc = sir_sol.total_vaccinated()
-    # ttl_pop = sir_sol.total_population()
-    # exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
-    # exp_vacc_2 = ttl_vacc["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
-    # obs_vacc_1 = ttl_vacc["vacc_1"]
-    # obs_vacc_2 = ttl_vacc["vacc_2"]
     ttl_vacc = sir_sol.total_vaccinated()
     ttl_pop = sir_sol.total_population()
-    obs_vacc_1 = 0.002 * 6.0 * 2 * ttl_vacc["vacc_1"]
+    obs_vacc_1 = 0.002 * 17.6 * ttl_vacc["vacc_1"]
     obs_vacc_2 = 0.002 * 6.0 * ttl_vacc["vacc_2"]
     total_vacc_burden = obs_vacc_1 + obs_vacc_2
     exp_vacc_1 = total_vacc_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
