@@ -5,8 +5,16 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from ethical_sir import SIRParams, SIRInitialConditions, SIRSolution, optimal_initial_conditions, loss_clinical_burden, loss_equity_of_burden, loss_equity_of_vaccination, sir_vacc
-
+from ethical_sir import (
+    SIRParams,
+    SIRInitialConditions,
+    SIRSolution,
+    optimal_initial_conditions,
+    loss_clinical_burden,
+    loss_equity_of_burden,
+    loss_equity_of_vaccination,
+    sir_vacc,
+)
 
 
 # ================================
@@ -22,8 +30,40 @@ ts = np.arange(0, 200, 1 / 24)
 
 foo = []
 # Iterate from 0.1 up to 0.45 in steps of 0.025. then do the same for a and b
-for a in [0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45]:
-    for b in [0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45]:
+for a in [
+    0.1,
+    0.125,
+    0.15,
+    0.175,
+    0.2,
+    0.225,
+    0.25,
+    0.275,
+    0.3,
+    0.325,
+    0.35,
+    0.375,
+    0.4,
+    0.425,
+    0.45,
+]:
+    for b in [
+        0.1,
+        0.125,
+        0.15,
+        0.175,
+        0.2,
+        0.225,
+        0.25,
+        0.275,
+        0.3,
+        0.325,
+        0.35,
+        0.375,
+        0.4,
+        0.425,
+        0.45,
+    ]:
         tmp_ic = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, a, b)
         tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)
         foo.append(
@@ -57,7 +97,6 @@ plt.grid()
 plt.savefig(fig_demo_1_heatmap)
 
 
-
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `loss_equity_of_burden` is the colour.
 
 fig_demo_2_heatmap = "scratch-demo-1-heatmap-EB.png"
@@ -74,7 +113,9 @@ plt.savefig(fig_demo_2_heatmap)
 
 fig_demo_3_heatmap = "scratch-demo-1-heatmap-EV.png"
 plt.figure(figsize=(12, 8))
-plt.scatter(df["a"], df["b"], c=df["loss_equity_of_vaccination"], cmap="viridis", s=1000)
+plt.scatter(
+    df["a"], df["b"], c=df["loss_equity_of_vaccination"], cmap="viridis", s=1000
+)
 plt.xlabel("a")
 plt.ylabel("b")
 plt.title("Equity of Vaccination Loss")
@@ -86,7 +127,15 @@ plt.savefig(fig_demo_3_heatmap)
 
 fig_demo_4_heatmap = "scratch-demo-1-heatmap-ALL.png"
 plt.figure(figsize=(12, 8))
-plt.scatter(df["a"], df["b"], c=df["loss_clinical_burden"] + df["loss_equity_of_burden"] + df["loss_equity_of_vaccination"], cmap="viridis", s=1000)
+plt.scatter(
+    df["a"],
+    df["b"],
+    c=df["loss_clinical_burden"]
+    + df["loss_equity_of_burden"]
+    + df["loss_equity_of_vaccination"],
+    cmap="viridis",
+    s=1000,
+)
 plt.xlabel("a")
 plt.ylabel("b")
 plt.title("Combined Loss")

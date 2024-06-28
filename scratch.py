@@ -4,7 +4,17 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import numpy as np
 
-from ethical_sir import SIRParams, SIRInitialConditions, SIRSolution, optimal_initial_conditions, loss_clinical_burden, loss_equity_of_burden, loss_equity_of_vaccination, sir_vacc, initial_cond_from_vacc
+from ethical_sir import (
+    SIRParams,
+    SIRInitialConditions,
+    SIRSolution,
+    optimal_initial_conditions,
+    loss_clinical_burden,
+    loss_equity_of_burden,
+    loss_equity_of_vaccination,
+    sir_vacc,
+    initial_cond_from_vacc,
+)
 
 
 # ================================
@@ -38,7 +48,9 @@ print(
 )
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (0.5,0.5,0.0):")
-optimal_init_cond = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, 0.5, 0.0)
+optimal_init_cond = optimal_initial_conditions(
+    params, ts, pop_size_1, pop_size_2, 0.5, 0.0
+)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(result_optimal.total_infections()))
 print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
@@ -49,7 +61,9 @@ print(
 )
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (0.5,0.0,0.5):")
-optimal_init_cond = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, 0.0, 0.5)
+optimal_init_cond = optimal_initial_conditions(
+    params, ts, pop_size_1, pop_size_2, 0.0, 0.5
+)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(result_optimal.total_infections()))
 print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
@@ -60,7 +74,9 @@ print(
 )
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (0.6,0.2,0.2):")
-optimal_init_cond = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, 0.2, 0.2)
+optimal_init_cond = optimal_initial_conditions(
+    params, ts, pop_size_1, pop_size_2, 0.2, 0.2
+)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(result_optimal.total_infections()))
 print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
@@ -71,7 +87,9 @@ print(
 )
 print("======================================================================")
 print("Results with optimal vaccination proportions for ethics: (0.4,0.3,0.3):")
-optimal_init_cond = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, 0.3, 0.3)
+optimal_init_cond = optimal_initial_conditions(
+    params, ts, pop_size_1, pop_size_2, 0.3, 0.3
+)
 result_optimal = sir_vacc(params, optimal_init_cond["opt_init_cond"], ts)
 print("Total Infections: " + str(result_optimal.total_infections()))
 print("Total Vaccinated: " + str(result_optimal.total_vaccinated()))
