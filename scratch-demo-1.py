@@ -90,7 +90,10 @@ def initial_cond_from_vacc(
 def loss_clinical_burden(sir_sol: SIRSolution) -> float:
     ttl_infs = sir_sol.total_infections()
     ttl_vacc = sir_sol.total_vaccinated()
-    return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
+    net_days_hosp_for_inf = 0.02 * (3.075 * ttl_infs["inf_in_1"] + 7.60 * ttl_infs["inf_in_2"])
+    net_days_hosp_for_vacc = 0.002 * (6.0 * 2 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"])
+    return net_days_hosp_for_inf + net_days_hosp_for_vacc
+    # return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
 
 # TODO This needs to be updated use the stochastic burden of the cost
@@ -98,12 +101,19 @@ def loss_clinical_burden(sir_sol: SIRSolution) -> float:
 # (zero-inflated), although this should be calculated in the stochastic
 # simulation.
 def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
+    # ttl_infs = sir_sol.total_infections()
+    # ttl_pop = sir_sol.total_population()
+    # exp_burden_1 = ttl_infs["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
+    # exp_burden_2 = ttl_infs["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
+    # obs_burden_1 = ttl_infs["inf_in_1"]
+    # obs_burden_2 = ttl_infs["inf_in_2"]
     ttl_infs = sir_sol.total_infections()
     ttl_pop = sir_sol.total_population()
-    exp_burden_1 = ttl_infs["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
-    exp_burden_2 = ttl_infs["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
-    obs_burden_1 = ttl_infs["inf_in_1"]
-    obs_burden_2 = ttl_infs["inf_in_2"]
+    obs_burden_1 = 0.02 * 3.075 * ttl_infs["inf_in_1"]
+    obs_burden_2 = 0.02 * 7.60 * ttl_infs["inf_in_2"]
+    total_inf_burden = obs_burden_1 + obs_burden_2
+    exp_burden_1 = total_inf_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
+    exp_burden_2 = total_inf_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
     return abs(exp_burden_1 - obs_burden_1) + abs(exp_burden_2 - obs_burden_2)
 
 
@@ -112,12 +122,19 @@ def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
 # random per vaccination cost (zero-inflated) and should be calculated
 # in the stochastic simulation.
 def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
+    # ttl_vacc = sir_sol.total_vaccinated()
+    # ttl_pop = sir_sol.total_population()
+    # exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
+    # exp_vacc_2 = ttl_vacc["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
+    # obs_vacc_1 = ttl_vacc["vacc_1"]
+    # obs_vacc_2 = ttl_vacc["vacc_2"]
     ttl_vacc = sir_sol.total_vaccinated()
     ttl_pop = sir_sol.total_population()
-    exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
-    exp_vacc_2 = ttl_vacc["total"] * (ttl_pop["pop_2"] / ttl_pop["total"])
-    obs_vacc_1 = ttl_vacc["vacc_1"]
-    obs_vacc_2 = ttl_vacc["vacc_2"]
+    obs_vacc_1 = 0.002 * 6.0 * 2 * ttl_vacc["vacc_1"]
+    obs_vacc_2 = 0.002 * 6.0 * ttl_vacc["vacc_2"]
+    total_vacc_burden = obs_vacc_1 + obs_vacc_2
+    exp_vacc_1 = total_vacc_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
+    exp_vacc_2 = total_vacc_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
     return abs(exp_vacc_1 - obs_vacc_1) + abs(exp_vacc_2 - obs_vacc_2)
 
 
@@ -220,11 +237,14 @@ def optimal_initial_conditions(
 
 # ================================
 
+# TODO This still needs to be fixed to include the values from conmat.
 params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.2)
-pop_size_1 = 500
-pop_size_2 = 500
+pop_size_1 = 900
+pop_size_2 = 100
 ts = np.arange(0, 100, 1 / 24)
 
+# tmp_ic = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0, 0)
+# tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)
 
 foo = []
 # Iterate from 0.1 up to 0.45 in steps of 0.025. then do the same for a and b
