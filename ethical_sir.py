@@ -13,6 +13,17 @@ class SIRParams:
     beta_21: float
     beta_22: float
     gamma: float
+    
+
+@dataclass
+class BurdenParams:
+    perc_hosp_inf: float
+    days_hosp_inf_1: float
+    days_hosp_inf_2: float
+    perc_hosp_vacc: float
+    days_hosp_vacc_1: float
+    days_hosp_vacc_2: float
+    
 
 
 @dataclass
@@ -86,11 +97,19 @@ def initial_cond_from_vacc(
 
 # TODO This needs to include the cost of vaccination in the same units
 # as clinical burden.
-def loss_clinical_burden(sir_sol: SIRSolution) -> float:
+def loss_clinical_burden(sir_sol: SIRSolution,
+                         disease_burden_params:BurdenParams) -> float:
     ttl_infs = sir_sol.total_infections()
     ttl_vacc = sir_sol.total_vaccinated()
-    net_days_hosp_for_inf = 0.02 * (3.075 * ttl_infs["inf_in_1"] + 7.60 * ttl_infs["inf_in_2"])
-    net_days_hosp_for_vacc = 0.002 * (6.0 * 2 * ttl_vacc["vacc_1"] + 6.0 * ttl_vacc["vacc_2"])
+    net_days_hosp_for_inf = \
+        disease_burden_params.perc_hosp_inf * \
+            (disease_burden_params.days_hosp_inf_1 * ttl_infs["inf_in_1"]+
+             disease_burden_params.days_hosp_inf_2 * ttl_infs["inf_in_2"])
+            
+    net_days_hosp_for_vacc = disease_burden_params.perc_hosp_vacc * \
+        (disease_burden_params.days_hosp_vacc_1 * ttl_vacc["vacc_1"] +
+         disease_burden_params.days_hosp_vacc_2 * ttl_vacc["vacc_2"] )
+    
     return net_days_hosp_for_inf + net_days_hosp_for_vacc
     # return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
@@ -99,7 +118,8 @@ def loss_clinical_burden(sir_sol: SIRSolution) -> float:
 # of an infection. Recall the $ C_{I}^{i} $ is random per infection
 # (zero-inflated), although this should be calculated in the stochastic
 # simulation.
-def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
+def loss_equity_of_burden(sir_sol: SIRSolution,
+                          disease_burden_params:BurdenParams) -> float:
     # ttl_infs = sir_sol.total_infections()
     # ttl_pop = sir_sol.total_population()
     # exp_burden_1 = ttl_infs["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
@@ -108,8 +128,12 @@ def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
     # obs_burden_2 = ttl_infs["inf_in_2"]
     ttl_infs = sir_sol.total_infections()
     ttl_pop = sir_sol.total_population()
-    obs_burden_1 = 0.02 * 3.075 * ttl_infs["inf_in_1"]
-    obs_burden_2 = 0.02 * 7.60 * ttl_infs["inf_in_2"]
+    obs_burden_1 = disease_burden_params.perc_hosp_inf * \
+                   disease_burden_params.days_hosp_inf_1 * \
+                   ttl_infs["inf_in_1"]
+    obs_burden_2 = disease_burden_params.perc_hosp_inf * \
+                   disease_burden_params.days_hosp_inf_2 * \
+                   ttl_infs["inf_in_2"]
     total_inf_burden = obs_burden_1 + obs_burden_2
     exp_burden_1 = total_inf_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
     exp_burden_2 = total_inf_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
@@ -120,7 +144,8 @@ def loss_equity_of_burden(sir_sol: SIRSolution) -> float:
 # stored in the SIRSolution object). Recall that $ C_{V}^{i} $ is
 # random per vaccination cost (zero-inflated) and should be calculated
 # in the stochastic simulation.
-def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
+def loss_equity_of_vaccination(sir_sol: SIRSolution,
+                               disease_burden_params:BurdenParams) -> float:
     # ttl_vacc = sir_sol.total_vaccinated()
     # ttl_pop = sir_sol.total_population()
     # exp_vacc_1 = ttl_vacc["total"] * (ttl_pop["pop_1"] / ttl_pop["total"])
@@ -129,8 +154,15 @@ def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
     # obs_vacc_2 = ttl_vacc["vacc_2"]
     ttl_vacc = sir_sol.total_vaccinated()
     ttl_pop = sir_sol.total_population()
-    obs_vacc_1 = 0.002 * 6.0 * 2 * ttl_vacc["vacc_1"]
-    obs_vacc_2 = 0.002 * 6.0 * ttl_vacc["vacc_2"]
+    obs_vacc_1 = disease_burden_params.perc_hosp_vacc * \
+                 disease_burden_params.days_hosp_vacc_1 * \
+                 ttl_vacc["vacc_1"] 
+    obs_vacc_2 = disease_burden_params.perc_hosp_vacc * \
+                 disease_burden_params.days_hosp_vacc_2 * \
+                 ttl_vacc["vacc_2"] 
+                 
+    #obs_vacc_1 = 0.002 * 6.0 * 2 * ttl_vacc["vacc_1"]
+    #obs_vacc_2 = 0.002 * 6.0 * ttl_vacc["vacc_2"]
     total_vacc_burden = obs_vacc_1 + obs_vacc_2
     exp_vacc_1 = total_vacc_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
     exp_vacc_2 = total_vacc_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
@@ -143,7 +175,8 @@ def loss_equity_of_vaccination(sir_sol: SIRSolution) -> float:
 # https://gillespy2.readthedocs.io/en/latest/tutorials/tut_toggle_switch/tut_toggle_switch.html
 # This seems like it would be a sensible replacement for the current
 # ODE based approach.
-def sir_vacc(params: SIRParams, sir_0: SIRInitialConditions, ts) -> SIRSolution:
+def sir_vacc(params: SIRParams,
+             sir_0: SIRInitialConditions, ts) -> SIRSolution:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
 
     pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1
@@ -198,7 +231,8 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
 
 # TODO Make a consistent naming between "objective" and "loss".
 def objective_func_factory(
-        params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
+        params: SIRParams, disease_burden_params:BurdenParams, ts, 
+        pop_size_1: float, pop_size_2: float, a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = initial_cond_from_vacc(
@@ -206,18 +240,21 @@ def objective_func_factory(
         )
         sir_sol = sir_vacc(params, init_cond, ts)
         return (
-            (1 - a - b) * loss_clinical_burden(sir_sol)
-            + a * loss_equity_of_burden(sir_sol)
-            + b * loss_equity_of_vaccination(sir_sol)
+            (1 - a - b) * loss_clinical_burden(sir_sol, disease_burden_params)
+            + a * loss_equity_of_burden(sir_sol, disease_burden_params)
+            + b * loss_equity_of_vaccination(sir_sol, disease_burden_params)
         )
 
     return objective
 
 
 def optimal_initial_conditions(
-        params: SIRParams, ts, pop_size_1: float, pop_size_2: float, a: float, b: float
+        params: SIRParams,
+        disease_burden_params:BurdenParams, ts, pop_size_1: float, 
+        pop_size_2: float, a: float, b: float
 ) -> SIRInitialConditions:
-    objective = objective_func_factory(params, ts, pop_size_1, pop_size_2, a, b)
+    objective = objective_func_factory(params, disease_burden_params,
+                                       ts, pop_size_1, pop_size_2, a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
     opt_result = scipy.optimize.minimize(
