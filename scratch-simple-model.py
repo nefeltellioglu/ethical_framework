@@ -5,13 +5,22 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from ethical_sir import SIRParams, SIRInitialConditions, SIRSolution, optimal_initial_conditions, loss_clinical_burden, loss_equity_of_burden, loss_equity_of_vaccination, sir_vacc
+from ethical_sir import BurdenParams, SIRParams, SIRInitialConditions, SIRSolution, optimal_initial_conditions, loss_clinical_burden, loss_equity_of_burden, loss_equity_of_vaccination, sir_vacc
 
 
 
 # ================================
 
 # TODO This still needs to be fixed to include the values from conmat.
+
+disease_burden_params = BurdenParams(
+                        perc_hosp_inf= 0.02,
+                        days_hosp_inf_1= 3.075,
+                        days_hosp_inf_2= 7.60,
+                        perc_hosp_vacc= 0.002,
+                        days_hosp_vacc_1= 6.0 * 2,
+                        days_hosp_vacc_2= 6.0)
+
 params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.2)
 pop_size_1 = 900
 pop_size_2 = 100
@@ -25,8 +34,10 @@ foo = []
 #then do the get b conditional on a
 for a in np.arange(0.1, 1, 0.025):
     for b in np.arange(0.1, 1 - a, 0.025):
-        tmp_ic = optimal_initial_conditions(params, ts, pop_size_1, pop_size_2, a, b)
-        tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)
+        tmp_ic = optimal_initial_conditions(params, disease_burden_params,
+                                            ts, pop_size_1, pop_size_2, a, b)
+        tmp_sol = sir_vacc(params,  
+                           tmp_ic["opt_init_cond"], ts)
         foo.append(
             {
                 "a": a,
@@ -35,9 +46,12 @@ for a in np.arange(0.1, 1, 0.025):
                 "total_infections_2": tmp_sol.total_infections()["inf_in_2"],
                 "total_vaccinated_1": tmp_sol.total_vaccinated()["vacc_1"],
                 "total_vaccinated_2": tmp_sol.total_vaccinated()["vacc_2"],
-                "loss_clinical_burden": loss_clinical_burden(tmp_sol),
-                "loss_equity_of_burden": loss_equity_of_burden(tmp_sol),
-                "loss_equity_of_vaccination": loss_equity_of_vaccination(tmp_sol),
+                "loss_clinical_burden": loss_clinical_burden(tmp_sol, 
+                                         disease_burden_params),
+                "loss_equity_of_burden": loss_equity_of_burden(tmp_sol, 
+                                          disease_burden_params),
+                "loss_equity_of_vaccination": loss_equity_of_vaccination(
+                                            tmp_sol, disease_burden_params),
             }
         )
 
