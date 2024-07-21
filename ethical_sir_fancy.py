@@ -44,10 +44,22 @@ class SIRInitialConditions:
     i0_2: int
     r0_1: int
     r0_2: int
+    s0_1_vp: int
+    s0_1_vu: int
+    s0_2_vp: int
+    s0_2_vu: int
+    i0_1_vu: int
+    i0_2_vu: int
+    r0_1_vu: int
+    r0_2_vu: int
+    
+    
 
 
 # TODO This needs to include a slot for the cost of an infection.
 # TODO This needs to include a slot for the cost of vaccination.
+# TODO: There is no dynamic vaccination. Double check if that's needed.
+# TODO: Check if more stats are necessary to be collected from fancy model
 @dataclass
 class SIRSolution:
     s1: [float]
@@ -56,57 +68,80 @@ class SIRSolution:
     i2: [float]
     r1: [float]
     r2: [float]
+    s1_vp: [float]
+    s1_vu: [float]
+    s2_vp: [float]
+    s2_vu: [float]
+    i1_vu: [float]
+    i2_vu: [float]
+    r1_vu: [float]
+    r2_vu: [float]
+    
     times: [float]
 
     def total_vaccinated(self) -> dict:
         return {
-            "vacc_1": self.r1[0],
-            "vacc_2": self.r2[0],
-            "total": self.r1[0] + self.r2[0],
+            "vacc_1": self.s1_vp[0] + self.s1_vu[0],
+            "vacc_2": self.s2_vp[0] + self.s2_vu[0],
+            "total": self.s1_vp[0] + self.s1_vu[0] + \
+                     self.s2_vp[0] + self.s2_vu[0],
         }
 
     def total_infections(self) -> dict:
+        
+        inf_in_1 = self.i1[-1] + self.r1[-1] - self.r1[0] + \
+                    self.i1_vu[-1] + self.r1_vu[-1] - self.r1_vu[0]
+        inf_in_2 = self.i2[-1] + self.r2[-1] - self.r2[0] + \
+                    self.i2_vu[-1] + self.r2_vu[-1] - self.r2_vu[0]
         return {
-            "inf_in_1": self.i1[-1] + self.r1[-1] - self.r1[0],
-            "inf_in_2": self.i2[-1] + self.r2[-1] - self.r2[0],
-            "total": self.i1[-1]
-            + self.r1[-1]
-            - self.r1[0]
-            + self.i2[-1]
-            + self.r2[-1]
-            - self.r2[0],
+            "inf_in_1": inf_in_1,
+            "inf_in_2": inf_in_2,
+            "total": inf_in_1 + inf_in_2,
         }
 
     def total_population(self) -> dict:
+        
+        pop_1 = self.s1[0] + self.i1[0] + self.r1[0] + self.s1_vp[0] + \
+                self.s1_vu[0] + self.i1_vu[0] + self.r1_vu[0] 
+                
+        pop_2 = self.s2[0] + self.i2[0] + self.r2[0] + self.s2_vp[0] + \
+                self.s2_vu[0] + self.i2_vu[0] + self.r2_vu[0] 
         return {
-            "pop_1": self.s1[0] + self.i1[0] + self.r1[0],
-            "pop_2": self.s2[0] + self.i2[0] + self.r2[0],
-            "total": self.s1[0]
-            + self.i1[0]
-            + self.r1[0]
-            + self.s2[0]
-            + self.i2[0]
-            + self.r2[0],
+            "pop_1": pop_1,
+            "pop_2": pop_2,
+            "total": pop_1 + pop_2,
         }
 
 
 # TODO Make sure that this returns an integer for the initial
 # conditions so it works with the stochastic model.
 def initial_cond_from_vacc(
-    vacc_prop_1: float, vacc_prop_2: float, pop_size_1: int, pop_size_2: int
+    vacc_prop_1: float, vacc_prop_2: float, pop_size_1: int, pop_size_2: int,
+    vacc_protection_1: float, vacc_protection_2: float
 ) -> SIRInitialConditions:
     return SIRInitialConditions(
         pop_size_1 * (1 - vacc_prop_1) - 1,
         pop_size_2 * (1 - vacc_prop_2) - 1,
         1,
         1,
-        pop_size_1 * vacc_prop_1,
-        pop_size_2 * vacc_prop_2,
+        0,#pop_size_1 * vacc_prop_1,
+        0,#pop_size_2 * vacc_prop_2,
+        pop_size_1 * vacc_prop_1 * vacc_protection_1,
+        pop_size_1 * vacc_prop_1 * (1 - vacc_protection_1),
+        pop_size_2 * vacc_prop_2 * vacc_protection_2,
+        pop_size_2 * vacc_prop_2 * (1 - vacc_protection_2),
+        0,
+        0,
+        0,
+        0
     )
+
+
 
 
 # TODO This needs to include the cost of vaccination in the same units
 # as clinical burden.
+# TODO fancy model check
 def loss_clinical_burden(sir_sols: [SIRSolution],
                          disease_burden_params:BurdenParams) -> float:
     
@@ -135,6 +170,7 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
 # of an infection. Recall the $ C_{I}^{i} $ is random per infection
 # (zero-inflated), although this should be calculated in the stochastic
 # simulation.
+# TODO fancy model check
 def loss_equity_of_burden(sir_sols: [SIRSolution],
                           disease_burden_params:BurdenParams) -> float:
     # ttl_infs = sir_sol.total_infections()
@@ -166,6 +202,7 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
 # stored in the SIRSolution object). Recall that $ C_{V}^{i} $ is
 # random per vaccination cost (zero-inflated) and should be calculated
 # in the stochastic simulation.
+# TODO fancy model check
 def loss_equity_of_vaccination(sir_sols: [SIRSolution],
                                disease_burden_params:BurdenParams) -> float:
     # ttl_vacc = sir_sol.total_vaccinated()
@@ -196,32 +233,64 @@ def loss_equity_of_vaccination(sir_sols: [SIRSolution],
     return loss_equity_of_vaccinations
 
 
-# TODO This will need to be updated to do a stochastic simulation. The
-# GillesPy2 package allows you to switch between stochastic and
-# deterministic simulations of the same model:
-# https://gillespy2.readthedocs.io/en/latest/tutorials/tut_toggle_switch/tut_toggle_switch.html
-# This seems like it would be a sensible replacement for the current
-# ODE based approach.
 def sir_vacc(params: SIRParams,
              sir_0: SIRInitialConditions, ts) -> [SIRSolution]:
-    y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
+    y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
+          sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
+          sir_0.i0_1_vu, sir_0.i0_2_vu, sir_0.r0_1_vu, sir_0.r0_2_vu,]
 
-    pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1
-    pop_size_2 = sir_0.s0_2 + sir_0.i0_2 + sir_0.r0_2
 
+    pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1 + \
+                 sir_0.s0_1_vp, sir_0.s0_1_vu + sir_0.i0_1_vu + sir_0.r0_1_vu
+    pop_size_2 = sir_0.s0_2 + sir_0.i0_2 + sir_0.r0_2 + \
+                 sir_0.s0_2_vp, sir_0.s0_2_vu + sir_0.i0_2_vu + sir_0.r0_2_vu
+    
     def deriv(y, t, params):
-        s_1, s_2, i_1, i_2, r_1, r_2 = y
+        s_1, s_2, i_1, i_2, r_1, r_2, s_1_vp, s_1_vu, s_2_vp, s_2_vu, i_1_vu,  i_2_vu, r_1_vu, r_2_vu = y
+        
+        #unvaccinated  I infect unvaccinated S
         inf_11 = params.beta_11 * i_1 * s_1 / pop_size_1
         inf_12 = params.beta_12 * i_1 * s_2 / pop_size_2
         inf_21 = params.beta_21 * i_2 * s_1 / pop_size_1
         inf_22 = params.beta_22 * i_2 * s_2 / pop_size_2
-        ds_1 = -inf_11 - inf_21
-        ds_2 = -inf_12 - inf_22
-        di_1 = inf_11 + inf_21 - params.gamma * i_1
-        di_2 = inf_12 + inf_22 - params.gamma * i_2
+        
+        #vaccinated unprotected I (Ivu) infect unvaccinated S (S)
+        inf_1vu1 = params.beta_11 * i_1_vu * s_1 / pop_size_1
+        inf_1vu2 = params.beta_12 * i_1_vu * s_2 / pop_size_2
+        inf_2vu1 = params.beta_21 * i_2_vu * s_1 / pop_size_1
+        inf_2vu2 = params.beta_22 * i_2_vu * s_2 / pop_size_2
+        
+        #unvaccinated I infect vaccinated unprotected S (Svu)
+        inf_11vu = params.beta_11 * i_1 * s_1_vu / pop_size_1
+        inf_12vu = params.beta_12 * i_1 * s_2_vu / pop_size_2
+        inf_21vu = params.beta_21 * i_2 * s_1_vu / pop_size_1
+        inf_22vu = params.beta_22 * i_2 * s_2_vu / pop_size_2
+        
+        #vaccinated unprotected I (Ivu) infect vaccinated unprotected S (Svu)
+        inf_1vu1vu = params.beta_11 * i_1_vu * s_1_vu / pop_size_1
+        inf_1vu2vu = params.beta_12 * i_1_vu * s_2_vu / pop_size_2
+        inf_2vu1vu = params.beta_21 * i_2_vu * s_1_vu / pop_size_1
+        inf_2vu2vu = params.beta_22 * i_2_vu * s_2_vu / pop_size_2
+        
+        
+        ds_1 = -inf_11 - inf_21 - inf_1vu1 - inf_2vu1
+        ds_2 = -inf_12 - inf_22 - inf_1vu2 - inf_2vu2
+        di_1 = inf_11 + inf_21 + inf_1vu1 + inf_2vu1 - params.gamma * i_1
+        di_2 = inf_12 + inf_22 + inf_1vu2 + inf_2vu2 - params.gamma * i_2
         dr_1 = params.gamma * i_1
         dr_2 = params.gamma * i_2
-        return [ds_1, ds_2, di_1, di_2, dr_1, dr_2]
+        ds_1_vp = 0
+        ds_1_vu = -inf_11vu - inf_21vu - inf_1vu1vu - inf_2vu1vu 
+        ds_2_vp = 0
+        ds_2_vu = -inf_12vu - inf_22vu - inf_1vu2vu - inf_2vu2vu
+        di_1_vu = inf_11vu + inf_21vu + inf_1vu1vu + inf_2vu1vu - params.gamma * i_1_vu  
+        di_2_vu = inf_12vu + inf_22vu + inf_1vu2vu + inf_2vu2vu - params.gamma * i_2_vu  
+        dr_1_vu = params.gamma * i_1_vu  
+        dr_2_vu = params.gamma * i_2_vu  
+        
+        return [ds_1, ds_2, di_1, di_2, dr_1, dr_2, 
+                ds_1_vp ,ds_1_vu, ds_2_vp,  ds_2_vu, di_1_vu, di_2_vu,
+                dr_1_vu, dr_2_vu]
 
     result = scipy.integrate.odeint(
         deriv, y0, ts, args=(params,)
@@ -233,9 +302,22 @@ def sir_vacc(params: SIRParams,
         i2=result[:, 3],
         r1=result[:, 4],
         r2=result[:, 5],
+        
+        s1_vp=result[:, 6],
+        s1_vu=result[:, 7],
+        s2_vp=result[:, 8],
+        s2_vu=result[:, 9],
+        i1_vu=result[:, 10],
+        i2_vu=result[:, 11],
+        r1_vu=result[:, 12],
+        r2_vu=result[:, 13],
+        
         times=ts,
     )]
 
+
+
+# TODO: introduce fancy model
 def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
                  opt_params: OptParams, ts) -> [SIRSolution]:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
