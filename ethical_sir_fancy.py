@@ -241,9 +241,9 @@ def sir_vacc(params: SIRParams,
 
 
     pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1 + \
-                 sir_0.s0_1_vp, sir_0.s0_1_vu + sir_0.i0_1_vu + sir_0.r0_1_vu
+                 sir_0.s0_1_vp + sir_0.s0_1_vu + sir_0.i0_1_vu + sir_0.r0_1_vu
     pop_size_2 = sir_0.s0_2 + sir_0.i0_2 + sir_0.r0_2 + \
-                 sir_0.s0_2_vp, sir_0.s0_2_vu + sir_0.i0_2_vu + sir_0.r0_2_vu
+                 sir_0.s0_2_vp + sir_0.s0_2_vu + sir_0.i0_2_vu + sir_0.r0_2_vu
     
     def deriv(y, t, params):
         s_1, s_2, i_1, i_2, r_1, r_2, s_1_vp, s_1_vu, s_2_vp, s_2_vu, i_1_vu,  i_2_vu, r_1_vu, r_2_vu = y
@@ -405,6 +405,7 @@ def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
 
 # TODO This needs to be extended to include some sort of visualisation
 # of the cost associated with infections and vaccnations.
+# TODO: introduce fancy model
 def plot_SIRSolution(sir_sol: SIRSolution) -> None:
     plt.figure(figsize=(12, 8))
     plt.plot(sir_sol.times, sir_sol.s1, label="Susceptible 1")
@@ -427,11 +428,13 @@ def objective_func_factory(
         params: SIRParams, disease_burden_params:BurdenParams, 
         opt_params: OptParams,
         ts, 
-        pop_size_1: float, pop_size_2: float, a: float, b: float
+        pop_size_1: float, pop_size_2: float, a: float, b: float, 
+        vacc_protection_1: float, vacc_protection_2: float
 ) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = initial_cond_from_vacc(
-            vacc_props[0], vacc_props[1], pop_size_1, pop_size_2
+            vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
+            vacc_protection_1, vacc_protection_2
         )
         if opt_params.model_type == "ODE":
             sir_sol = sir_vacc(params, init_cond, ts)
@@ -465,11 +468,13 @@ def optimal_initial_conditions(
         disease_burden_params:BurdenParams,
         opt_params: OptParams,
         ts, pop_size_1: float, 
-        pop_size_2: float, a: float, b: float
+        pop_size_2: float, a: float, b: float, vacc_protection_1: float,
+        vacc_protection_2: float
 ) -> SIRInitialConditions:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
-                                       ts, pop_size_1, pop_size_2, a, b)
+                                       ts, pop_size_1, pop_size_2, a, b,
+                                       vacc_protection_1, vacc_protection_2)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
     opt_result = scipy.optimize.minimize(
@@ -481,7 +486,8 @@ def optimal_initial_conditions(
     if opt_result.success:
         return {
             "opt_init_cond": initial_cond_from_vacc(
-                opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2
+                opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
+                vacc_protection_1, vacc_protection_2
             ),
             "obejctive_value": opt_result.fun,
         }
