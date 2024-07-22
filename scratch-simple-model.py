@@ -30,14 +30,16 @@ opt_params = OptParams(
     no_runs = 1, 
     initial_vacc_1 = 0.5,
     initial_vacc_2 = 0.5,
-    stat_type = "mean")
+    stat_type = "mean",
+    opt_method = 'Nelder-Mead')
 
 opt_params = OptParams(
     model_type = "SSA",
     no_runs = 100, 
     initial_vacc_1 = 0.5,
     initial_vacc_2 = 0.5,
-    stat_type = "mean")
+    stat_type = "mean",
+    opt_method = 'trust-constr')
 
 pop_size_1 = 900
 pop_size_2 = 100

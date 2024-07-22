@@ -32,6 +32,7 @@ class OptParams:
     initial_vacc_1: float
     initial_vacc_2: float
     stat_type: str
+    opt_method: str
     
     
 
@@ -396,12 +397,14 @@ def optimal_initial_conditions(
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
     
+    
     opt_result = scipy.optimize.minimize(
         objective,
         [opt_params.initial_vacc_1, opt_params.initial_vacc_2],
         bounds=[(0, vacc_upper_bound_1), (0, vacc_upper_bound_2)],
-        method="Nelder-Mead",
+        method=opt_params.opt_method,
     )
+    
     if opt_result.success:
         return {
             "opt_init_cond": initial_cond_from_vacc(
