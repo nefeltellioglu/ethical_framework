@@ -381,6 +381,8 @@ def objective_func_factory(
         
     return objective
 
+# TODO: SSA model optimization doesnt work with method="Nelder-Mead"
+# The optimization for SSA model needs to be fixed
 def optimal_initial_conditions(
         params: SIRParams,
         disease_burden_params:BurdenParams,
@@ -393,6 +395,7 @@ def optimal_initial_conditions(
                                        ts, pop_size_1, pop_size_2, a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
+    
     opt_result = scipy.optimize.minimize(
         objective,
         [opt_params.initial_vacc_1, opt_params.initial_vacc_2],
