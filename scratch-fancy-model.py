@@ -43,8 +43,8 @@ opt_params = OptParams(
 
 pop_size_1 = 900
 pop_size_2 = 100
-vacc_protection_1 = 0.5
-vacc_protection_2 = 0.5
+vacc_protection_1 = 1
+vacc_protection_2 = 1
 ts = np.arange(0, 100, 1 / 24)
 
 # tmp_ic = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0, 0)
@@ -134,12 +134,12 @@ for a in np.arange(0.1, 1, 0.025):
                 
 
 df = pd.DataFrame(foo)
-df.to_csv("scratch-%s.csv"%opt_params.model_type)
+df.to_csv("scratch-fancy-%s.csv"%opt_params.model_type)
 
 # Do a matplotlib plot.
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `loss_clinical_burden` is the colour.
 
-fig_demo_1_heatmap = "scratch-%s-heatmap-CB.png"%opt_params.model_type
+fig_demo_1_heatmap = "scratch-fancy-%s-heatmap-CB.png"%opt_params.model_type
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["loss_clinical_burden"], cmap="viridis", s=1000)
 plt.xlabel("a")
@@ -153,7 +153,7 @@ plt.savefig(fig_demo_1_heatmap)
 
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `loss_equity_of_burden` is the colour.
 
-fig_demo_2_heatmap = "scratch-%s-heatmap-EB.png"%opt_params.model_type
+fig_demo_2_heatmap = "scratch-fancy-%s-heatmap-EB.png"%opt_params.model_type
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["loss_equity_of_burden"], cmap="viridis", s=1000)
 plt.xlabel("a")
@@ -165,7 +165,7 @@ plt.savefig(fig_demo_2_heatmap)
 
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `loss_equity_of_vaccination` is the colour.
 
-fig_demo_3_heatmap = "scratch-%s-heatmap-EV.png"%opt_params.model_type
+fig_demo_3_heatmap = "scratch-fancy-%s-heatmap-EV.png"%opt_params.model_type
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["loss_equity_of_vaccination"], cmap="viridis", s=1000)
 plt.xlabel("a")
@@ -177,7 +177,7 @@ plt.savefig(fig_demo_3_heatmap)
 
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `loss_clinical_burden + loss_equity_of_burden + loss_equity_of_vaccination` is the colour.
 
-fig_demo_4_heatmap = "scratch-%s-heatmap-ALL.png"%opt_params.model_type
+fig_demo_4_heatmap = "scratch-fancy-%s-heatmap-ALL.png"%opt_params.model_type
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["loss_clinical_burden"] + df["loss_equity_of_burden"] + df["loss_equity_of_vaccination"], cmap="viridis", s=1000)
 plt.xlabel("a")
@@ -189,8 +189,8 @@ plt.savefig(fig_demo_4_heatmap)
 
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `total_vaccine_<X>` is the colour.
 
-fig_demo_5_1_heatmap = "scratch-%s-heatmap-TV1.png"%opt_params.model_type
-fig_demo_5_2_heatmap = "scratch-%s-heatmap-TV2.png"%opt_params.model_type
+fig_demo_5_1_heatmap = "scratch-fancy-%s-heatmap-TV1.png"%opt_params.model_type
+fig_demo_5_2_heatmap = "scratch-fancy-%s-heatmap-TV2.png"%opt_params.model_type
 
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["total_vaccinated_1"], cmap="viridis", s=1000)
@@ -212,8 +212,8 @@ plt.savefig(fig_demo_5_2_heatmap)
 
 # Do a heatmap where the `a` column is on the x-axis and the `b` column is on the y-axis and the `total_infections_<X>` is the colour.
 
-fig_demo_6_1_heatmap = "scratch-%s-heatmap-TI1.png"%opt_params.model_type
-fig_demo_6_2_heatmap = "scratch-%s-heatmap-TI2.png"%opt_params.model_type
+fig_demo_6_1_heatmap = "scratch-fancy-%s-heatmap-TI1.png"%opt_params.model_type
+fig_demo_6_2_heatmap = "scratch-fancy-%s-heatmap-TI2.png"%opt_params.model_type
 
 plt.figure(figsize=(12, 8))
 plt.scatter(df["a"], df["b"], c=df["total_infections_1"], cmap="viridis", s=1000)

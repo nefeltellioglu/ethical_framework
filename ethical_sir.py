@@ -127,7 +127,7 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
         
         loss_clinical_burden = net_days_hosp_for_inf + net_days_hosp_for_vacc
         loss_clinical_burdens.append(loss_clinical_burden)
-    return loss_clinical_burdens
+    return np.array(loss_clinical_burdens)
     # return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
 
 
@@ -159,7 +159,7 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
         
         loss_equity_of_burden = abs(exp_burden_1 - obs_burden_1) + abs(exp_burden_2 - obs_burden_2)
         loss_equity_of_burdens.append(loss_equity_of_burden)
-    return loss_equity_of_burdens
+    return np.array(loss_equity_of_burdens)
 
 
 # TODO This needs to make use of the cost of vaccination (which is
@@ -193,7 +193,7 @@ def loss_equity_of_vaccination(sir_sols: [SIRSolution],
         
         loss_equity_of_vaccination = abs(exp_vacc_1 - obs_vacc_1) + abs(exp_vacc_2 - obs_vacc_2)
         loss_equity_of_vaccinations.append(loss_equity_of_vaccination)
-    return loss_equity_of_vaccinations
+    return np.array(loss_equity_of_vaccinations)
 
 
 # TODO This will need to be updated to do a stochastic simulation. The
@@ -360,21 +360,21 @@ def objective_func_factory(
             )
         elif opt_params.model_type == "SSA":
             sir_sols = sir_vacc_SSA(params, init_cond, opt_params, ts)
+            
+            loss_clinical_burden1 = loss_clinical_burden(sir_sols, disease_burden_params)
+            loss_equity_of_burden1 = loss_equity_of_burden(sir_sols, disease_burden_params)
+            loss_equity_of_vaccination1 = loss_equity_of_vaccination(sir_sols, disease_burden_params)
+            
+            objectives = (
+                            (1 - a - b) * loss_clinical_burden1
+                            + a * loss_equity_of_burden1
+                            + b * loss_equity_of_vaccination1
+                        )
             if opt_params.stat_type == "mean":
-                loss_clinical_burden1 = np.mean(loss_clinical_burden(sir_sols, disease_burden_params))
-                loss_equity_of_burden1 = np.mean(loss_equity_of_burden(sir_sols, disease_burden_params))
-                loss_equity_of_vaccination1 = np.mean(loss_equity_of_vaccination(sir_sols, disease_burden_params))
+                objective =  np.mean(objectives)
             elif opt_params.stat_type == "median":
-                loss_clinical_burden1 = np.median(loss_clinical_burden(sir_sols, disease_burden_params))
-                loss_equity_of_burden1 = np.median(loss_equity_of_burden(sir_sols, disease_burden_params))
-                loss_equity_of_vaccination1 = np.median(loss_equity_of_vaccination(sir_sols, disease_burden_params))
-                
-            return (
-                (1 - a - b) * loss_clinical_burden1
-                + a * loss_equity_of_burden1
-                + b * loss_equity_of_vaccination1
-            )
-
+                objective =  np.median(objectives)
+            
     return objective
 
 

@@ -26,6 +26,7 @@ params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.2)
 
 
 
+    
 opt_params = OptParams(
     model_type = "ODE",
     no_runs = 1, 
@@ -39,7 +40,7 @@ opt_params = OptParams(
     initial_vacc_1 = 0.5,
     initial_vacc_2 = 0.5,
     stat_type = "mean")
-    
+
 
 pop_size_1 = 900
 pop_size_2 = 100
