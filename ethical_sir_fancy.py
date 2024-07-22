@@ -445,20 +445,24 @@ def objective_func_factory(
             )
         elif opt_params.model_type == "SSA":
             sir_sols = sir_vacc_SSA(params, init_cond, opt_params, ts)
+            
+            loss_clinical_burden1 = loss_clinical_burden(sir_sols, disease_burden_params)
+            loss_equity_of_burden1 = loss_equity_of_burden(sir_sols, disease_burden_params)
+            loss_equity_of_vaccination1 = loss_equity_of_vaccination(sir_sols, disease_burden_params)
+            
+            objectives = (
+                            (1 - a - b) * loss_clinical_burden1
+                            + a * loss_equity_of_burden1
+                            + b * loss_equity_of_vaccination1
+                        )
             if opt_params.stat_type == "mean":
-                loss_clinical_burden1 = np.mean(loss_clinical_burden(sir_sols, disease_burden_params))
-                loss_equity_of_burden1 = np.mean(loss_equity_of_burden(sir_sols, disease_burden_params))
-                loss_equity_of_vaccination1 = np.mean(loss_equity_of_vaccination(sir_sols, disease_burden_params))
+                cur_objective =  np.nanmean(objectives)
             elif opt_params.stat_type == "median":
-                loss_clinical_burden1 = np.median(loss_clinical_burden(sir_sols, disease_burden_params))
-                loss_equity_of_burden1 = np.median(loss_equity_of_burden(sir_sols, disease_burden_params))
-                loss_equity_of_vaccination1 = np.median(loss_equity_of_vaccination(sir_sols, disease_burden_params))
+                cur_objective =  np.nanmedian(objectives)
                 
-            return (
-                (1 - a - b) * loss_clinical_burden1
-                + a * loss_equity_of_burden1
-                + b * loss_equity_of_vaccination1
-            )
+            if not isinstance(cur_objective, float):
+                print("here")         
+            return cur_objective
 
     return objective
 
