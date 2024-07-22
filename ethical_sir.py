@@ -371,12 +371,15 @@ def objective_func_factory(
                             + b * loss_equity_of_vaccination1
                         )
             if opt_params.stat_type == "mean":
-                objective =  np.mean(objectives)
+                cur_objective =  np.nanmean(objectives)
             elif opt_params.stat_type == "median":
-                objective =  np.median(objectives)
-            
+                cur_objective =  np.nanmedian(objectives)
+                
+            if not isinstance(cur_objective, float):
+                print("here")         
+            return cur_objective
+        
     return objective
-
 
 def optimal_initial_conditions(
         params: SIRParams,
