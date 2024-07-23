@@ -24,6 +24,10 @@ class BurdenParams:
     perc_hosp_vacc_2: float
     days_hosp_vacc_1: float
     days_hosp_vacc_2: float
+    vacc_protection_1: float
+    vacc_protection_2: float
+    vacc_protection_dis_1: float
+    vacc_protection_dis_2: float
     
 @dataclass
 class OptParams:
@@ -83,17 +87,30 @@ class SIRSolution:
         return {
             "vacc_1": self.s1_vp[0] + self.s1_vu[0],
             "vacc_2": self.s2_vp[0] + self.s2_vu[0],
+            "vacc_1_vu": self.s1_vu[0],
+            "vacc_2_vu": self.s2_vu[0],
             "total": self.s1_vp[0] + self.s1_vu[0] + \
                      self.s2_vp[0] + self.s2_vu[0],
         }
 
     def total_infections(self) -> dict:
         
-        inf_in_1 = self.i1[-1] + self.r1[-1] - self.r1[0] + \
-                    self.i1_vu[-1] + self.r1_vu[-1] - self.r1_vu[0]
-        inf_in_2 = self.i2[-1] + self.r2[-1] - self.r2[0] + \
-                    self.i2_vu[-1] + self.r2_vu[-1] - self.r2_vu[0]
+        
+                    
+        inf_in_1_novacc = self.i1[-1] + self.r1[-1] - self.r1[0] 
+        inf_in_2_novacc = self.i2[-1] + self.r2[-1] - self.r2[0]
+        
+        inf_in_1_vu = self.i1_vu[-1] + self.r1_vu[-1] - self.r1_vu[0]
+        inf_in_2_vu = self.i2_vu[-1] + self.r2_vu[-1] - self.r2_vu[0]
+        
+        inf_in_1 = inf_in_1_novacc + inf_in_1_vu
+        
+        inf_in_2 = inf_in_2_novacc + inf_in_2_vu
         return {
+            "inf_in_1_novacc": inf_in_1_novacc,
+            "inf_in_2_novacc": inf_in_2_novacc,
+            "inf_in_1_vu": inf_in_1_vu,
+            "inf_in_2_vu": inf_in_2_vu,
             "inf_in_1": inf_in_1,
             "inf_in_2": inf_in_2,
             "total": inf_in_1 + inf_in_2,
@@ -141,7 +158,7 @@ def initial_cond_from_vacc(
 
 # TODO This needs to include the cost of vaccination in the same units
 # as clinical burden.
-# TODO fancy model check
+# TODO: Nefel introduced eff against severe outcome -> Can someone double check?
 def loss_clinical_burden(sir_sols: [SIRSolution],
                          disease_burden_params:BurdenParams) -> float:
     
@@ -149,18 +166,23 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
     for sir_sol in sir_sols:
         ttl_infs = sir_sol.total_infections()
         ttl_vacc = sir_sol.total_vaccinated()
-        net_days_hosp_for_inf = \
+        net_days_hosp_for_inf_no_vacc = \
             disease_burden_params.perc_hosp_inf * \
-                (disease_burden_params.days_hosp_inf_1 * ttl_infs["inf_in_1"]+
-                 disease_burden_params.days_hosp_inf_2 * ttl_infs["inf_in_2"])
+                (disease_burden_params.days_hosp_inf_1 * ttl_infs["inf_in_1_novacc"]+
+                 disease_burden_params.days_hosp_inf_2 * ttl_infs["inf_in_2_novacc"])
+        
+        net_days_hosp_for_inf_vacc = \
+            disease_burden_params.perc_hosp_inf * \
+                (disease_burden_params.days_hosp_inf_1 * (1 - disease_burden_params.vacc_protection_dis_1) * ttl_infs["inf_in_1_vu"] +
+                 disease_burden_params.days_hosp_inf_2 * (1 - disease_burden_params.vacc_protection_dis_2) * ttl_infs["inf_in_2_vu"])
                 
-        net_days_hosp_for_vacc = \
+        net_days_hosp_for_adverse = \
             (disease_burden_params.days_hosp_vacc_1 * ttl_vacc["vacc_1"] * \
              disease_burden_params.perc_hosp_vacc_1) + \
              (disease_burden_params.days_hosp_vacc_2 * ttl_vacc["vacc_2"] * \
               disease_burden_params.perc_hosp_vacc_2)
         
-        loss_clinical_burden = net_days_hosp_for_inf + net_days_hosp_for_vacc
+        loss_clinical_burden = net_days_hosp_for_inf_no_vacc + net_days_hosp_for_inf_vacc + net_days_hosp_for_adverse
         loss_clinical_burdens.append(loss_clinical_burden)
     return loss_clinical_burdens
     # return ttl_infs["total"] + 0.5 * ttl_vacc["total"]
@@ -170,7 +192,7 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
 # of an infection. Recall the $ C_{I}^{i} $ is random per infection
 # (zero-inflated), although this should be calculated in the stochastic
 # simulation.
-# TODO fancy model check
+# TODO: Nefel introduced eff against severe outcome -> Can someone double check?
 def loss_equity_of_burden(sir_sols: [SIRSolution],
                           disease_burden_params:BurdenParams) -> float:
     # ttl_infs = sir_sol.total_infections()
@@ -183,12 +205,24 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
     for sir_sol in sir_sols:
         ttl_infs = sir_sol.total_infections()
         ttl_pop = sir_sol.total_population()
-        obs_burden_1 = disease_burden_params.perc_hosp_inf * \
+        obs_burden_1_novacc = disease_burden_params.perc_hosp_inf * \
                        disease_burden_params.days_hosp_inf_1 * \
-                       ttl_infs["inf_in_1"]
-        obs_burden_2 = disease_burden_params.perc_hosp_inf * \
+                       ttl_infs["inf_in_1_novacc"]
+        obs_burden_1_vu = disease_burden_params.perc_hosp_inf * \
+                       disease_burden_params.days_hosp_inf_1 * \
+                       (1 - disease_burden_params.vacc_protection_dis_1 )* \
+                       ttl_infs["inf_in_1_vu"]
+        obs_burden_1 = obs_burden_1_novacc + obs_burden_1_vu
+        
+        obs_burden_2_novacc = disease_burden_params.perc_hosp_inf * \
                        disease_burden_params.days_hosp_inf_2 * \
-                       ttl_infs["inf_in_2"]
+                       ttl_infs["inf_in_2_novacc"]
+        obs_burden_2_vu = disease_burden_params.perc_hosp_inf * \
+                       disease_burden_params.days_hosp_inf_2 * \
+                       (1 - disease_burden_params.vacc_protection_dis_2) * \
+                       ttl_infs["inf_in_2_vu"]
+        obs_burden_2 = obs_burden_2_novacc + obs_burden_2_vu               
+                      
         total_inf_burden = obs_burden_1 + obs_burden_2
         exp_burden_1 = total_inf_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
         exp_burden_2 = total_inf_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
@@ -202,7 +236,7 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
 # stored in the SIRSolution object). Recall that $ C_{V}^{i} $ is
 # random per vaccination cost (zero-inflated) and should be calculated
 # in the stochastic simulation.
-# TODO fancy model check
+# TODO: Alex, Cam - No change here when I introduced eff against severe outcome -> Is this correct?
 def loss_equity_of_vaccination(sir_sols: [SIRSolution],
                                disease_burden_params:BurdenParams) -> float:
     # ttl_vacc = sir_sol.total_vaccinated()
@@ -320,24 +354,42 @@ def sir_vacc(params: SIRParams,
 # TODO: introduce fancy model
 def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
                  opt_params: OptParams, ts) -> [SIRSolution]:
-    y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2]
+    y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
+          sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
+          sir_0.i0_1_vu, sir_0.i0_2_vu, sir_0.r0_1_vu, sir_0.r0_2_vu,]
 
-    pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1
-    pop_size_2 = sir_0.s0_2 + sir_0.i0_2 + sir_0.r0_2
+
+    pop_size_1 = sir_0.s0_1 + sir_0.i0_1 + sir_0.r0_1 + \
+                 sir_0.s0_1_vp + sir_0.s0_1_vu + sir_0.i0_1_vu + sir_0.r0_1_vu
+    pop_size_2 = sir_0.s0_2 + sir_0.i0_2 + sir_0.r0_2 + \
+                 sir_0.s0_2_vp + sir_0.s0_2_vu + sir_0.i0_2_vu + sir_0.r0_2_vu
     
     class SIR2(gillespy2.Model): 
         def __init__(self, y0, params, pop_size_1, pop_size_2,t):
             # First call the gillespy2.Model initializer. 
             gillespy2.Model.__init__(self, name='SIR2')
             # Define compartments.
-            s_1 = gillespy2.Species(name='s_1', initial_value=y0[0], mode='continuous')
-            s_2 = gillespy2.Species(name='s_2', initial_value=y0[1], mode='continuous')
-            i_1 = gillespy2.Species(name='i_1', initial_value=y0[2], mode='continuous')
-            i_2 = gillespy2.Species(name='i_2', initial_value=y0[3], mode='continuous')
-            r_1 = gillespy2.Species(name='r_1', initial_value=y0[4], mode='continuous')
-            r_2 = gillespy2.Species(name='r_2', initial_value=y0[5], mode='continuous')
+            s_1 = gillespy2.Species(name='s_1', initial_value=y0[0])
+            s_2 = gillespy2.Species(name='s_2', initial_value=y0[1])
+            i_1 = gillespy2.Species(name='i_1', initial_value=y0[2])
+            i_2 = gillespy2.Species(name='i_2', initial_value=y0[3])
+            r_1 = gillespy2.Species(name='r_1', initial_value=y0[4])
+            r_2 = gillespy2.Species(name='r_2', initial_value=y0[5])
+            s_1_vp = gillespy2.Species(name='s_1_vp', initial_value=y0[6])
+            s_1_vu = gillespy2.Species(name='s_1_vu', initial_value=y0[7])
+            s_2_vp = gillespy2.Species(name='s_2_vp', initial_value=y0[8])
+            s_2_vu = gillespy2.Species(name='s_2_vu', initial_value=y0[9])
+            i_1_vu = gillespy2.Species(name='i_1_vu', initial_value=y0[10])
+            i_2_vu = gillespy2.Species(name='i_2_vu', initial_value=y0[11])
+            r_1_vu = gillespy2.Species(name='r_1_vu', initial_value=y0[12])
+            r_2_vu = gillespy2.Species(name='r_2_vu', initial_value=y0[13])
             
-            self.add_species([s_1, s_2, i_1, i_2, r_1, r_2])
+            
+            
+            
+            self.add_species([s_1, s_2, i_1, i_2, r_1, r_2, 
+                              s_1_vp, s_1_vu, s_2_vp, s_2_vu, 
+                              i_1_vu,  i_2_vu, r_1_vu, r_2_vu])
             
             #Define parameters
             beta_11 = gillespy2.Parameter(name='beta_11', 
@@ -353,7 +405,7 @@ def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
             
             self.add_parameter([beta_11, beta_12, beta_21, beta_22, gamma])
             
-            # Define derivatives.
+            #unvaccinated  I infect unvaccinated S
             inf_11 = gillespy2.Reaction(name="inf_11", 
                                         rate=beta_11, 
                                  reactants={s_1:1,i_1:1}, products={i_1:2}) 
@@ -372,16 +424,76 @@ def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
             rec_2 = gillespy2.Reaction(name="rec_2", 
                                         rate=gamma, 
                                  reactants={i_2:1}, products={r_2:1}) 
-            self.add_reaction([inf_11,inf_12,inf_21,inf_22,rec_1, rec_2])
+            
+            
+            #vaccinated unprotected I (Ivu) infect unvaccinated S (S)
+            inf_1vu1 = gillespy2.Reaction(name="inf_1vu1", 
+                                        rate=beta_11, 
+                                 reactants={s_1:1,i_1_vu:1}, products={i_1:1, i_1_vu:1}) 
+            inf_1vu2 = gillespy2.Reaction(name="inf_1vu2", 
+                                        rate=beta_12, 
+                                 reactants={s_2:1,i_1_vu:1}, products={i_2:1, i_1_vu:1}) 
+            inf_2vu1 = gillespy2.Reaction(name="inf_2vu1", 
+                                        rate=beta_21, 
+                                 reactants={s_1:1,i_2_vu:1}, products={i_1:1 ,i_2_vu:1}) 
+            inf_2vu2 = gillespy2.Reaction(name="inf_2vu2", 
+                                        rate=beta_22, 
+                                 reactants={s_2:1,i_2_vu:1}, products={i_2:1,i_2_vu:1}) 
+            
+            #unvaccinated I infect vaccinated unprotected S (Svu)
+            inf_11vu = gillespy2.Reaction(name="inf_11vu", 
+                                        rate=beta_11, 
+                                 reactants={s_1_vu:1,i_1:1}, products={i_1_vu:1,i_1:1}) 
+            inf_12vu = gillespy2.Reaction(name="inf_12vu", 
+                                        rate=beta_12, 
+                                 reactants={s_2_vu:1,i_1:1}, products={i_2_vu:1,i_1:1}) 
+            inf_21vu = gillespy2.Reaction(name="inf_21vu", 
+                                        rate=beta_21, 
+                                 reactants={s_1_vu:1,i_2:1}, products={i_1_vu:1,i_2:1}) 
+            inf_22vu = gillespy2.Reaction(name="inf_22vu", 
+                                        rate=beta_22, 
+                                 reactants={s_2_vu:1,i_2:1}, products={i_2_vu:1,i_2:1}) 
+        
+            
+            #vaccinated unprotected I (Ivu) infect vaccinated unprotected S (Svu)
+            inf_1vu1vu = gillespy2.Reaction(name="inf_1vu1vu", 
+                                        rate=beta_11, 
+                                 reactants={s_1_vu:1,i_1_vu:1}, products={i_1_vu:2}) 
+            inf_1vu2vu = gillespy2.Reaction(name="inf_1vu2vu", 
+                                        rate=beta_12, 
+                                 reactants={s_2_vu:1,i_1_vu:1}, products={i_2_vu:1,i_1_vu:1}) 
+            inf_2vu1vu = gillespy2.Reaction(name="inf_2vu1vu", 
+                                        rate=beta_21, 
+                                 reactants={s_1_vu:1,i_2_vu:1}, products={i_1_vu:1,i_2_vu:1}) 
+            inf_2vu2vu = gillespy2.Reaction(name="inf_2vu2vu", 
+                                        rate=beta_22, 
+                                 reactants={s_2_vu:1,i_2_vu:1}, products={i_2_vu:2}) 
+            
+            #recovery from vu
+            rec_1_vu = gillespy2.Reaction(name="rec_1_vu", 
+                                        rate=gamma, 
+                                 reactants={i_1_vu:1}, products={r_1_vu:1}) 
+            rec_2_vu = gillespy2.Reaction(name="rec_2_vu", 
+                                        rate=gamma, 
+                                 reactants={i_2_vu:1}, products={r_2_vu:1}) 
+            
+            
+            self.add_reaction([inf_11,inf_12,inf_21,inf_22,rec_1, rec_2,
+                              inf_1vu1, inf_1vu2, inf_2vu1,inf_2vu2,
+                              inf_11vu,inf_12vu, inf_21vu, inf_22vu,
+                              inf_1vu1vu,inf_1vu2vu, inf_2vu1vu, inf_2vu2vu,
+                              rec_1_vu, rec_2_vu
+                               ])
             self.timespan(t)
     
-    #gillespy plots
     model = SIR2(y0, params, pop_size_1, pop_size_2, ts)
-    #results = model.run(number_of_trajectories=1,
-    #                    algorithm="ODE")
     
     results = model.run(number_of_trajectories=opt_params.no_runs,
-                        algorithm= opt_params.model_type)#"Tau-Hybrid")
+                        algorithm= opt_params.model_type)
+    
+    #sanity check with ODE model results: DONE
+    #results = model.run(number_of_trajectories=opt_params.no_runs,
+    #                    algorithm= "ODE")#"Tau-Hybrid")
     
     
     
@@ -395,6 +507,17 @@ def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
             i2=result["i_2"],
             r1=result["r_1"],
             r2=result["r_2"],
+            
+            
+            s1_vp=result["s_1_vp"],
+            s1_vu=result["s_1_vu"],
+            s2_vp=result["s_2_vp"],
+            s2_vu=result["s_2_vu"],
+            i1_vu=result["i_1_vu"],
+            i2_vu=result["i_2_vu"],
+            r1_vu=result["r_1_vu"],
+            r2_vu=result["r_2_vu"],
+            
             times=ts,))
     
     return sir_sols
@@ -414,7 +537,17 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
     plt.plot(sir_sol.times, sir_sol.i2, label="Infected 2")
     plt.plot(sir_sol.times, sir_sol.r1, label="Recovered 1")
     plt.plot(sir_sol.times, sir_sol.r2, label="Recovered 2")
-    plt.xlabel("Time (months)")
+    plt.plot(sir_sol.times, sir_sol.s1_vp, label="Susceptible VP 1")
+    plt.plot(sir_sol.times, sir_sol.s1_vu, label="Susceptible VU 1")
+    plt.plot(sir_sol.times, sir_sol.s2_vp, label="Susceptible VP 2")
+    plt.plot(sir_sol.times, sir_sol.s2_vu, label="Susceptible VU 2")
+    plt.plot(sir_sol.times, sir_sol.i1_vu, label="Infected VU 1")
+    plt.plot(sir_sol.times, sir_sol.i2_vu, label="Infected VU 2")
+    plt.plot(sir_sol.times, sir_sol.r1_vu, label="Recovered VU 1")
+    plt.plot(sir_sol.times, sir_sol.r2_vu, label="Recovered VU 2")
+    
+    
+    plt.xlabel("Time (days)")
     plt.ylabel("Population")
     plt.legend()
     plt.title("Disease Spread and Vaccination Dynamics")
@@ -428,24 +561,26 @@ def objective_func_factory(
         params: SIRParams, disease_burden_params:BurdenParams, 
         opt_params: OptParams,
         ts, 
-        pop_size_1: float, pop_size_2: float, a: float, b: float, 
-        vacc_protection_1: float, vacc_protection_2: float
+        pop_size_1: float, pop_size_2: float, a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = initial_cond_from_vacc(
             vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
-            vacc_protection_1, vacc_protection_2
+            disease_burden_params.vacc_protection_1, 
+            disease_burden_params.vacc_protection_2
         )
         if opt_params.model_type == "ODE":
             sir_sol = sir_vacc(params, init_cond, ts)
+            #plot_SIRSolution(sir_sol[0])
+            
             return (
                 (1 - a - b) * loss_clinical_burden(sir_sol, disease_burden_params)[0]
                 + a * loss_equity_of_burden(sir_sol, disease_burden_params)[0]
                 + b * loss_equity_of_vaccination(sir_sol, disease_burden_params)[0]
             )
-        elif opt_params.model_type == "SSA":
+        elif opt_params.model_type in ["SSA", "Tau-Hybrid"]:
             sir_sols = sir_vacc_SSA(params, init_cond, opt_params, ts)
-            
+            #plot_SIRSolution(sir_sols[0])
             loss_clinical_burden1 = loss_clinical_burden(sir_sols, disease_burden_params)
             loss_equity_of_burden1 = loss_equity_of_burden(sir_sols, disease_burden_params)
             loss_equity_of_vaccination1 = loss_equity_of_vaccination(sir_sols, disease_burden_params)
@@ -460,25 +595,21 @@ def objective_func_factory(
             elif opt_params.stat_type == "median":
                 cur_objective =  np.nanmedian(objectives)
                 
-            if not isinstance(cur_objective, float):
-                print("here")         
             return cur_objective
 
     return objective
 
-
+#TODO: introduce grid search for stochastic runs
 def optimal_initial_conditions(
         params: SIRParams,
         disease_burden_params:BurdenParams,
         opt_params: OptParams,
         ts, pop_size_1: float, 
-        pop_size_2: float, a: float, b: float, vacc_protection_1: float,
-        vacc_protection_2: float
+        pop_size_2: float, a: float, b: float
 ) -> SIRInitialConditions:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
-                                       ts, pop_size_1, pop_size_2, a, b,
-                                       vacc_protection_1, vacc_protection_2)
+                                       ts, pop_size_1, pop_size_2, a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
     opt_result = scipy.optimize.minimize(
@@ -491,7 +622,8 @@ def optimal_initial_conditions(
         return {
             "opt_init_cond": initial_cond_from_vacc(
                 opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
-                vacc_protection_1, vacc_protection_2
+                disease_burden_params.vacc_protection_1, 
+                disease_burden_params.vacc_protection_2
             ),
             "obejctive_value": opt_result.fun,
         }

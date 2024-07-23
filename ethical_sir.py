@@ -372,9 +372,9 @@ def objective_func_factory(
                             + b * loss_equity_of_vaccination1
                         )
             if opt_params.stat_type == "mean":
-                cur_objective =  np.nanmean(objectives)
+                cur_objective =  np.mean(objectives)
             elif opt_params.stat_type == "median":
-                cur_objective =  np.nanmedian(objectives)
+                cur_objective =  np.median(objectives)
                 
             if not isinstance(cur_objective, float):
                 print("here")         

@@ -25,6 +25,7 @@ disease_burden_params = BurdenParams(
 params = SIRParams(0.40, 0.35, 0.35, 0.30, 0.2)
     
 
+
 opt_params = OptParams(
     model_type = "ODE",
     no_runs = 1, 
@@ -35,10 +36,10 @@ opt_params = OptParams(
 
 opt_params = OptParams(
     model_type = "SSA",
-    no_runs = 100, 
+    no_runs = 10, 
     initial_vacc_1 = 0.5,
     initial_vacc_2 = 0.5,
-    stat_type = "mean",
+    stat_type = "median",
     opt_method = 'trust-constr')
 
 pop_size_1 = 900
