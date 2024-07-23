@@ -95,8 +95,8 @@ opt_params = OptParams(
     stat_type = "mean")
     
 #population sizes and sim time horizon
-pop_size_1 = 900
-pop_size_2 = 100
+pop_size_1 = 890
+pop_size_2 = 110
 ts = np.arange(0, 100, 1 / 24)
 
 # tmp_ic = optimal_initial_conditions(params, pop_size_1, pop_size_2, 0, 0)
