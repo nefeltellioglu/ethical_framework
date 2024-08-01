@@ -34,6 +34,17 @@ conda env create -f environment.yaml
   + TODO Generate plots to check that the optimal vaccination strategy
     (i.e. the initial condition) is (practically) identifiable.
 
+The `create-grid-database.py` script iterates over a large combination
+of parameters and initial conditions and computes multiple simulations
+per pair. This information can be queried to work out what is the
+optimal initial condition (i.e. vaccination scheme) to minimise the
+loss with an arbitrary loss function. To create the database needed to
+do this run the following script.
+
+```
+$ python create-grid-database.py
+```
+
 ### Database creation example
 
 This script would create a database containing the model simulation
