@@ -103,10 +103,10 @@ ts = np.arange(0, 100, 1 / 24)
 # tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)
 
 foo = []
-# Iterate from 0.1 up to 1 in steps of 0.025. 
-#then do the get b conditional on a
-for a in np.arange(0.1, 1, 0.025):
-    for b in np.arange(0.1, 1 - a, 0.025):
+# Iterate from 0.1 up to 1 in steps of 0.1 then do the same with b conditional on a
+for a in np.arange(0.1, 1, 0.1):
+    for b in np.arange(0.1, 1 - a, 0.1):
+        print("Running a=%s, b=%s"%(a, b))
         tmp_ic = optimal_initial_conditions(params, disease_burden_params,
                                   opt_params, ts, pop_size_1, pop_size_2, a, b)
         
