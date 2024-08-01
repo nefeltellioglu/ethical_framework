@@ -36,10 +36,10 @@ disease_burden_params = BurdenParams(
                         perc_hosp_vacc_2= 0.002,
                         days_hosp_vacc_1= 6.0,
                         days_hosp_vacc_2= 6.0,
-                        vacc_protection_1 = vacc_protection_inf,
-                        vacc_protection_2 = vacc_protection_inf,
-                        vacc_protection_dis_1 = vacc_protection_dis,
-                        vacc_protection_dis_2 = vacc_protection_dis)
+                        # vacc_protection_1 = vacc_protection_inf,
+                        # vacc_protection_2 = vacc_protection_inf,
+                        vacc_protection_from_disease_1 = vacc_protection_dis,
+                        vacc_protection_from_disease_2 = vacc_protection_dis)
 
 
 
@@ -108,8 +108,10 @@ for a in np.arange(0.1, 1, 0.1):
     for b in np.arange(0.1, 1 - a, 0.1):
         print("Running a=%s, b=%s"%(a, b))
         tmp_ic = optimal_initial_conditions(params, disease_burden_params,
-                                  opt_params, ts, pop_size_1, pop_size_2, a, b)
-        
+                                  opt_params, ts,
+                                            pop_size_1, pop_size_2,
+                                            vacc_protection_inf, vacc_protection_inf,
+                                            a, b)
         if opt_params.model_type == "ODE":
             tmp_sol = sir_vacc(params,  
                                tmp_ic["opt_init_cond"], ts)[0]

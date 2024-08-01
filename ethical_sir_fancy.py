@@ -24,11 +24,13 @@ class BurdenParams:
     perc_hosp_vacc_2: float
     days_hosp_vacc_1: float
     days_hosp_vacc_2: float
-    vacc_protection_1: float
-    vacc_protection_2: float
-    vacc_protection_dis_1: float
-    vacc_protection_dis_2: float
-    
+    vacc_protection_from_disease_1: float
+    vacc_protection_from_disease_2: float
+    # vacc_protection_1: float
+    # vacc_protection_2: float
+    # vacc_protection_dis_1: float
+    # vacc_protection_dis_2: float
+
 @dataclass
 class OptParams:
     model_type: str
@@ -56,14 +58,40 @@ class SIRInitialConditions:
     i0_2_vu: int
     r0_1_vu: int
     r0_2_vu: int
-    
-    
+
+    @staticmethod
+    def integer_initial_conditions(vacc_prop_1: float,
+                                   vacc_prop_2: float,
+                                   pop_size_1: int,
+                                   pop_size_2: int,
+                                   vacc_protection_1: float,
+                                   vacc_protection_2: float):
+        num_vac_1 = int(pop_size_1 * vacc_prop_1)
+        num_vac_1_protected = int(num_vac_1 * vacc_protection_1)
+        num_vac_2 = int(pop_size_2 * vacc_prop_2)
+        num_vac_2_protected = int(num_vac_2 * vacc_protection_2)
+        return SIRInitialConditions(
+            pop_size_1 - num_vac_1 - 1,
+            pop_size_2 - num_vac_2 - 1,
+            1,
+            1,
+            0,
+            0,
+            num_vac_1_protected,
+            num_vac_1 - num_vac_1_protected,
+            num_vac_2_protected,
+            num_vac_2 - num_vac_2_protected,
+            0,
+            0,
+            0,
+            0
+        )
 
 
-# TODO This needs to include a slot for the cost of an infection.
-# TODO This needs to include a slot for the cost of vaccination.
-# TODO: There is no dynamic vaccination. Double check if that's needed.
-# TODO: Check if more stats are necessary to be collected from fancy model
+# TODO There is no dynamic vaccination. Double check if that's needed.
+# TODO Check if more stats are necessary to be collected from fancy model
+# TODO There should be a method to construct `SIRSolution' objects
+#      from an initial condition and a parameters object.
 @dataclass
 class SIRSolution:
     s1: [float]
@@ -130,28 +158,6 @@ class SIRSolution:
         }
 
 
-# TODO Make sure that this returns an integer for the initial
-# conditions so it works with the stochastic model.
-def initial_cond_from_vacc(
-    vacc_prop_1: float, vacc_prop_2: float, pop_size_1: int, pop_size_2: int,
-    vacc_protection_1: float, vacc_protection_2: float
-) -> SIRInitialConditions:
-    return SIRInitialConditions(
-        pop_size_1 * (1 - vacc_prop_1) - 1,
-        pop_size_2 * (1 - vacc_prop_2) - 1,
-        1,
-        1,
-        0,#pop_size_1 * vacc_prop_1,
-        0,#pop_size_2 * vacc_prop_2,
-        pop_size_1 * vacc_prop_1 * vacc_protection_1,
-        pop_size_1 * vacc_prop_1 * (1 - vacc_protection_1),
-        pop_size_2 * vacc_prop_2 * vacc_protection_2,
-        pop_size_2 * vacc_prop_2 * (1 - vacc_protection_2),
-        0,
-        0,
-        0,
-        0
-    )
 
 
 
@@ -173,9 +179,9 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
         
         net_days_hosp_for_inf_vacc = \
             disease_burden_params.perc_hosp_inf * \
-                (disease_burden_params.days_hosp_inf_1 * (1 - disease_burden_params.vacc_protection_dis_1) * ttl_infs["inf_in_1_vu"] +
-                 disease_burden_params.days_hosp_inf_2 * (1 - disease_burden_params.vacc_protection_dis_2) * ttl_infs["inf_in_2_vu"])
-                
+                (disease_burden_params.days_hosp_inf_1 * (1 - disease_burden_params.vacc_protection_from_disease_1) * ttl_infs["inf_in_1_vu"] +
+                 disease_burden_params.days_hosp_inf_2 * (1 - disease_burden_params.vacc_protection_from_disease_2) * ttl_infs["inf_in_2_vu"])
+
         net_days_hosp_for_adverse = \
             (disease_burden_params.days_hosp_vacc_1 * ttl_vacc["vacc_1"] * \
              disease_burden_params.perc_hosp_vacc_1) + \
@@ -210,7 +216,7 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
                        ttl_infs["inf_in_1_novacc"]
         obs_burden_1_vu = disease_burden_params.perc_hosp_inf * \
                        disease_burden_params.days_hosp_inf_1 * \
-                       (1 - disease_burden_params.vacc_protection_dis_1 )* \
+                       (1 - disease_burden_params.vacc_protection_from_disease_1 )* \
                        ttl_infs["inf_in_1_vu"]
         obs_burden_1 = obs_burden_1_novacc + obs_burden_1_vu
         
@@ -219,7 +225,7 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
                        ttl_infs["inf_in_2_novacc"]
         obs_burden_2_vu = disease_burden_params.perc_hosp_inf * \
                        disease_burden_params.days_hosp_inf_2 * \
-                       (1 - disease_burden_params.vacc_protection_dis_2) * \
+                       (1 - disease_burden_params.vacc_protection_from_disease_2) * \
                        ttl_infs["inf_in_2_vu"]
         obs_burden_2 = obs_burden_2_novacc + obs_burden_2_vu               
                       
@@ -560,15 +566,17 @@ def plot_SIRSolution(sir_sol: SIRSolution) -> None:
 def objective_func_factory(
         params: SIRParams, disease_burden_params:BurdenParams, 
         opt_params: OptParams,
-        ts, 
-        pop_size_1: float, pop_size_2: float, a: float, b: float
+        ts,
+        pop_size_1: float, pop_size_2: float,
+        vacc_protection_1: float, vacc_protection_2: float,
+        a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
-        init_cond = initial_cond_from_vacc(
+        init_cond = SIRInitialConditions.integer_initial_conditions(
             vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
-            disease_burden_params.vacc_protection_1, 
-            disease_burden_params.vacc_protection_2
+            vacc_protection_1, vacc_protection_2
         )
+
         if opt_params.model_type == "ODE":
             sir_sol = sir_vacc(params, init_cond, ts)
             #plot_SIRSolution(sir_sol[0])
@@ -604,12 +612,16 @@ def optimal_initial_conditions(
         params: SIRParams,
         disease_burden_params:BurdenParams,
         opt_params: OptParams,
-        ts, pop_size_1: float, 
-        pop_size_2: float, a: float, b: float
+        ts,
+        pop_size_1: float, pop_size_2: float,
+        vacc_protection_1: float, vacc_protection_2: float,
+        a: float, b: float
 ) -> SIRInitialConditions:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
-                                       ts, pop_size_1, pop_size_2, a, b)
+                                       ts, pop_size_1, pop_size_2,
+                                       vacc_protection_1, vacc_protection_2,
+                                       a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
     opt_result = scipy.optimize.minimize(
@@ -620,10 +632,9 @@ def optimal_initial_conditions(
     )
     if opt_result.success:
         return {
-            "opt_init_cond": initial_cond_from_vacc(
+            "opt_init_cond": SIRInitialConditions.integer_initial_conditions(
                 opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
-                disease_burden_params.vacc_protection_1, 
-                disease_burden_params.vacc_protection_2
+                vacc_protection_1, vacc_protection_2
             ),
             "obejctive_value": opt_result.fun,
         }
