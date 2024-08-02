@@ -26,10 +26,7 @@ class BurdenParams:
     days_hosp_vacc_2: float
     vacc_protection_from_disease_1: float
     vacc_protection_from_disease_2: float
-    # vacc_protection_1: float
-    # vacc_protection_2: float
-    # vacc_protection_dis_1: float
-    # vacc_protection_dis_2: float
+
 
 @dataclass
 class OptParams:
