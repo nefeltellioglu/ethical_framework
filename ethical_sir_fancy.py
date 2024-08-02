@@ -63,6 +63,27 @@ class SIRInitialConditions:
                                    pop_size_2: int,
                                    vacc_protection_1: float,
                                    vacc_protection_2: float):
+        """
+        Returns initial conditions for the SIR model with integer
+        values given a population size and vaccination proportion
+        assuming that initially there is a single infected individual
+        in each population.
+
+        :param vacc_prop_1: Proportion of population 1 vaccinated.
+        :param vacc_prop_2: Proportion of population 2 vaccinated.
+        :param pop_size_1: Population size of population 1.
+        :param pop_size_2: Population size of population 2.
+        :param vacc_protection_1: Proportion of population 1 vaccinated that are protected.
+        :param vacc_protection_2: Proportion of population 2 vaccinated that are protected.
+        :return: Initial conditions for the SIR model.
+
+        Note: "Protected" means that these individuals cannot get
+        infected. This does not yet account for the possibility of an
+        imperfect vaccination.
+
+        Note: The integer values are important so that this can be
+        used as the initial condition for a CTMC model.
+        """
         num_vac_1 = int(pop_size_1 * vacc_prop_1)
         num_vac_1_protected = int(num_vac_1 * vacc_protection_1)
         num_vac_2 = int(pop_size_2 * vacc_prop_2)
