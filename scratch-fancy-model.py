@@ -36,8 +36,6 @@ disease_burden_params = BurdenParams(
                         perc_hosp_vacc_2= 0.002,
                         days_hosp_vacc_1= 6.0,
                         days_hosp_vacc_2= 6.0,
-                        # vacc_protection_1 = vacc_protection_inf,
-                        # vacc_protection_2 = vacc_protection_inf,
                         vacc_protection_from_disease_1 = vacc_protection_dis,
                         vacc_protection_from_disease_2 = vacc_protection_dis)
 
@@ -186,6 +184,9 @@ for a in np.arange(0.1, 1, 0.1):
                 )
                 
 
+
+# Saving a copy of the results in this way is useful as a way to track
+# that we haven't broken anything in the code in the future.
 df = pd.DataFrame(foo)
 df.to_csv("scratch-fancy-%s.csv"%opt_params.model_type)
 
