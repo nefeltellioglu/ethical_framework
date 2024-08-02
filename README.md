@@ -5,8 +5,10 @@
 To run the computations
 
 ```
-$ python transmission_model.py
+$ python scratch-fancy-model.py
 ```
+
+The results of this are output to `scratch-fancy-ODE.csv`.
 
 To lint the code and keep documentation up to date:
 
