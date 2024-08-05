@@ -22,10 +22,20 @@ $ bash housekeeping.sh
 conda env create -f environment.yaml
 ```
 
+### Snakemake pipeline
+
+There is a `snakefile` to configure building the grid-search database
+and to generate some basic plots. To run the whole pipeline on a
+single core use the following command:
+
+```
+snakemake -c1 all
+```
+
 ## `grid-search-opt` branch goals
 
 - TODO Use grid search as the optimisation strategy
-  + TODO Create a database of the model solutions to store the heavy
+  + DONE Create a database of the model solutions to store the heavy
     compute so various optimisation question can be answered quickly
     be querying the database. See SQL example below.
   + TODO Configure the database construction with a file.
@@ -41,11 +51,7 @@ of parameters and initial conditions and computes multiple simulations
 per pair. This information can be queried to work out what is the
 optimal initial condition (i.e. vaccination scheme) to minimise the
 loss with an arbitrary loss function. To create the database needed to
-do this run the following script.
-
-```
-$ python create-grid-database.py
-```
+do this run the `create-grid-database.py` script.
 
 ### Database creation example
 
