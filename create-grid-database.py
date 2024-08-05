@@ -132,10 +132,8 @@ burden_parameters = [
             perc_hosp_vacc_2=0.002,
             days_hosp_vacc_1=6.0,
             days_hosp_vacc_2=6.0,
-            vacc_protection_1=0.531,
-            vacc_protection_2=0.531,
-            vacc_protection_dis_1=0.825,
-            vacc_protection_dis_2=0.825,
+            vacc_protection_from_disease_1=0.825,
+            vacc_protection_from_disease_2=0.825,
         ),
     }
 ]
