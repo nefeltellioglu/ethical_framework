@@ -42,7 +42,9 @@ snakemake -c1 all
     whatever allows us to import just the modelling code as
     `ethics.model`. Then there can be a `ethics.optimisation` for the
     optimisation.
-  + TODO Configure the database construction with a file.
+  + TODO Configure the database construction with a file. This will
+    provide a nicer alternative to having hard-coded parameters in the
+    code. This should live in `config/`.
   + TODO Write an optimisation method that searches the database for
     the best initial condition.
   + TODO Generate plots to check that we are using a suitable number
@@ -90,9 +92,28 @@ outcome1 REAL,
 outcome2 REAL
 );
 
-CREATE TABLE loss_function_configuration (
+CREATE TABLE burden_parameters (
 id INTEGER PRIMARY KEY,
 parameter1 REAL,
 parameter2 REAL
 );
+```
+
+Note that we have split the `outcome` and the `configuration` table
+because when using a stochastic model the outcomes are random
+variables and this allows us to reference a shared configuration
+rather than replicating that data in each outcome. It adds a bit of
+complexity for the deterministic model case but should simplify things
+in the stochastic case.
+
+### Optimisation
+
+The optimisation function takes an identifier for model and burden
+parameters, and the database. It returns the identifier of the optimal
+initial condition.
+
+```python
+def optimal_initial_condition(model_param_id: int,
+                              burden_param_id: int,
+							  db: dict) -> int:
 ```
