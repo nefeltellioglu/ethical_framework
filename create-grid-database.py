@@ -41,8 +41,8 @@ pop_size_2 = 500
 
 initial_conditions = []
 ic_ix = 0
-for num_vac_1 in range(0, pop_size_1, 200):
-    for num_vac_2 in range(0, pop_size_2, 200):
+for num_vac_1 in range(0, pop_size_1, 100):
+    for num_vac_2 in range(0, pop_size_2, 100):
         # Print out the initial condition being added to the list
         print(
             f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
