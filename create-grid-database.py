@@ -76,23 +76,31 @@ configurations = [
     )
 ]
 
+
+def _compute_sol(config) -> SIRSolution:
+    model_params = next((mp["parameters"] for mp in model_parameters if mp["id"] == config["model_parameters_id"]), None)
+    ic = next((ic["value"] for ic in initial_conditions if ic["id"] == config["initial_condition_id"]), None)
+    return sir_vacc(params = model_params, sir_0 = ic, ts = np.linspace(0, 100, 100))[0]
+
+solutions = [_compute_sol(c) for c in configurations]
+
 num_seeds = 2
 outcomes = [
     {
         "id": o_ix,
         "configuration_id": c["id"],
         "seed": seed,
-        "inf_1_no_vac": -1,
-        "inf_1_vu": -1,
-        "inf_1_vp": -1,
-        "vac_1": -1,
-        "inf_2_no_vac": -1,
-        "inf_2_vu": -1,
-        "inf_2_vp": -1,
-        "vac_2": -1,
+        "inf_1_no_vac": sol.r1[-1],
+        "inf_1_vu": sol.r1_vu[-1],
+        "inf_1_vp": 0,
+        "vac_1": sol.s1_vu[0] + sol.s1_vp[0],
+        "inf_2_no_vac": sol.r2[-1],
+        "inf_2_vu": sol.r2_vu[-1],
+        "inf_2_vp": 0,
+        "vac_2": sol.s2_vu[0] + sol.s2_vp[0],
     }
-    for o_ix, (c, seed) in enumerate(
-        itertools.product(configurations, range(num_seeds))
+    for o_ix, (c, sol, seed) in enumerate(
+        itertools.product(configurations, solutions, range(num_seeds))
     )
 ]
 
