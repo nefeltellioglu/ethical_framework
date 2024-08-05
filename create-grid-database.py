@@ -147,6 +147,6 @@ db = {
     "burden_parameters": burden_parameters,
 }
 
-output_file = "grid_database.pkl"
+output_file = "out/grid_database.pkl"
 with open(output_file, "wb") as f:
     pickle.dump(db, f)
