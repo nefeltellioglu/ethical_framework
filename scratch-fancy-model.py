@@ -36,10 +36,8 @@ disease_burden_params = BurdenParams(
                         perc_hosp_vacc_2= 0.002,
                         days_hosp_vacc_1= 6.0,
                         days_hosp_vacc_2= 6.0,
-                        vacc_protection_1 = vacc_protection_inf,
-                        vacc_protection_2 = vacc_protection_inf,
-                        vacc_protection_dis_1 = vacc_protection_dis,
-                        vacc_protection_dis_2 = vacc_protection_dis)
+                        vacc_protection_from_disease_1 = vacc_protection_dis,
+                        vacc_protection_from_disease_2 = vacc_protection_dis)
 
 
 
@@ -103,13 +101,15 @@ ts = np.arange(0, 100, 1 / 24)
 # tmp_sol = sir_vacc(params, tmp_ic["opt_init_cond"], ts)
 
 foo = []
-# Iterate from 0.1 up to 1 in steps of 0.025. 
-#then do the get b conditional on a
-for a in np.arange(0.1, 1, 0.025):
-    for b in np.arange(0.1, 1 - a, 0.025):
+# Iterate from 0.1 up to 1 in steps of 0.1 then do the same with b conditional on a
+for a in np.arange(0.1, 1, 0.1):
+    for b in np.arange(0.1, 1 - a, 0.1):
+        print("Running a=%s, b=%s"%(a, b))
         tmp_ic = optimal_initial_conditions(params, disease_burden_params,
-                                  opt_params, ts, pop_size_1, pop_size_2, a, b)
-        
+                                  opt_params, ts,
+                                            pop_size_1, pop_size_2,
+                                            vacc_protection_inf, vacc_protection_inf,
+                                            a, b)
         if opt_params.model_type == "ODE":
             tmp_sol = sir_vacc(params,  
                                tmp_ic["opt_init_cond"], ts)[0]
@@ -184,6 +184,9 @@ for a in np.arange(0.1, 1, 0.025):
                 )
                 
 
+
+# Saving a copy of the results in this way is useful as a way to track
+# that we haven't broken anything in the code in the future.
 df = pd.DataFrame(foo)
 df.to_csv("scratch-fancy-%s.csv"%opt_params.model_type)
 
