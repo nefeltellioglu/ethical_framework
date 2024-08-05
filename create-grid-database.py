@@ -66,6 +66,7 @@ for num_vac_1 in range(0, pop_size_1, 200):
                 ),
             }
         )
+        ic_ix += 1
 
 
 configurations = [
