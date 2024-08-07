@@ -32,6 +32,14 @@ single core use the following command:
 snakemake -c1 all
 ```
 
+## Configuration
+
+To avoid magic numbers appearing thoughout the code, there is a single
+file `config/config-YYY-MM-DD.json` which should be used as the single
+source of truth regarding parameter values. If you want to change one
+of the parameters, it should simply be a matter of adjusting this
+file.
+
 ## `grid-search-opt` branch goals
 
 - TODO Use grid search as the optimisation strategy
@@ -42,7 +50,7 @@ snakemake -c1 all
     whatever allows us to import just the modelling code as
     `ethics.model`. Then there can be a `ethics.optimisation` for the
     optimisation.
-  + TODO Configure the database construction with a file. This will
+  + DONE Configure the database construction with a file. This will
     provide a nicer alternative to having hard-coded parameters in the
     code. This should live in `config/`.
   + TODO Write an optimisation method that searches the database for
