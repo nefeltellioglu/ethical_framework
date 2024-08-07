@@ -668,3 +668,12 @@ def optimal_initial_conditions(
         }
     else:
         raise ValueError("Optimization failed with message: " + opt_result.message)
+
+
+def loss(outcome: SIROutcome, burden_params: BurdenParams, a: float, b: float) -> float:
+    """
+    Compute the loss function for a given outcome and burden
+    parameters for the given weights a and b.
+    """
+    # Throw a not implemented error if this is used.
+    raise NotImplementedError
