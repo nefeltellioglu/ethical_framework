@@ -31,12 +31,22 @@ class BurdenParams:
 @dataclass
 class OptParams:
     model_type: str
-    no_runs: int 
+    no_runs: int
     initial_vacc_1: float
     initial_vacc_2: float
     stat_type: str
-    
-    
+
+
+@dataclass
+class SIROutcome:
+    inf_1_no_vac: int
+    inf_1_vac_unprtct: int
+    inf_1_vac_prtct: int
+    total_vac_1: int
+    inf_2_no_vac: int
+    inf_2_vac_unprtct: int
+    inf_2_vac_prtct: int
+    total_vac_2: int
 
 
 @dataclass

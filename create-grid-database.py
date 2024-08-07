@@ -14,6 +14,7 @@ from ethics.model import (
     SIRParams,
     SIRInitialConditions,
     SIRSolution,
+    SIROutcome,
     optimal_initial_conditions,
     loss_clinical_burden,
     loss_equity_of_burden,
@@ -113,14 +114,16 @@ outcomes = [
         "id": o_ix,
         "configuration_id": c["id"],
         "seed": seed,
-        "inf_1_no_vac": sol.r1[-1],
-        "inf_1_vu": sol.r1_vu[-1],
-        "inf_1_vp": 0,
-        "vac_1": sol.s1_vu[0] + sol.s1_vp[0],
-        "inf_2_no_vac": sol.r2[-1],
-        "inf_2_vu": sol.r2_vu[-1],
-        "inf_2_vp": 0,
-        "vac_2": sol.s2_vu[0] + sol.s2_vp[0],
+        "outcome": SIROutcome(
+            inf_1_no_vac=sol.r1[-1],
+            inf_1_vac_unprtct=sol.r1_vu[-1],
+            inf_1_vac_prtct=0,
+            total_vac_1=sol.s1_vu[0] + sol.s1_vp[0],
+            inf_2_no_vac=sol.r2[-1],
+            inf_2_vac_unprtct=sol.r2_vu[-1],
+            inf_2_vac_prtct=0,
+            total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
+        )
     }
     for o_ix, (c, sol, seed) in enumerate(
         itertools.product(configurations, solutions, range(num_seeds))

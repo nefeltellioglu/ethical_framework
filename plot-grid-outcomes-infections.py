@@ -1,8 +1,28 @@
+import json
 import pickle
 import matplotlib.pyplot as plt
 
+from ethics.model import (
+    OptParams,
+    BurdenParams,
+    SIRParams,
+    SIRInitialConditions,
+    SIRSolution,
+    SIROutcome,
+    optimal_initial_conditions,
+    loss_clinical_burden,
+    loss_equity_of_burden,
+    loss_equity_of_vaccination,
+    sir_vacc,
+    sir_vacc_SSA,
+)
 
-input_file = "out/grid_database.pkl"
+with open("config/config-2024-08-07.json", "r") as f:
+    CONFIG = json.load(f)
+
+
+input_file = CONFIG["database_file"]
+
 with open(input_file, "rb") as f:
     db = pickle.load(f)
 
@@ -17,10 +37,11 @@ tmp = {"total_vacc_1": [],
        "total_inf_1": [],
        "total_inf_2": []}
 for oc in db["outcomes"]:
-    tmp["total_vacc_1"].append(oc["vac_1"])
-    tmp["total_vacc_2"].append(oc["vac_2"])
-    tmp["total_inf_1"].append(oc["inf_1_no_vac"] + oc["inf_1_vu"] + oc["inf_1_vp"])
-    tmp["total_inf_2"].append(oc["inf_2_no_vac"] + oc["inf_2_vu"] + oc["inf_2_vp"])
+    oc_obj = oc["outcome"]
+    tmp["total_vacc_1"].append(oc_obj.total_vac_1)
+    tmp["total_vacc_2"].append(oc_obj.total_vac_2)
+    tmp["total_inf_1"].append(oc_obj.inf_1_no_vac + oc_obj.inf_1_vac_unprtct + oc_obj.inf_1_vac_prtct)
+    tmp["total_inf_2"].append(oc_obj.inf_2_no_vac + oc_obj.inf_2_vac_unprtct + oc_obj.inf_2_vac_prtct)
 
 
 plt.figure()
