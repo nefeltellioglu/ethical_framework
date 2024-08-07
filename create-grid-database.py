@@ -3,11 +3,12 @@ import scipy.optimize
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import itertools
+import json
 import numpy as np
 import pandas as pd
 import pickle
 
-from ethical_sir_fancy import (
+from ethics.model import (
     OptParams,
     BurdenParams,
     SIRParams,
@@ -22,22 +23,27 @@ from ethical_sir_fancy import (
 )
 
 
+with open("config/config-2024-08-07.json", "r") as f:
+    CONFIG = json.load(f)
+
+
 model_parameters = [
     {
         "id": 0,
         "parameters": SIRParams(
-            beta_11=0.19188309203678316,
-            beta_12=0.16789770553218525,
-            beta_21=0.16789770553218525,
-            beta_22=0.14391231902758736,
-            gamma=0.125,
+            beta_11=CONFIG["model_parameters"]["beta_11"],
+            beta_12=CONFIG["model_parameters"]["beta_12"],
+            beta_21=CONFIG["model_parameters"]["beta_21"],
+            beta_22=CONFIG["model_parameters"]["beta_22"],
+            gamma=CONFIG["model_parameters"]["gamma"]
         ),
     }
 ]
 
 
-pop_size_1 = 1000
-pop_size_2 = 500
+
+pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
+pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
 
 initial_conditions = []
 ic_ix = 0
@@ -125,15 +131,15 @@ burden_parameters = [
     {
         "id": 0,
         "parameters": BurdenParams(
-            perc_hosp_inf=0.02,
-            days_hosp_inf_1=3.075,
-            days_hosp_inf_2=7.60,
-            perc_hosp_vacc_1=0.004,
-            perc_hosp_vacc_2=0.002,
-            days_hosp_vacc_1=6.0,
-            days_hosp_vacc_2=6.0,
-            vacc_protection_from_disease_1=0.825,
-            vacc_protection_from_disease_2=0.825,
+            perc_hosp_inf=CONFIG["burden_parameters"]["perc_hosp_inf"],
+            days_hosp_inf_1=CONFIG["burden_parameters"]["days_hosp_inf_1"],
+            days_hosp_inf_2=CONFIG["burden_parameters"]["days_hosp_inf_2"],
+            perc_hosp_vacc_1=CONFIG["burden_parameters"]["perc_hosp_vacc_1"],
+            perc_hosp_vacc_2=CONFIG["burden_parameters"]["perc_hosp_vacc_2"],
+            days_hosp_vacc_1=CONFIG["burden_parameters"]["days_hosp_vacc_1"],
+            days_hosp_vacc_2=CONFIG["burden_parameters"]["days_hosp_vacc_2"],
+            vacc_protection_from_disease_1=CONFIG["burden_parameters"]["vacc_protection_from_disease_1"],
+            vacc_protection_from_disease_2=CONFIG["burden_parameters"]["vacc_protection_from_disease_2"],
         ),
     }
 ]
@@ -147,6 +153,6 @@ db = {
     "burden_parameters": burden_parameters,
 }
 
-output_file = "out/grid_database.pkl"
+output_file = CONFIG["database_file"]
 with open(output_file, "wb") as f:
     pickle.dump(db, f)
