@@ -38,7 +38,7 @@ snakemake -c1 all
   + DONE Create a database of the model solutions to store the heavy
     compute so various optimisation question can be answered quickly
     be querying the database. See SQL example below.
-  + TODO Rename `ethical_sir_fancy.py` to `ethics/model.py` or
+  + DONE Rename `ethical_sir_fancy.py` to `ethics/model.py` or
     whatever allows us to import just the modelling code as
     `ethics.model`. Then there can be a `ethics.optimisation` for the
     optimisation.
