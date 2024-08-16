@@ -36,11 +36,10 @@ model_parameters = [
             beta_12=CONFIG["model_parameters"]["beta_12"],
             beta_21=CONFIG["model_parameters"]["beta_21"],
             beta_22=CONFIG["model_parameters"]["beta_22"],
-            gamma=CONFIG["model_parameters"]["gamma"]
+            gamma=CONFIG["model_parameters"]["gamma"],
         ),
     }
 ]
-
 
 
 pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
@@ -123,7 +122,7 @@ outcomes = [
             inf_2_vu=sol.r2_vu[-1],
             inf_2_vp=0,
             total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
-        )
+        ),
     }
     for o_ix, (c, sol, seed) in enumerate(
         itertools.product(configurations, solutions, range(num_seeds))
@@ -141,8 +140,12 @@ burden_parameters = [
             perc_hosp_vacc_2=CONFIG["burden_parameters"]["perc_hosp_vacc_2"],
             days_hosp_vacc_1=CONFIG["burden_parameters"]["days_hosp_vacc_1"],
             days_hosp_vacc_2=CONFIG["burden_parameters"]["days_hosp_vacc_2"],
-            vacc_protection_from_disease_1=CONFIG["burden_parameters"]["vacc_protection_from_disease_1"],
-            vacc_protection_from_disease_2=CONFIG["burden_parameters"]["vacc_protection_from_disease_2"],
+            vacc_protection_from_disease_1=CONFIG["burden_parameters"][
+                "vacc_protection_from_disease_1"
+            ],
+            vacc_protection_from_disease_2=CONFIG["burden_parameters"][
+                "vacc_protection_from_disease_2"
+            ],
         ),
     }
 ]
