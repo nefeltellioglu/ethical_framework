@@ -17,15 +17,20 @@ class SIRParams:
 
 @dataclass
 class BurdenParams:
+    # Infection burden parameters
     perc_hosp_inf: float
     days_hosp_inf_1: float
     days_hosp_inf_2: float
+    # Protection from disease among (unprotected) vaccinated.
+    # TODO Something about this seems a bit fishy to me, maybe we need
+    # a clearer variable name. Is it a proportion???
+    vacc_protection_from_disease_1: float
+    vacc_protection_from_disease_2: float
+    # Vaccination burden parameter
     perc_hosp_vacc_1: float
     perc_hosp_vacc_2: float
     days_hosp_vacc_1: float
     days_hosp_vacc_2: float
-    vacc_protection_from_disease_1: float
-    vacc_protection_from_disease_2: float
 
 
 @dataclass
@@ -40,12 +45,12 @@ class OptParams:
 @dataclass
 class SIROutcome:
     inf_1_no_vac: int
-    inf_1_vac_unprtct: int
-    inf_1_vac_prtct: int
+    inf_1_vu: int
+    inf_1_vp: int
     total_vac_1: int
     inf_2_no_vac: int
-    inf_2_vac_unprtct: int
-    inf_2_vac_prtct: int
+    inf_2_vu: int
+    inf_2_vp: int
     total_vac_2: int
 
 
@@ -65,6 +70,18 @@ class SIRInitialConditions:
     i0_2_vu: int
     r0_1_vu: int
     r0_2_vu: int
+
+    def pop_size(self, pop: int) -> int:
+        """
+        Returns the total population size for a given population.
+        """
+        match pop:
+            case 1:
+                return self.s0_1 + self.i0_1 + self.r0_1 + self.s0_1_vp + self.s0_1_vu + self.i0_1_vu + self.r0_1_vu
+            case 2:
+                return self.s0_2 + self.i0_2 + self.r0_2 + self.s0_2_vp + self.s0_2_vu + self.i0_2_vu + self.r0_2_vu
+            case _:
+                raise ValueError(f"Invalid population: {pop}.")
 
     @staticmethod
     def integer_initial_conditions(vacc_prop_1: float,
