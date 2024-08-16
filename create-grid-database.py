@@ -41,6 +41,8 @@ model_parameters = [
     }
 ]
 
+_num_model_parameters = len(model_parameters)
+assert _num_model_parameters == 1
 
 pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
 pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
@@ -75,7 +77,8 @@ for num_vac_1 in range(0, pop_size_1, 100):
             }
         )
         ic_ix += 1
-
+_num_initial_conditions = len(initial_conditions)
+assert _num_initial_conditions == (len(range(0, pop_size_1, 100)) * len(range(0, pop_size_2, 100)))
 
 configurations = [
     {"id": c_ix, "model_parameters_id": mp["id"], "initial_condition_id": ic["id"]}
@@ -83,6 +86,8 @@ configurations = [
         itertools.product(model_parameters, initial_conditions)
     )
 ]
+_num_configurations = len(configurations)
+assert _num_configurations == _num_model_parameters * _num_initial_conditions
 
 
 def _compute_sol(config) -> SIRSolution:
@@ -106,13 +111,16 @@ def _compute_sol(config) -> SIRSolution:
 
 
 solutions = [_compute_sol(c) for c in configurations]
+_num_solutions = len(solutions)
+assert _num_solutions == _num_configurations
 
-num_seeds = 2
+# NOTE the seed is always 0 because we are not using any randomness in
+# the model
 outcomes = [
     {
         "id": o_ix,
         "configuration_id": c["id"],
-        "seed": seed,
+        "seed": 0,
         "outcome": SIROutcome(
             inf_1_no_vac=sol.r1[-1],
             inf_1_vu=sol.r1_vu[-1],
@@ -124,10 +132,13 @@ outcomes = [
             total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
         ),
     }
-    for o_ix, (c, sol, seed) in enumerate(
-        itertools.product(configurations, solutions, range(num_seeds))
+    for o_ix, (c, sol) in enumerate(
+        zip(configurations, solutions)
     )
 ]
+_num_outcomes = len(outcomes)
+assert _num_outcomes == _num_solutions
+
 
 burden_parameters = [
     {
@@ -149,7 +160,8 @@ burden_parameters = [
         ),
     }
 ]
-
+_num_burden_parameters = len(burden_parameters)
+assert _num_burden_parameters == 1
 
 db = {
     "model_parameters": model_parameters,
