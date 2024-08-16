@@ -1,9 +1,10 @@
 import ethics.model as em
+import typing as tp
 
 
 def optimal_initial_condition(
     a: float, b: float, model_param_id: int, burden_param_id: int, db: dict
-) -> int:
+) -> tp.Tuple[int, float]:
     """
     Find the optimal initial condition for a given model and
     burden parameters given the database and the a and b parameters
@@ -18,25 +19,30 @@ def optimal_initial_condition(
     # 4. Return the identifier of the optimal initial condition.
 
     configs = [
-        c for c in db["configurations"] if c["model_parameter_id"] == model_param_id
+        c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
     ]
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
-    bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
-        "parameters"
-    ]
+    bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id]
+    assert len(bp) == 1
+    bp = bp[0]["parameters"]
 
     best_ic, best_loss = None, float("inf")
     for oc in ocs:
-        tmp_config = [c for c in configs if c["id"] == oc["configuration_id"]][0]
+        tmp_config = [c for c in configs if c["id"] == oc["configuration_id"]]
+        assert len(tmp_config) == 1
+        tmp_config = tmp_config[0]
         tmp_ic = [
             ic
             for ic in db["initial_conditions"]
             if ic["id"] == tmp_config["initial_condition_id"]
-        ][0]
+        ]
+        assert len(tmp_ic) == 1
+        tmp_ic_id = tmp_ic[0]["id"]
+        tmp_ic = tmp_ic[0]["value"]
         tmp_loss = em.loss(oc["outcome"], tmp_ic, bp, a, b)
         if tmp_loss < best_loss:
             best_loss = tmp_loss
-            best_ic = tmp_ic["id"]
+            best_ic = tmp_ic_id
 
-    return best_ic
+    return best_ic, best_loss
