@@ -55,7 +55,7 @@ class SIROutcome:
 
 
 @dataclass
-class SIRInitialConditions:
+class SIRInitialCondition:
     s0_1: int
     s0_2: int
     i0_1: int
@@ -115,7 +115,7 @@ class SIRInitialConditions:
         num_vac_1_protected = int(num_vac_1 * vacc_protection_1)
         num_vac_2 = int(pop_size_2 * vacc_prop_2)
         num_vac_2_protected = int(num_vac_2 * vacc_protection_2)
-        return SIRInitialConditions(
+        return SIRInitialCondition(
             pop_size_1 - num_vac_1 - 1,
             pop_size_2 - num_vac_2 - 1,
             1,
@@ -319,7 +319,7 @@ def loss_equity_of_vaccination(sir_sols: [SIRSolution],
 
 
 def sir_vacc(params: SIRParams,
-             sir_0: SIRInitialConditions, ts) -> [SIRSolution]:
+             sir_0: SIRInitialCondition, ts) -> [SIRSolution]:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
           sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
           sir_0.i0_1_vu, sir_0.i0_2_vu, sir_0.r0_1_vu, sir_0.r0_2_vu,]
@@ -403,7 +403,7 @@ def sir_vacc(params: SIRParams,
 
 
 # TODO: introduce fancy model
-def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
+def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialCondition,
                  opt_params: OptParams, ts) -> [SIRSolution]:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
           sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
@@ -617,7 +617,7 @@ def objective_func_factory(
         a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
-        init_cond = SIRInitialConditions.integer_initial_conditions(
+        init_cond = SIRInitialCondition.integer_initial_conditions(
             vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
             vacc_protection_1, vacc_protection_2
         )
@@ -661,7 +661,7 @@ def optimal_initial_conditions(
         pop_size_1: float, pop_size_2: float,
         vacc_protection_1: float, vacc_protection_2: float,
         a: float, b: float
-) -> SIRInitialConditions:
+) -> SIRInitialCondition:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
                                        ts, pop_size_1, pop_size_2,
@@ -677,7 +677,7 @@ def optimal_initial_conditions(
     )
     if opt_result.success:
         return {
-            "opt_init_cond": SIRInitialConditions.integer_initial_conditions(
+            "opt_init_cond": SIRInitialCondition.integer_initial_conditions(
                 opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
                 vacc_protection_1, vacc_protection_2
             ),
