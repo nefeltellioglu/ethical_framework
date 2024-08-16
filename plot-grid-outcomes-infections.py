@@ -6,7 +6,6 @@ from ethics.model import (
     OptParams,
     BurdenParams,
     SIRParams,
-    SIRInitialConditions,
     SIRSolution,
     SIROutcome,
     optimal_initial_conditions,
@@ -40,8 +39,8 @@ for oc in db["outcomes"]:
     oc_obj = oc["outcome"]
     tmp["total_vacc_1"].append(oc_obj.total_vac_1)
     tmp["total_vacc_2"].append(oc_obj.total_vac_2)
-    tmp["total_inf_1"].append(oc_obj.inf_1_no_vac + oc_obj.inf_1_vac_unprtct + oc_obj.inf_1_vac_prtct)
-    tmp["total_inf_2"].append(oc_obj.inf_2_no_vac + oc_obj.inf_2_vac_unprtct + oc_obj.inf_2_vac_prtct)
+    tmp["total_inf_1"].append(oc_obj.inf_1_no_vac + oc_obj.inf_1_vu + oc_obj.inf_1_vp)
+    tmp["total_inf_2"].append(oc_obj.inf_2_no_vac + oc_obj.inf_2_vu + oc_obj.inf_2_vp)
 
 
 plt.figure()

@@ -12,7 +12,7 @@ from ethics.model import (
     OptParams,
     BurdenParams,
     SIRParams,
-    SIRInitialConditions,
+    SIRInitialCondition,
     SIRSolution,
     SIROutcome,
     optimal_initial_conditions,
@@ -57,7 +57,7 @@ for num_vac_1 in range(0, pop_size_1, 100):
         initial_conditions.append(
             {
                 "id": ic_ix,
-                "value": SIRInitialConditions(
+                "value": SIRInitialCondition(
                     s0_1=pop_size_1 - num_vac_1 - 1,
                     s0_2=pop_size_2 - num_vac_2 - 1,
                     i0_1=1,
@@ -116,12 +116,12 @@ outcomes = [
         "seed": seed,
         "outcome": SIROutcome(
             inf_1_no_vac=sol.r1[-1],
-            inf_1_vac_unprtct=sol.r1_vu[-1],
-            inf_1_vac_prtct=0,
+            inf_1_vu=sol.r1_vu[-1],
+            inf_1_vp=0,
             total_vac_1=sol.s1_vu[0] + sol.s1_vp[0],
             inf_2_no_vac=sol.r2[-1],
-            inf_2_vac_unprtct=sol.r2_vu[-1],
-            inf_2_vac_prtct=0,
+            inf_2_vu=sol.r2_vu[-1],
+            inf_2_vp=0,
             total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
         )
     }
