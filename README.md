@@ -53,8 +53,10 @@ file.
   + DONE Configure the database construction with a file. This will
     provide a nicer alternative to having hard-coded parameters in the
     code. This should live in `config/`.
-  + TODO Write an optimisation method that searches the database for
+  + DONE Write an optimisation method that searches the database for
     the best initial condition.
+  + TODO Generate plots to check that we are getting a suitable answer
+    using the grid-search optimisation.
   + TODO Generate plots to check that we are using a suitable number
     of replicates to get the average value.
   + TODO Generate plots to check that the optimal vaccination strategy
