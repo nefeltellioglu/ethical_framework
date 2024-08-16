@@ -687,10 +687,38 @@ def optimal_initial_conditions(
         raise ValueError("Optimization failed with message: " + opt_result.message)
 
 
-def loss(outcome: SIROutcome, burden_params: BurdenParams, a: float, b: float) -> float:
+def loss(outcome: SIROutcome,
+         ic: SIRInitialCondition,
+         burden_params: BurdenParams,
+         a: float, b: float) -> float:
     """
-    Compute the loss function for a given outcome and burden
-    parameters for the given weights a and b.
+    Burden is the sum of infection burden and vaccination burden.
     """
-    # Throw a not implemented error if this is used.
-    raise NotImplementedError
+    pop_size_1, pop_size_2 = ic.pop_size(1), ic.pop_size(2)
+    total_pop = float(pop_size_1 + pop_size_2)
+
+    obs_vb_1 = outcome.total_vac_1 * burden_params.prop_hosp_vacc_1 * burden_params.days_hosp_vacc_1
+    obs_vb_2 = outcome.total_vac_2 * burden_params.prop_hosp_vacc_2 * burden_params.days_hosp_vacc_2
+    obs_ib_1_no_vac = outcome.inf_1_no_vac * burden_params.prop_hosp_inf * burden_params.days_hosp_inf_1
+    obs_ib_2_no_vac = outcome.inf_2_no_vac * burden_params.prop_hosp_inf * burden_params.days_hosp_inf_2
+    obs_ib_1_vu = outcome.inf_1_vu * burden_params.prop_hosp_inf * burden_params.days_hosp_inf_1 * (1 - burden_params.vacc_protection_from_disease_1)
+    obs_ib_2_vu = outcome.inf_2_vu * burden_params.prop_hosp_inf * burden_params.days_hosp_inf_2 * (1 - burden_params.vacc_protection_from_disease_2)
+    obs_cb_1 = obs_ib_1_no_vac + obs_ib_1_vu + obs_vb_1
+    obs_cb_2 = obs_ib_2_no_vac + obs_ib_2_vu + obs_vb_2
+
+    exp_cb_1 = (obs_cb_1 + obs_cb_2) * (pop_size_1 / total_pop)
+    exp_cb_2 = (obs_cb_1 + obs_cb_2) * (pop_size_2 / total_pop)
+    exp_vb_1 = (obs_vb_1 + obs_vb_2) * (pop_size_1 / total_pop)
+    exp_vb_2 = (obs_vb_1 + obs_vb_2) * (pop_size_2 / total_pop)
+
+    loss_total_clinical_burden = \
+        obs_cb_1 + obs_cb_2 + obs_vb_1 + obs_vb_2
+    loss_equity_of_clinical_burden = \
+        abs(exp_cb_1 - obs_cb_1) + abs(exp_cb_2 - obs_cb_2)
+    loss_equity_of_vaccination_burden = \
+        abs(exp_vb_1 - obs_vb_1) + abs(exp_vb_2 - obs_vb_2)
+
+    return \
+        (1 - a - b) * loss_total_clinical_burden + \
+        a * loss_equity_of_clinical_burden + \
+        b * loss_equity_of_vaccination_burden
