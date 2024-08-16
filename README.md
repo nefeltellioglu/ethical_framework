@@ -42,6 +42,10 @@ file.
 
 ## `grid-search-opt` branch goals
 
+- TODO Double check that the percentages in the `BurdenParams` class
+  can safely be renamed to proportions as this is what they appear to
+  be.
+- TODO Work out if we should be thinking about the Pareto front?
 - TODO Use grid search as the optimisation strategy
   + DONE Create a database of the model solutions to store the heavy
     compute so various optimisation question can be answered quickly
@@ -55,12 +59,14 @@ file.
     code. This should live in `config/`.
   + DONE Write an optimisation method that searches the database for
     the best initial condition.
-  + TODO Generate plots to check that we are getting a suitable answer
-    using the grid-search optimisation.
+  + DONE Generate plots to check that the optimal vaccination strategy
+    (i.e. the initial condition) is (practically) identifiable.
+  + TODO Implement a normalisation strategy so that all of the
+    objectives are on a comparable scale. We could do this by looking
+    at the vertices of the a/b simplex and then scaling each loss term
+    to take values form 0 to 1.
   + TODO Generate plots to check that we are using a suitable number
     of replicates to get the average value.
-  + TODO Generate plots to check that the optimal vaccination strategy
-    (i.e. the initial condition) is (practically) identifiable.
 
 The `create-grid-database.py` script iterates over a large combination
 of parameters and initial conditions and computes multiple simulations
