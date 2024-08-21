@@ -35,7 +35,9 @@ for oc in ocs:
     tmp_config_id = oc["configuration_id"]
 
     tmp_ic = [ic for ic in db["initial_conditions"] if ic["id"] == [c for c in configs if c["id"] == tmp_config_id][0]["initial_condition_id"]][0]["value"]
-    tmp_loss = em.loss(oc["outcome"], tmp_ic, bp, ethical_a, ethical_b)
+
+    tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = em.loss_terms(oc["outcome"], tmp_ic, bp)
+    tmp_loss = (1 - ethical_a - ethical_b) * tmp_loss_tcb + ethical_a * tmp_loss_ecb + ethical_b * tmp_loss_evb
     plot_df.append({"outcome_id": oc["id"],
                     "config_id": tmp_config_id,
                     "vac_1": oc["outcome"].total_vac_1,
@@ -61,6 +63,6 @@ plt.scatter(best_vac_1, best_vac_2, s=500, c="red", marker="o")
 cbar.set_label("Loss")
 plt.xlabel("Total Vaccinations in Group 1")
 plt.ylabel("Total Vaccinations in Group 2")
-plt.savefig("out/vacc-vs-vacc-loss.png")
-plt.savefig("out/vacc-vs-vacc-loss.svg")
+plt.savefig("out/example-optimisation-result.png")
+plt.savefig("out/example-optimisation-result.svg")
 plt.clf()

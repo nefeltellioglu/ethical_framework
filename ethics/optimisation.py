@@ -3,7 +3,7 @@ import typing as tp
 
 
 def optimal_initial_condition(
-    a: float, b: float, model_param_id: int, burden_param_id: int, db: dict
+        a: float, b: float, model_param_id: int, burden_param_id: int, db: dict, normalise: bool = False
 ) -> tp.Tuple[int, float]:
     """
     Find the optimal initial condition for a given model and
@@ -16,6 +16,33 @@ def optimal_initial_condition(
     model_param_id: The identifier of the model parameters in the database.
     burden_param_id: The identifier of the burden parameters in the database.
     db: The database containing the model, burden, and outcome data.
+    normalise: whether to normalise the loss function terms (which by default is true).
+
+    NOTE The "id" field in the database is use as a primary key so it
+    can be used to select a unique record.
+    """
+    if normalise:
+        raise NotImplementedError("Normalisation is not implemented yet.")
+    else:
+        return extreme_initial_condition(a, b, model_param_id, burden_param_id, db, minimise=True)
+
+
+def extreme_initial_condition(
+        a: float, b: float, model_param_id: int, burden_param_id: int, db: dict,
+        minimise: bool = True
+) -> tp.Tuple[int, float]:
+    """
+    Find the most extreme initial condition for a given model and
+    burden parameters given the database and the a and b parameters
+    for the loss function.
+
+    Args:
+    a: The a parameter for the loss function.
+    b: The b parameter for the loss function.
+    model_param_id: The identifier of the model parameters in the database.
+    burden_param_id: The identifier of the burden parameters in the database.
+    db: The database containing the model, burden, and outcome data.
+    minimise: whether to minimise the loss function (which by default is true).
 
     NOTE The "id" field in the database is use as a primary key so it
     can be used to select a unique record.
@@ -47,7 +74,8 @@ def optimal_initial_condition(
         assert len(tmp_ic) == 1
         tmp_ic_id = tmp_ic[0]["id"]
         tmp_ic = tmp_ic[0]["value"]
-        tmp_loss = em.loss(oc["outcome"], tmp_ic, bp, a, b)
+        tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = em.loss_terms(oc["outcome"], tmp_ic, bp)
+        tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
         if tmp_loss < best_loss:
             best_loss = tmp_loss
             best_ic = tmp_ic_id
