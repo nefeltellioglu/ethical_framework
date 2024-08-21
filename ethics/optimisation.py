@@ -8,7 +8,14 @@ def optimal_initial_condition(
     """
     Find the optimal initial condition for a given model and
     burden parameters given the database and the a and b parameters
-    for the objective function.
+    for the loss function.
+
+    Args:
+    a: The a parameter for the loss function.
+    b: The b parameter for the loss function.
+    model_param_id: The identifier of the model parameters in the database.
+    burden_param_id: The identifier of the burden parameters in the database.
+    db: The database containing the model, burden, and outcome data.
 
     NOTE The "id" field in the database is use as a primary key so it
     can be used to select a unique record.
