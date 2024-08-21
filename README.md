@@ -61,7 +61,7 @@ file.
     the best initial condition.
   + DONE Generate plots to check that the optimal vaccination strategy
     (i.e. the initial condition) is (practically) identifiable.
-  + TODO Implement a normalisation strategy so that all of the
+  + DONE Implement a normalisation strategy so that all of the
     objectives are on a comparable scale. We could do this by looking
     at the vertices of the a/b simplex and then scaling each loss term
     to take values form 0 to 1.
@@ -131,5 +131,5 @@ initial condition.
 ```python
 def optimal_initial_condition(model_param_id: int,
                               burden_param_id: int,
-							  db: dict) -> int:
+                              db: dict) -> int:
 ```
