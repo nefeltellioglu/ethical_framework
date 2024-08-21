@@ -45,7 +45,6 @@ file.
 - TODO Double check that the percentages in the `BurdenParams` class
   can safely be renamed to proportions as this is what they appear to
   be.
-- TODO Work out if we should be thinking about the Pareto front?
 - TODO Use grid search as the optimisation strategy
   + DONE Create a database of the model solutions to store the heavy
     compute so various optimisation question can be answered quickly
@@ -65,6 +64,10 @@ file.
     objectives are on a comparable scale. We could do this by looking
     at the vertices of the a/b simplex and then scaling each loss term
     to take values form 0 to 1.
+  + TODO Get the database construction working with the stochastic
+    simulator.
+  + TODO Get the optimisation process working with the stochastic
+    model.
   + TODO Generate plots to check that we are using a suitable number
     of replicates to get the average value.
 
