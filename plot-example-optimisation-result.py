@@ -19,7 +19,7 @@ assert len(db["model_parameters"]) == 1
 # At the point where we need to make some plots!
 model_param_id = 0
 burden_param_id = 0
-ethical_a = 0.1
+ethical_a = 0.5
 ethical_b = 0.1
 
 bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0]["parameters"]
@@ -46,7 +46,7 @@ for oc in ocs:
                     })
 plot_df = pd.DataFrame(plot_df)
 
-foo, bar = eo.optimal_initial_condition(ethical_a, ethical_b, model_param_id, burden_param_id, db)
+foo, bar = eo.optimal_initial_condition(ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True)
 _optimal_ic = [ic for ic in db["initial_conditions"] if ic["id"] == foo]
 _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
 _optimal_outcome = [o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]]
