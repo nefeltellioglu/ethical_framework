@@ -17,30 +17,45 @@ class SIRParams:
 
 @dataclass
 class BurdenParams:
+    # Infection burden parameters
     perc_hosp_inf: float
     days_hosp_inf_1: float
     days_hosp_inf_2: float
+    # Protection from disease among (unprotected) vaccinated.
+    # TODO Something about this seems a bit fishy to me, maybe we need
+    # a clearer variable name. Is it a proportion???
+    vacc_protection_from_disease_1: float
+    vacc_protection_from_disease_2: float
+    # Vaccination burden parameter
     perc_hosp_vacc_1: float
     perc_hosp_vacc_2: float
     days_hosp_vacc_1: float
     days_hosp_vacc_2: float
-    vacc_protection_from_disease_1: float
-    vacc_protection_from_disease_2: float
 
 
 @dataclass
 class OptParams:
     model_type: str
-    no_runs: int 
+    no_runs: int
     initial_vacc_1: float
     initial_vacc_2: float
     stat_type: str
-    
-    
 
 
 @dataclass
-class SIRInitialConditions:
+class SIROutcome:
+    inf_1_no_vac: int
+    inf_1_vu: int
+    inf_1_vp: int
+    total_vac_1: int
+    inf_2_no_vac: int
+    inf_2_vu: int
+    inf_2_vp: int
+    total_vac_2: int
+
+
+@dataclass
+class SIRInitialCondition:
     s0_1: int
     s0_2: int
     i0_1: int
@@ -55,6 +70,18 @@ class SIRInitialConditions:
     i0_2_vu: int
     r0_1_vu: int
     r0_2_vu: int
+
+    def pop_size(self, pop: int) -> int:
+        """
+        Returns the total population size for a given population.
+        """
+        match pop:
+            case 1:
+                return self.s0_1 + self.i0_1 + self.r0_1 + self.s0_1_vp + self.s0_1_vu + self.i0_1_vu + self.r0_1_vu
+            case 2:
+                return self.s0_2 + self.i0_2 + self.r0_2 + self.s0_2_vp + self.s0_2_vu + self.i0_2_vu + self.r0_2_vu
+            case _:
+                raise ValueError(f"Invalid population: {pop}.")
 
     @staticmethod
     def integer_initial_conditions(vacc_prop_1: float,
@@ -88,7 +115,7 @@ class SIRInitialConditions:
         num_vac_1_protected = int(num_vac_1 * vacc_protection_1)
         num_vac_2 = int(pop_size_2 * vacc_prop_2)
         num_vac_2_protected = int(num_vac_2 * vacc_protection_2)
-        return SIRInitialConditions(
+        return SIRInitialCondition(
             pop_size_1 - num_vac_1 - 1,
             pop_size_2 - num_vac_2 - 1,
             1,
@@ -292,7 +319,7 @@ def loss_equity_of_vaccination(sir_sols: [SIRSolution],
 
 
 def sir_vacc(params: SIRParams,
-             sir_0: SIRInitialConditions, ts) -> [SIRSolution]:
+             sir_0: SIRInitialCondition, ts) -> [SIRSolution]:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
           sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
           sir_0.i0_1_vu, sir_0.i0_2_vu, sir_0.r0_1_vu, sir_0.r0_2_vu,]
@@ -376,7 +403,7 @@ def sir_vacc(params: SIRParams,
 
 
 # TODO: introduce fancy model
-def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialConditions,
+def sir_vacc_SSA(params: SIRParams, sir_0: SIRInitialCondition,
                  opt_params: OptParams, ts) -> [SIRSolution]:
     y0 = [sir_0.s0_1, sir_0.s0_2, sir_0.i0_1, sir_0.i0_2, sir_0.r0_1, sir_0.r0_2,
           sir_0.s0_1_vp, sir_0.s0_1_vu, sir_0.s0_2_vp, sir_0.s0_2_vu, 
@@ -590,7 +617,7 @@ def objective_func_factory(
         a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
-        init_cond = SIRInitialConditions.integer_initial_conditions(
+        init_cond = SIRInitialCondition.integer_initial_conditions(
             vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
             vacc_protection_1, vacc_protection_2
         )
@@ -634,7 +661,7 @@ def optimal_initial_conditions(
         pop_size_1: float, pop_size_2: float,
         vacc_protection_1: float, vacc_protection_2: float,
         a: float, b: float
-) -> SIRInitialConditions:
+) -> SIRInitialCondition:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
                                        ts, pop_size_1, pop_size_2,
@@ -650,7 +677,7 @@ def optimal_initial_conditions(
     )
     if opt_result.success:
         return {
-            "opt_init_cond": SIRInitialConditions.integer_initial_conditions(
+            "opt_init_cond": SIRInitialCondition.integer_initial_conditions(
                 opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
                 vacc_protection_1, vacc_protection_2
             ),
@@ -658,3 +685,70 @@ def optimal_initial_conditions(
         }
     else:
         raise ValueError("Optimization failed with message: " + opt_result.message)
+
+
+def loss(
+    outcome: SIROutcome,
+    ic: SIRInitialCondition,
+    burden_params: BurdenParams,
+    a: float,
+    b: float,
+) -> float:
+    """
+    Burden is the sum of infection burden and vaccination burden.
+    """
+    pop_size_1, pop_size_2 = ic.pop_size(1), ic.pop_size(2)
+    total_pop = float(pop_size_1 + pop_size_2)
+
+    # import pdb; pdb.set_trace()
+    obs_vb_1 = (
+        outcome.total_vac_1
+        * burden_params.perc_hosp_vacc_1
+        * burden_params.days_hosp_vacc_1
+    )
+    obs_vb_2 = (
+        outcome.total_vac_2
+        * burden_params.perc_hosp_vacc_2
+        * burden_params.days_hosp_vacc_2
+    )
+    obs_ib_1_no_vac = (
+        outcome.inf_1_no_vac
+        * burden_params.perc_hosp_inf
+        * burden_params.days_hosp_inf_1
+    )
+    obs_ib_2_no_vac = (
+        outcome.inf_2_no_vac
+        * burden_params.perc_hosp_inf
+        * burden_params.days_hosp_inf_2
+    )
+    obs_ib_1_vu = (
+        outcome.inf_1_vu
+        * burden_params.perc_hosp_inf
+        * burden_params.days_hosp_inf_1
+        * (1 - burden_params.vacc_protection_from_disease_1)
+    )
+    obs_ib_2_vu = (
+        outcome.inf_2_vu
+        * burden_params.perc_hosp_inf
+        * burden_params.days_hosp_inf_2
+        * (1 - burden_params.vacc_protection_from_disease_2)
+    )
+    obs_cb_1 = obs_ib_1_no_vac + obs_ib_1_vu + obs_vb_1
+    obs_cb_2 = obs_ib_2_no_vac + obs_ib_2_vu + obs_vb_2
+
+    exp_cb_1 = (obs_cb_1 + obs_cb_2) * (pop_size_1 / total_pop)
+    exp_cb_2 = (obs_cb_1 + obs_cb_2) * (pop_size_2 / total_pop)
+    exp_vb_1 = (obs_vb_1 + obs_vb_2) * (pop_size_1 / total_pop)
+    exp_vb_2 = (obs_vb_1 + obs_vb_2) * (pop_size_2 / total_pop)
+
+    loss_total_clinical_burden = obs_cb_1 + obs_cb_2 + obs_vb_1 + obs_vb_2
+    loss_equity_of_clinical_burden = abs(exp_cb_1 - obs_cb_1) + abs(exp_cb_2 - obs_cb_2)
+    loss_equity_of_vaccination_burden = abs(exp_vb_1 - obs_vb_1) + abs(
+        exp_vb_2 - obs_vb_2
+    )
+
+    return (
+        (1 - a - b) * loss_total_clinical_burden
+        + a * loss_equity_of_clinical_burden
+        + b * loss_equity_of_vaccination_burden
+    )
