@@ -696,6 +696,13 @@ def loss(
 ) -> float:
     """
     Burden is the sum of infection burden and vaccination burden.
+
+    Args:
+    outcome: `SIROutcome`
+    ic: `SIRInitialCondition`
+    burden_params: `BurdenParams`
+    a: The a parameter for the loss function.
+    b: The b parameter for the loss function.
     """
     pop_size_1, pop_size_2 = ic.pop_size(1), ic.pop_size(2)
     total_pop = float(pop_size_1 + pop_size_2)
