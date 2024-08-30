@@ -2,20 +2,6 @@
 
 ## Usage
 
-To run the computations
-
-```
-$ python scratch-fancy-model.py
-```
-
-The results of this are output to `scratch-fancy-ODE.csv`.
-
-To lint the code and keep documentation up to date:
-
-```
-$ bash housekeeping.sh
-```
-
 ### Environment
 
 ```
@@ -29,7 +15,21 @@ and to generate some basic plots. To run the whole pipeline on a
 single core use the following command:
 
 ```
-snakemake -c1 all
+snakemake -c1 -p
+```
+
+To do a dry-run to see what snakemake would do, add `-n`:
+
+```
+snakemake -c1 -pn
+```
+
+### Housekeeping
+
+To lint the code and keep documentation up to date:
+
+```
+$ bash housekeeping.sh
 ```
 
 ## Configuration
