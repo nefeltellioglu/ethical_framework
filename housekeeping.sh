@@ -10,6 +10,9 @@ black create-grid-database.py
 black ethics/model.py
 black ethics/optimisation.py
 
+black plot-example-optimisation-result.py
+black plot-grid-outcomes-infections.py
+
 # Keep the conda environment file up to date
 
 conda env export > environment.yaml
