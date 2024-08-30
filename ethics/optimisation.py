@@ -2,11 +2,18 @@ import ethics.model as em
 import typing as tp
 
 
-LossTermTransformer = tp.Callable[tp.Tuple[float, float, float], tp.Tuple[float, float, float]]
+LossTermTransformer = tp.Callable[
+    tp.Tuple[float, float, float], tp.Tuple[float, float, float]
+]
 
 
 def optimal_initial_condition(
-        a: float, b: float, model_param_id: int, burden_param_id: int, db: dict, normalise: bool
+    a: float,
+    b: float,
+    model_param_id: int,
+    burden_param_id: int,
+    db: dict,
+    normalise: bool,
 ) -> tp.Tuple[int, float]:
     """
     Find the optimal initial condition for a given model and
@@ -29,12 +36,24 @@ def optimal_initial_condition(
         # 2. Construct a transformation that normalises them to a range [0, 1].
         # 3. Get the optimal initial condition with normalised loss terms.
 
-        _, max_tcb = extreme_initial_condition(0.0, 0.0, model_param_id, burden_param_id, db, minimise=False)
-        _, min_tcb = extreme_initial_condition(0.0, 0.0, model_param_id, burden_param_id, db, minimise=True)
-        _, max_ecb = extreme_initial_condition(1.0, 0.0, model_param_id, burden_param_id, db, minimise=False)
-        _, min_ecb = extreme_initial_condition(1.0, 0.0, model_param_id, burden_param_id, db, minimise=True)
-        _, max_evb = extreme_initial_condition(0.0, 1.0, model_param_id, burden_param_id, db, minimise=False)
-        _, min_evb = extreme_initial_condition(0.0, 1.0, model_param_id, burden_param_id, db, minimise=True)
+        _, max_tcb = extreme_initial_condition(
+            0.0, 0.0, model_param_id, burden_param_id, db, minimise=False
+        )
+        _, min_tcb = extreme_initial_condition(
+            0.0, 0.0, model_param_id, burden_param_id, db, minimise=True
+        )
+        _, max_ecb = extreme_initial_condition(
+            1.0, 0.0, model_param_id, burden_param_id, db, minimise=False
+        )
+        _, min_ecb = extreme_initial_condition(
+            1.0, 0.0, model_param_id, burden_param_id, db, minimise=True
+        )
+        _, max_evb = extreme_initial_condition(
+            0.0, 1.0, model_param_id, burden_param_id, db, minimise=False
+        )
+        _, min_evb = extreme_initial_condition(
+            0.0, 1.0, model_param_id, burden_param_id, db, minimise=True
+        )
 
         print("--------------------------------------------------------")
         print("Optimising initial condition with normalised loss terms.")
@@ -45,22 +64,37 @@ def optimal_initial_condition(
         transform = lambda x: (
             (x[0] - min_tcb) / (max_tcb - min_tcb),
             (x[1] - min_ecb) / (max_ecb - min_ecb),
-            (x[2] - min_evb) / (max_evb - min_evb)
+            (x[2] - min_evb) / (max_evb - min_evb),
         )
 
-        best_ic_id, best_loss = extreme_initial_condition(a, b, model_param_id, burden_param_id, db, minimise=True, transform=transform)
+        best_ic_id, best_loss = extreme_initial_condition(
+            a,
+            b,
+            model_param_id,
+            burden_param_id,
+            db,
+            minimise=True,
+            transform=transform,
+        )
         print(f"Best loss: {best_loss}")
         print("--------------------------------------------------------")
         return best_ic_id, best_loss
     else:
-        best_ic_id, best_loss = extreme_initial_condition(a, b, model_param_id, burden_param_id, db, minimise=True)
+        best_ic_id, best_loss = extreme_initial_condition(
+            a, b, model_param_id, burden_param_id, db, minimise=True
+        )
         print(f"Best loss: {best_loss}")
         return best_ic_id, best_loss
 
 
 def extreme_initial_condition(
-        a: float, b: float, model_param_id: int, burden_param_id: int, db: dict,
-        minimise: bool = True, transform: LossTermTransformer = lambda x: x
+    a: float,
+    b: float,
+    model_param_id: int,
+    burden_param_id: int,
+    db: dict,
+    minimise: bool = True,
+    transform: LossTermTransformer = lambda x: x,
 ) -> tp.Tuple[int, float]:
     """
     Find the most extreme initial condition for a given model and
@@ -106,9 +140,13 @@ def extreme_initial_condition(
         assert len(tmp_ic) == 1
         tmp_ic_id = tmp_ic[0]["id"]
         tmp_ic = tmp_ic[0]["value"]
-        tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = transform(em.loss_terms(oc["outcome"], tmp_ic, bp))
+        tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = transform(
+            em.loss_terms(oc["outcome"], tmp_ic, bp)
+        )
         tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
-        if (minimise and (tmp_loss < best_loss)) or ((not minimise) and (tmp_loss > best_loss)):
+        if (minimise and (tmp_loss < best_loss)) or (
+            (not minimise) and (tmp_loss > best_loss)
+        ):
             best_loss = tmp_loss
             best_ic = tmp_ic_id
 

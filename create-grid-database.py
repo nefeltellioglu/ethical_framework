@@ -86,7 +86,9 @@ for num_vac_1 in range(0, pop_size_1, 100):
         )
         ic_ix += 1
 _num_initial_conditions = len(initial_conditions)
-assert _num_initial_conditions == (len(range(0, pop_size_1, 100)) * len(range(0, pop_size_2, 100)))
+assert _num_initial_conditions == (
+    len(range(0, pop_size_1, 100)) * len(range(0, pop_size_2, 100))
+)
 
 configurations = [
     {"id": c_ix, "model_parameters_id": mp["id"], "initial_condition_id": ic["id"]}
@@ -140,9 +142,7 @@ outcomes = [
             total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
         ),
     }
-    for o_ix, (c, sol) in enumerate(
-        zip(configurations, solutions)
-    )
+    for o_ix, (c, sol) in enumerate(zip(configurations, solutions))
 ]
 _num_outcomes = len(outcomes)
 assert _num_outcomes == _num_solutions
