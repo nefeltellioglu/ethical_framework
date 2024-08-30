@@ -31,10 +31,7 @@ configs = db["configurations"]
 m_params = db["model_parameters"]
 ics = db["initial_conditions"]
 
-tmp = {"total_vacc_1": [],
-       "total_vacc_2": [],
-       "total_inf_1": [],
-       "total_inf_2": []}
+tmp = {"total_vacc_1": [], "total_vacc_2": [], "total_inf_1": [], "total_inf_2": []}
 for oc in db["outcomes"]:
     oc_obj = oc["outcome"]
     tmp["total_vacc_1"].append(oc_obj.total_vac_1)
