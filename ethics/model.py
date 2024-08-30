@@ -687,20 +687,35 @@ def optimal_initial_conditions(
         raise ValueError("Optimization failed with message: " + opt_result.message)
 
 
-def loss(
+def loss_terms(
     outcome: SIROutcome,
     ic: SIRInitialCondition,
     burden_params: BurdenParams,
-    a: float,
-    b: float,
-) -> float:
+) -> (float, float, float):
     """
-    Burden is the sum of infection burden and vaccination burden.
+    The three loss terms: total clinical burden, loss of equity in
+    clinical burden, and loss of equity in vaccination burden.
+    Clinical burden includes both the infection burden and vaccination
+    burden.
+
+    Args:
+    outcome: `SIROutcome`
+    ic: `SIRInitialCondition`
+    burden_params: `BurdenParams`
+
+    Details:
+    This function provides the terms needed to compute the following
+    loss function:
+
+    (
+         (1 - a - b) * loss_total_clinical_burden
+         + a * loss_equity_of_clinical_burden
+         + b * loss_equity_of_vaccination_burden
+    )
     """
     pop_size_1, pop_size_2 = ic.pop_size(1), ic.pop_size(2)
     total_pop = float(pop_size_1 + pop_size_2)
 
-    # import pdb; pdb.set_trace()
     obs_vb_1 = (
         outcome.total_vac_1
         * burden_params.perc_hosp_vacc_1
@@ -747,8 +762,4 @@ def loss(
         exp_vb_2 - obs_vb_2
     )
 
-    return (
-        (1 - a - b) * loss_total_clinical_burden
-        + a * loss_equity_of_clinical_burden
-        + b * loss_equity_of_vaccination_burden
-    )
+    return (loss_total_clinical_burden, loss_equity_of_clinical_burden, loss_equity_of_vaccination_burden)

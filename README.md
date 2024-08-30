@@ -2,20 +2,6 @@
 
 ## Usage
 
-To run the computations
-
-```
-$ python scratch-fancy-model.py
-```
-
-The results of this are output to `scratch-fancy-ODE.csv`.
-
-To lint the code and keep documentation up to date:
-
-```
-$ bash housekeeping.sh
-```
-
 ### Environment
 
 ```
@@ -29,7 +15,21 @@ and to generate some basic plots. To run the whole pipeline on a
 single core use the following command:
 
 ```
-snakemake -c1 all
+snakemake -c1 -p
+```
+
+To do a dry-run to see what snakemake would do, add `-n`:
+
+```
+snakemake -c1 -pn
+```
+
+### Housekeeping
+
+To lint the code and keep documentation up to date:
+
+```
+$ bash housekeeping.sh
 ```
 
 ## Configuration
@@ -45,7 +45,6 @@ file.
 - TODO Double check that the percentages in the `BurdenParams` class
   can safely be renamed to proportions as this is what they appear to
   be.
-- TODO Work out if we should be thinking about the Pareto front?
 - TODO Use grid search as the optimisation strategy
   + DONE Create a database of the model solutions to store the heavy
     compute so various optimisation question can be answered quickly
@@ -61,10 +60,14 @@ file.
     the best initial condition.
   + DONE Generate plots to check that the optimal vaccination strategy
     (i.e. the initial condition) is (practically) identifiable.
-  + TODO Implement a normalisation strategy so that all of the
+  + DONE Implement a normalisation strategy so that all of the
     objectives are on a comparable scale. We could do this by looking
     at the vertices of the a/b simplex and then scaling each loss term
     to take values form 0 to 1.
+  + TODO Get the database construction working with the stochastic
+    simulator.
+  + TODO Get the optimisation process working with the stochastic
+    model.
   + TODO Generate plots to check that we are using a suitable number
     of replicates to get the average value.
 
@@ -131,5 +134,5 @@ initial condition.
 ```python
 def optimal_initial_condition(model_param_id: int,
                               burden_param_id: int,
-							  db: dict) -> int:
+                              db: dict) -> int:
 ```
