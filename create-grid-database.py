@@ -7,6 +7,8 @@ import json
 import numpy as np
 import pandas as pd
 import pickle
+import os
+import sys
 
 from ethics.model import (
     OptParams,
@@ -24,7 +26,13 @@ from ethics.model import (
 )
 
 
-with open("config/config-2024-08-07.json", "r") as f:
+if len(sys.argv) > 1:
+    config_file = sys.argv[1]
+else:
+    config_file = "config/config-2024-08-07.json"
+assert os.path.exists(config_file)
+
+with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
 
