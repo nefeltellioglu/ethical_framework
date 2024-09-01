@@ -18,7 +18,7 @@ class SIRParams:
 @dataclass
 class BurdenParams:
     # Infection burden parameters
-    perc_hosp_inf: float
+    prop_hosp_inf: float
     days_hosp_inf_1: float
     days_hosp_inf_2: float
     # Protection from disease among (unprotected) vaccinated.
@@ -27,8 +27,8 @@ class BurdenParams:
     vacc_protection_from_disease_1: float
     vacc_protection_from_disease_2: float
     # Vaccination burden parameter
-    perc_hosp_vacc_1: float
-    perc_hosp_vacc_2: float
+    prop_hosp_vacc_1: float
+    prop_hosp_vacc_2: float
     days_hosp_vacc_1: float
     days_hosp_vacc_2: float
 
@@ -218,20 +218,20 @@ def loss_clinical_burden(sir_sols: [SIRSolution],
         ttl_infs = sir_sol.total_infections()
         ttl_vacc = sir_sol.total_vaccinated()
         net_days_hosp_for_inf_no_vacc = \
-            disease_burden_params.perc_hosp_inf * \
+            disease_burden_params.prop_hosp_inf * \
                 (disease_burden_params.days_hosp_inf_1 * ttl_infs["inf_in_1_novacc"]+
                  disease_burden_params.days_hosp_inf_2 * ttl_infs["inf_in_2_novacc"])
         
         net_days_hosp_for_inf_vacc = \
-            disease_burden_params.perc_hosp_inf * \
+            disease_burden_params.prop_hosp_inf * \
                 (disease_burden_params.days_hosp_inf_1 * (1 - disease_burden_params.vacc_protection_from_disease_1) * ttl_infs["inf_in_1_vu"] +
                  disease_burden_params.days_hosp_inf_2 * (1 - disease_burden_params.vacc_protection_from_disease_2) * ttl_infs["inf_in_2_vu"])
 
         net_days_hosp_for_adverse = \
             (disease_burden_params.days_hosp_vacc_1 * ttl_vacc["vacc_1"] * \
-             disease_burden_params.perc_hosp_vacc_1) + \
+             disease_burden_params.prop_hosp_vacc_1) + \
              (disease_burden_params.days_hosp_vacc_2 * ttl_vacc["vacc_2"] * \
-              disease_burden_params.perc_hosp_vacc_2)
+              disease_burden_params.prop_hosp_vacc_2)
         
         loss_clinical_burden = net_days_hosp_for_inf_no_vacc + net_days_hosp_for_inf_vacc + net_days_hosp_for_adverse
         loss_clinical_burdens.append(loss_clinical_burden)
@@ -256,19 +256,19 @@ def loss_equity_of_burden(sir_sols: [SIRSolution],
     for sir_sol in sir_sols:
         ttl_infs = sir_sol.total_infections()
         ttl_pop = sir_sol.total_population()
-        obs_burden_1_novacc = disease_burden_params.perc_hosp_inf * \
+        obs_burden_1_novacc = disease_burden_params.prop_hosp_inf * \
                        disease_burden_params.days_hosp_inf_1 * \
                        ttl_infs["inf_in_1_novacc"]
-        obs_burden_1_vu = disease_burden_params.perc_hosp_inf * \
+        obs_burden_1_vu = disease_burden_params.prop_hosp_inf * \
                        disease_burden_params.days_hosp_inf_1 * \
                        (1 - disease_burden_params.vacc_protection_from_disease_1 )* \
                        ttl_infs["inf_in_1_vu"]
         obs_burden_1 = obs_burden_1_novacc + obs_burden_1_vu
         
-        obs_burden_2_novacc = disease_burden_params.perc_hosp_inf * \
+        obs_burden_2_novacc = disease_burden_params.prop_hosp_inf * \
                        disease_burden_params.days_hosp_inf_2 * \
                        ttl_infs["inf_in_2_novacc"]
-        obs_burden_2_vu = disease_burden_params.perc_hosp_inf * \
+        obs_burden_2_vu = disease_burden_params.prop_hosp_inf * \
                        disease_burden_params.days_hosp_inf_2 * \
                        (1 - disease_burden_params.vacc_protection_from_disease_2) * \
                        ttl_infs["inf_in_2_vu"]
@@ -300,10 +300,10 @@ def loss_equity_of_vaccination(sir_sols: [SIRSolution],
     for sir_sol in sir_sols:
         ttl_vacc = sir_sol.total_vaccinated()
         ttl_pop = sir_sol.total_population()
-        obs_vacc_1 = disease_burden_params.perc_hosp_vacc_1 * \
+        obs_vacc_1 = disease_burden_params.prop_hosp_vacc_1 * \
                      disease_burden_params.days_hosp_vacc_1 * \
                      ttl_vacc["vacc_1"] 
-        obs_vacc_2 = disease_burden_params.perc_hosp_vacc_2 * \
+        obs_vacc_2 = disease_burden_params.prop_hosp_vacc_2 * \
                      disease_burden_params.days_hosp_vacc_2 * \
                      ttl_vacc["vacc_2"] 
                      
@@ -718,33 +718,33 @@ def loss_terms(
 
     obs_vb_1 = (
         outcome.total_vac_1
-        * burden_params.perc_hosp_vacc_1
+        * burden_params.prop_hosp_vacc_1
         * burden_params.days_hosp_vacc_1
     )
     obs_vb_2 = (
         outcome.total_vac_2
-        * burden_params.perc_hosp_vacc_2
+        * burden_params.prop_hosp_vacc_2
         * burden_params.days_hosp_vacc_2
     )
     obs_ib_1_no_vac = (
         outcome.inf_1_no_vac
-        * burden_params.perc_hosp_inf
+        * burden_params.prop_hosp_inf
         * burden_params.days_hosp_inf_1
     )
     obs_ib_2_no_vac = (
         outcome.inf_2_no_vac
-        * burden_params.perc_hosp_inf
+        * burden_params.prop_hosp_inf
         * burden_params.days_hosp_inf_2
     )
     obs_ib_1_vu = (
         outcome.inf_1_vu
-        * burden_params.perc_hosp_inf
+        * burden_params.prop_hosp_inf
         * burden_params.days_hosp_inf_1
         * (1 - burden_params.vacc_protection_from_disease_1)
     )
     obs_ib_2_vu = (
         outcome.inf_2_vu
-        * burden_params.perc_hosp_inf
+        * burden_params.prop_hosp_inf
         * burden_params.days_hosp_inf_2
         * (1 - burden_params.vacc_protection_from_disease_2)
     )
