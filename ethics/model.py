@@ -116,20 +116,20 @@ class SIRInitialCondition:
         num_vac_2 = int(pop_size_2 * vacc_prop_2)
         num_vac_2_protected = int(num_vac_2 * vacc_protection_2)
         return SIRInitialCondition(
-            pop_size_1 - num_vac_1 - 1,
-            pop_size_2 - num_vac_2 - 1,
-            1,
-            1,
-            0,
-            0,
-            num_vac_1_protected,
-            num_vac_1 - num_vac_1_protected,
-            num_vac_2_protected,
-            num_vac_2 - num_vac_2_protected,
-            0,
-            0,
-            0,
-            0
+           s0_1 = pop_size_1 - num_vac_1 - 1,
+           s0_2 = pop_size_2 - num_vac_2 - 1,
+           i0_1 = 1,
+           i0_2 = 1,
+           r0_1 = 0,
+           r0_2 = 0,
+           s0_1_vp = num_vac_1_protected,
+           s0_1_vu = num_vac_1 - num_vac_1_protected
+           s0_2_vp = num_vac_2_protected,
+           s0_2_vu = num_vac_2 - num_vac_2_protected,
+           i0_1_vu = 0,
+           i0_2_vu = 0,
+           r0_1_vu = 0,
+           r0_2_vu = 0,
         )
 
 
