@@ -75,12 +75,11 @@ class SIRInitialCondition:
         """
         Returns the total population size for a given population.
         """
-        match pop:
-            case 1:
+        if pop == 1:
                 return self.s0_1 + self.i0_1 + self.r0_1 + self.s0_1_vp + self.s0_1_vu + self.i0_1_vu + self.r0_1_vu
-            case 2:
+        elif pop == 2:
                 return self.s0_2 + self.i0_2 + self.r0_2 + self.s0_2_vp + self.s0_2_vu + self.i0_2_vu + self.r0_2_vu
-            case _:
+        else:
                 raise ValueError(f"Invalid population: {pop}.")
 
     @staticmethod
@@ -89,7 +88,8 @@ class SIRInitialCondition:
                                    pop_size_1: int,
                                    pop_size_2: int,
                                    vacc_protection_1: float,
-                                   vacc_protection_2: float):
+                                   vacc_protection_2: float,
+                                   initial_inf_rec: dict):
         """
         Returns initial conditions for the SIR model with integer
         values given a population size and vaccination proportion
@@ -116,20 +116,20 @@ class SIRInitialCondition:
         num_vac_2 = int(pop_size_2 * vacc_prop_2)
         num_vac_2_protected = int(num_vac_2 * vacc_protection_2)
         return SIRInitialCondition(
-           s0_1 = pop_size_1 - num_vac_1 - 1,
-           s0_2 = pop_size_2 - num_vac_2 - 1,
-           i0_1 = 1,
-           i0_2 = 1,
-           r0_1 = 0,
-           r0_2 = 0,
+           s0_1 = pop_size_1 - num_vac_1 - initial_inf_rec["i0_1"] - initial_inf_rec["r0_1"],
+           s0_2 = pop_size_2 - num_vac_2 - initial_inf_rec["i0_2"] - initial_inf_rec["r0_2"],
+           i0_1 = initial_inf_rec["i0_1"],
+           i0_2 = initial_inf_rec["i0_2"],
+           r0_1 = initial_inf_rec["r0_1"],
+           r0_2 = initial_inf_rec["r0_2"],
            s0_1_vp = num_vac_1_protected,
-           s0_1_vu = num_vac_1 - num_vac_1_protected
-           s0_2_vp = num_vac_2_protected,
-           s0_2_vu = num_vac_2 - num_vac_2_protected,
-           i0_1_vu = 0,
-           i0_2_vu = 0,
-           r0_1_vu = 0,
-           r0_2_vu = 0,
+           s0_1_vu = num_vac_1 - num_vac_1_protected - initial_inf_rec["i0_1_vu"] - initial_inf_rec["r0_1_vu"],
+           s0_2_vp = num_vac_2_protected ,
+           s0_2_vu = num_vac_2 - num_vac_2_protected - initial_inf_rec["i0_2_vu"] - initial_inf_rec["r0_2_vu"],
+           i0_1_vu = initial_inf_rec["i0_1_vu"],
+           i0_2_vu = initial_inf_rec["i0_2_vu"],
+           r0_1_vu = initial_inf_rec["r0_1_vu"],
+           r0_2_vu = initial_inf_rec["r0_2_vu"],
         )
 
 
@@ -613,13 +613,13 @@ def objective_func_factory(
         opt_params: OptParams,
         ts,
         pop_size_1: float, pop_size_2: float,
-        vacc_protection_1: float, vacc_protection_2: float,
+        vacc_protection_1: float, vacc_protection_2: float, initial_inf_rec:dict,
         a: float, b: float
 ) -> float:
     def objective(vacc_props: list) -> float:
         init_cond = SIRInitialCondition.integer_initial_conditions(
             vacc_props[0], vacc_props[1], pop_size_1, pop_size_2,
-            vacc_protection_1, vacc_protection_2
+            vacc_protection_1, vacc_protection_2, initial_inf_rec
         )
 
         if opt_params.model_type == "ODE":
@@ -660,12 +660,14 @@ def optimal_initial_conditions(
         ts,
         pop_size_1: float, pop_size_2: float,
         vacc_protection_1: float, vacc_protection_2: float,
+        initial_inf_rec: dict,
         a: float, b: float
 ) -> SIRInitialCondition:
     objective = objective_func_factory(params, disease_burden_params,
                                        opt_params,
                                        ts, pop_size_1, pop_size_2,
                                        vacc_protection_1, vacc_protection_2,
+                                       initial_inf_rec,
                                        a, b)
     vacc_upper_bound_1 = 1 - (1 / pop_size_1)
     vacc_upper_bound_2 = 1 - (1 / pop_size_2)
@@ -679,7 +681,7 @@ def optimal_initial_conditions(
         return {
             "opt_init_cond": SIRInitialCondition.integer_initial_conditions(
                 opt_result.x[0], opt_result.x[1], pop_size_1, pop_size_2,
-                vacc_protection_1, vacc_protection_2
+                vacc_protection_1, vacc_protection_2, initial_inf_rec
             ),
             "obejctive_value": opt_result.fun,
         }

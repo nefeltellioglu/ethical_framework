@@ -14,6 +14,7 @@ input_file = CONFIG["database_file"]
 with open(input_file, "rb") as f:
     db = pickle.load(f)
 
+
 assert len(db["model_parameters"]) == 1
 
 # At the point where we need to make some plots!

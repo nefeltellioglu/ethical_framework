@@ -39,7 +39,16 @@ disease_burden_params = BurdenParams(
                         vacc_protection_from_disease_1 = vacc_protection_dis,
                         vacc_protection_from_disease_2 = vacc_protection_dis)
 
-
+initial_inf_rec= {
+     "i0_1": 1, 
+     "i0_2" : 1, 
+     "r0_1" : 0, 
+     "r0_2" : 0, 
+     "i0_1_vu" : 0, 
+     "i0_2_vu" : 0, 
+     "r0_1_vu" : 0, 
+     "r0_2_vu" : 0, 
+  }
 
 #recovery rate delta ~8 days UK[15]
 gamma = 0.125 
@@ -109,6 +118,7 @@ for a in np.arange(0.1, 1, 0.1):
                                   opt_params, ts,
                                             pop_size_1, pop_size_2,
                                             vacc_protection_inf, vacc_protection_inf,
+                                            initial_inf_rec,
                                             a, b)
         if opt_params.model_type == "ODE":
             tmp_sol = sir_vacc(params,  
