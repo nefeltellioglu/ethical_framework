@@ -29,7 +29,8 @@ from ethics.model import (
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-08-07.json"
+    #config_file = "config/config-2024-08-07.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
 assert os.path.exists(config_file)
 
 with open(config_file, "r") as f:
