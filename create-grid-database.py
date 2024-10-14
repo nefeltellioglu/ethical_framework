@@ -88,7 +88,8 @@ for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
         ic_ix += 1
 _num_initial_conditions = len(initial_conditions)
 assert _num_initial_conditions == (
-    len(range(0, pop_size_1, 100)) * len(range(0, pop_size_2, 100))
+    len(range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"])) * \
+    len(range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]))
 )
 
 configurations = [

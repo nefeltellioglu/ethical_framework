@@ -11,8 +11,7 @@ rule make_grid_database_ode:
     input:
         "ethics/model.py",
         py = "create-grid-database.py",
-        #config = "config/config-2024-08-07.json"
-	config = "config/config-2024-10-14_manuscript.json"
+        config = "config/config-2024-10-14_manuscript.json"
     output:
         "out/grid_database.pkl"
     shell:
