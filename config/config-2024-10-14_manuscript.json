@@ -14,7 +14,7 @@
     },
     "grid_search_step":
     {
-	"grid_step": 5500
+	"grid_step": 50000
     },
     "burden_parameters":
     {

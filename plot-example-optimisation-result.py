@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import ethics.model as em
 import ethics.optimisation as eo
 
-with open("config/config-2024-08-07.json", "r") as f:
+with open("config/config-2024-10-14_manuscript.json", "r") as f:
     CONFIG = json.load(f)
 
 input_file = CONFIG["database_file"]
@@ -85,3 +85,5 @@ plt.ylabel("Total Vaccinations in Group 2")
 plt.savefig("out/example-optimisation-result.png")
 plt.savefig("out/example-optimisation-result.svg")
 plt.clf()
+
+
