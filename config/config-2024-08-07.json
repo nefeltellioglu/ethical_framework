@@ -12,6 +12,10 @@
 	"pop_size_1": 1000,
 	"pop_size_2": 500
     },
+    "grid_search_step":
+    {
+	"grid_step": 100,
+    },
     "burden_parameters":
     {
             "prop_hosp_inf": 0.02,

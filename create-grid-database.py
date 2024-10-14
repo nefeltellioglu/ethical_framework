@@ -58,8 +58,8 @@ pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
 
 initial_conditions = []
 ic_ix = 0
-for num_vac_1 in range(0, pop_size_1, 100):
-    for num_vac_2 in range(0, pop_size_2, 100):
+for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
+    for num_vac_2 in range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]):
         # Print out the initial condition being added to the list
         print(
             f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
