@@ -60,3 +60,29 @@ plt.ylabel("Total Infections in Group 2")
 plt.savefig("out/vacc-vs-inf-group-2.png")
 plt.savefig("out/vacc-vs-inf-group-2.svg")
 plt.clf()
+
+
+plt.figure()
+plt.scatter([100 * i/CONFIG["population_parameters"]["pop_size_1"] for i in tmp["total_vacc_1"]], 
+            [100 * i/CONFIG["population_parameters"]["pop_size_1"] for i in tmp["total_inf_1"]], 
+            c=[100 * i/CONFIG["population_parameters"]["pop_size_2"] for i in tmp["total_vacc_2"]])
+cbar = plt.colorbar()
+cbar.set_label("Total Vaccinations in Group 2 (%)")
+plt.xlabel("Total Vaccinations in Group 1 (%)")
+plt.ylabel("Total Infections in Group 1 (%)")
+plt.savefig("out/vacc-vs-inf-group-1-perc.png")
+plt.savefig("out/vacc-vs-inf-group-1-perc.svg")
+plt.clf()
+
+
+plt.figure()
+plt.scatter([100 * i/CONFIG["population_parameters"]["pop_size_2"] for i in tmp["total_vacc_2"]], 
+            [100 * i/CONFIG["population_parameters"]["pop_size_2"] for i in tmp["total_inf_2"]], 
+            c=[100 * i/CONFIG["population_parameters"]["pop_size_1"] for i in tmp["total_vacc_1"]])
+cbar = plt.colorbar()
+cbar.set_label("Total Vaccinations in Group 1 (%)")
+plt.xlabel("Total Vaccinations in Group 2 (%)")
+plt.ylabel("Total Infections in Group 2 (%)")
+plt.savefig("out/vacc-vs-inf-group-2-perc.png")
+plt.savefig("out/vacc-vs-inf-group-2-perc.svg")
+plt.clf()

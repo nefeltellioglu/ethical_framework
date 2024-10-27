@@ -82,8 +82,28 @@ plt.scatter(best_vac_1, best_vac_2, s=500, c="red", marker="o")
 cbar.set_label("Loss")
 plt.xlabel("Total Vaccinations in Group 1")
 plt.ylabel("Total Vaccinations in Group 2")
-plt.savefig("out/example-optimisation-result.png")
-plt.savefig("out/example-optimisation-result.svg")
+plt.savefig("out/example-optimisation-result_a_%s_b_%s.png"%(ethical_a, ethical_b))
+plt.savefig("out/example-optimisation-result_a_%s_b_%s.svg"%(ethical_a, ethical_b))
+plt.clf()
+
+
+
+
+
+plt.figure()
+plt.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"], 
+            100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"], 
+            c=plot_df["loss"])
+cbar = plt.colorbar()
+plt.scatter(100 * best_vac_1/CONFIG["population_parameters"]["pop_size_1"], 
+            100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
+            s=500, c="red", marker="o")
+cbar.set_label("Loss")
+plt.xlabel("Total Vaccinations in Group 1 (%)")
+plt.ylabel("Total Vaccinations in Group 2 (%)")
+plt.savefig("out/example-optimisation-result-perc_a_%s_b_%s.png"%(ethical_a, ethical_b))
+plt.savefig("out/example-optimisation-result-perc_a_%s_b_%s.svg"%(ethical_a, ethical_b))
+
 plt.clf()
 
 
