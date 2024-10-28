@@ -107,8 +107,10 @@ plt.scatter(plot_df["a"], plot_df["b"],
             c=100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"])
 cbar = plt.colorbar()
 cbar.set_label("Vaccinations in group 2 (%)")
-plt.xlabel("a")
-plt.ylabel("b")
+#plt.xlabel("a")
+#plt.ylabel("b")
+plt.xlabel("Equity in Vaccination Multiplier (a)")
+plt.ylabel("Equity in Infection Multiplier (b)")
 #plt.savefig("out/vac_group_2_across_all_perc.png", dpi=300)
 #plt.savefig("out/vac_group_2_across_all_perc.svg", dpi=300)
 
@@ -159,8 +161,10 @@ for var, label, color in zip(variables, labels, colors):
                      cbar_kws={'label': label},
                      cmap=color,annot=False, fmt='.0f')
     ax.invert_yaxis()
-    plt.xlabel("a")
-    plt.ylabel("b")
+    #plt.xlabel("a")
+    #plt.ylabel("b")
+    plt.xlabel("Equity in Vaccination Multiplier (a)")
+    plt.ylabel("Equity in Infection Multiplier (b)")
     plt.savefig("out/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig("out/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
@@ -207,8 +211,8 @@ for var, label, color in zip(variables, labels, colors):
     cbar = plt.colorbar(cntr1)
     cbar.set_label(label)
 
-    plt.xlabel("a")
-    plt.ylabel("b")
+    plt.xlabel("Equity in Vaccination Multiplier (a)")
+    plt.ylabel("Equity in Infection Multiplier (b)")
     plt.savefig("out/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig("out/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
