@@ -33,11 +33,13 @@ configs = [
 ]
 config_ids = [c["id"] for c in configs]
 ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
+step = CONFIG["grid_search_step"]["a_b_grid_step"]
+
 
 plot_df = []
 
-for ethical_a in np.arange(0.0, 1, 0.025):
-    for ethical_b in np.arange(0.0, 1 - ethical_a, 0.025):
+for ethical_a in np.arange(0.0, 1 + step, step):
+    for ethical_b in np.arange(0.0, 1 - ethical_a + step, step):
 
 
         foo, bar = eo.optimal_initial_condition(
@@ -145,7 +147,7 @@ for var, label, color in zip(variables, labels, colors):
     plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
-    data = plot_df.pivot(index="a", columns="b", values = perc_var)
+    data = plot_df.pivot(index="b", columns="a", values = perc_var)
     plt.figure()
     ax = sns.heatmap(data, linewidth=0.5,
                      vmin=min(plot_df[perc_var]), 
