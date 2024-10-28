@@ -163,8 +163,8 @@ for var, label, color in zip(variables, labels, colors):
     ax.invert_yaxis()
     #plt.xlabel("a")
     #plt.ylabel("b")
-    plt.xlabel("Equity in Vaccination Multiplier (a)")
-    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
+    plt.ylabel("Equity in Infection Burden Multiplier (b)")
     plt.savefig("out/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig("out/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
@@ -211,8 +211,8 @@ for var, label, color in zip(variables, labels, colors):
     cbar = plt.colorbar(cntr1)
     cbar.set_label(label)
 
-    plt.xlabel("Equity in Vaccination Multiplier (a)")
-    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
+    plt.ylabel("Equity in Infection Burden Multiplier (b)")
     plt.savefig("out/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig("out/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
