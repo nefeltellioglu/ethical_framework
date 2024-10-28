@@ -158,6 +158,6 @@ for var, label, color in zip(variables, labels, colors):
     ax.invert_yaxis()
     plt.xlabel("a")
     plt.ylabel("b")
-    plt.savefig("out/hm_%s_across_all_perc.png"%var, dpi=300)
-    plt.savefig("out/hm_%s_across_all_perc.svg"%var, dpi=300)
+    plt.savefig("out/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
+    plt.savefig("out/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
