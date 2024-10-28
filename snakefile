@@ -3,8 +3,8 @@ rule all:
     input:
         "out/grid_database.pkl",
         "out/vacc-vs-inf-group-1.png",
-        "out/example-optimisation-result.png"
-
+        #"out/example-optimisation-result.png"
+	
 
 
 rule make_grid_database_ode:
@@ -26,9 +26,12 @@ rule plot_example_optimisation_result:
         "ethics/optimisation.py",
         db = "out/grid_database.pkl",
         py = "plot-example-optimisation-result.py"
+    """
     output:
         "out/example-optimisation-result.png",
         "out/example-optimisation-result.svg"
+
+    """
     shell:
         """
         python {input.py}
