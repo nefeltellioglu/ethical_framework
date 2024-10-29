@@ -28,17 +28,16 @@ rule plot_example_optimisation_result:
     input:
         "ethics/model.py",
         "ethics/optimisation.py",
-        db = "out/grid_database.pkl",
+        "out/grid_database-{config_date_name}.pkl",
+        config = "config/config-{config_date_name}.json",
         py = "plot-example-optimisation-result.py"
-    """
     output:
-        "out/example-optimisation-result.png",
-        "out/example-optimisation-result.svg"
-
-    """
+        "out/{config_date_name}/example-optimisation-results.png"
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
-        python {input.py}
+        python {input.py} {input.config}
         """
 
 
