@@ -31,14 +31,14 @@
     },
     "initial_inf_rec":
     {
-        "i0_1": 1, 
-        "i0_2" : 1, 
-        "r0_1" : 0, 
-        "r0_2" : 0, 
-        "i0_1_vu" : 0, 
-        "i0_2_vu" : 0, 
-        "r0_1_vu" : 0, 
-        "r0_2_vu" : 0 
+        "i0_1": 1,
+        "i0_2" : 1,
+        "r0_1" : 0,
+        "r0_2" : 0,
+        "i0_1_vu" : 0,
+        "i0_2_vu" : 0,
+        "r0_1_vu" : 0,
+        "r0_2_vu" : 0
     },
-    "database_file": "out/grid_database.pkl"
+    "database_file": "out/grid_database-2024-10-14_manuscript.pkl"
 }

@@ -1,7 +1,8 @@
 
 rule all:
     input:
-        "out/grid_database.pkl",
+        "out/grid_database-2024-10-14_manuscript.pkl",
+        "out/grid_database-2024-10-28_limited_vaccine.pkl",
         "out/vacc-vs-inf-group-1.png",
         #"out/example-optimisation-result.png"
         "out/vacc-vs-inf-group-1.png",
@@ -12,12 +13,14 @@ rule make_grid_database_ode:
     input:
         "ethics/model.py",
         py = "create-grid-database.py",
-        config = "config/config-2024-10-28_limited_vaccine.json"
+        config = "config/config-{config_date_name}.json"
     output:
-        "out/grid_database.pkl"
+        "out/grid_database-{config_date_name}.pkl"
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
-        python {input.py} {input.config}
+        python {input.py} -i {input.config} -o {output}
         """
 
 
@@ -37,6 +40,8 @@ rule plot_example_optimisation_result:
         """
         python {input.py}
         """
+
+
 rule plot_all_optimization_results:
     input:
         "ethics/model.py",
