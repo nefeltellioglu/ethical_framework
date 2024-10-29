@@ -12,6 +12,10 @@
 	"pop_size_1": 4450000,
 	"pop_size_2": 550000
     },
+    "vaccine_parameters":
+    {
+	"maximum_vacc_rollout": 1000000
+    },
     "grid_search_step":
     {
 	"grid_step": 50000,
@@ -40,5 +44,5 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
-    "database_file": "out/grid_database-2024-10-14_manuscript.pkl"
+    "database_file": "out/grid_database-2024-10-28_limited_vaccine.pkl"
 }

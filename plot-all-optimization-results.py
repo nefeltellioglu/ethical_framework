@@ -9,17 +9,70 @@ import seaborn as sns
 from scipy.interpolate import griddata
 import matplotlib.tri as tri
 from matplotlib import cm
+import sys
+import os
 
-with open("config/config-2024-10-14_manuscript.json", "r") as f:
+if len(sys.argv) > 1:
+    config_file = sys.argv[1]
+else:
+    # config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-10-28_limited_vaccine.json"
+assert os.path.exists(config_file)
+# NOTE This assumes the configuration file is named with the format
+# `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
+# as the name for the output directory.
+config_date_name = os.path.basename(config_file).replace("config-", "").replace(".json", "")
+
+print(70 * "=")
+print("Ethics plotting example results")
+print(f"Using config file: {config_file}")
+print(70 * "=")
+with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-input_file = CONFIG["database_file"]
+output_dir = f"out/{config_date_name}"
+os.makedirs(output_dir, exist_ok=True)
 
-with open(input_file, "rb") as f:
+with open(CONFIG["database_file"], "rb") as f:
     db = pickle.load(f)
 
-
 assert len(db["model_parameters"]) == 1
+
+
+# ====================================================================
+# We only want the simulation results that use an amount of vaccine
+# less than the maximum amount specified in the configuration file so
+# we filter the results in the database to only include those records.
+# ====================================================================
+if "vaccine_parameters" in CONFIG:
+    max_vacc = CONFIG["vaccine_parameters"]['maximum_vacc_rollout']
+else:
+    max_vacc = float('inf')
+
+valid_ics = [
+    ic for ic in db["initial_conditions"]
+    if ic["value"].total_number_vaccinated() <= max_vacc
+]
+valid_ic_ids = [ic["id"] for ic in valid_ics]
+valid_configs = [
+    c for c in db["configurations"]
+    if c["initial_condition_id"] in valid_ic_ids
+]
+valid_config_ids = [c["id"] for c in valid_configs]
+valid_outcomes = [
+    o for o in db["outcomes"]
+    if o["configuration_id"] in valid_config_ids
+]
+
+db = {
+    "model_parameters": db["model_parameters"],
+    "initial_conditions": valid_ics,
+    "configurations": valid_configs,
+    "outcomes": valid_outcomes,
+    "burden_parameters": db["burden_parameters"]
+}
+# ====================================================================
+
 
 # At the point where we need to make some plots!
 model_param_id = 0
@@ -57,11 +110,11 @@ for ethical_a in np.arange(0.0, 1 , step):
         best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
         best_inf_1 = _optimal_outcome[0]["outcome"].inf_1_no_vac
         best_inf_2 = _optimal_outcome[0]["outcome"].inf_2_no_vac
-            
-            
+
+
         plot_df.append(
             {   "a": ethical_a,
-                "b": ethical_b, 
+                "b": ethical_b,
                 #"outcome_id": oc["id"],
                 #"config_id": tmp_config_id,
                 "vac_1": best_vac_1,
@@ -84,8 +137,8 @@ cbar = plt.colorbar()
 cbar.set_label("No vacc in group 1")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/vac_group_1_across_all.png", dpi=300)
-#plt.savefig("out/vac_group_1_across_all.svg", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all.svg", dpi=300)
 plt.clf()
 
 
@@ -97,8 +150,8 @@ cbar = plt.colorbar()
 cbar.set_label("Vaccinations in group 1 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/vac_group_1_across_all_perc.png", dpi=300)
-#plt.savefig("out/vac_group_1_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -110,9 +163,9 @@ cbar.set_label("Vaccinations in group 2 (%)")
 #plt.xlabel("a")
 #plt.ylabel("b")
 plt.xlabel("Equity in Vaccination Multiplier (a)")
-plt.ylabel("Equity in Infection Multiplier (b)")
-#plt.savefig("out/vac_group_2_across_all_perc.png", dpi=300)
-#plt.savefig("out/vac_group_2_across_all_perc.svg", dpi=300)
+plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -123,8 +176,8 @@ cbar = plt.colorbar()
 cbar.set_label("Infections in group 2 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/inf_group_2_across_all_perc.png", dpi=300)
-#plt.savefig("out/inf_group_2_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -135,8 +188,8 @@ cbar = plt.colorbar()
 cbar.set_label("Infections in group 1 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/inf_group_1_across_all_perc.png", dpi=300)
-#plt.savefig("out/inf_group_1_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -155,7 +208,7 @@ for var, label, color in zip(variables, labels, colors):
     data = plot_df.pivot(index="b", columns="a", values = perc_var)
     plt.figure()
     ax = sns.heatmap(data, linewidth=0.5,
-                     vmin=min(plot_df[perc_var]), 
+                     vmin=min(plot_df[perc_var]),
                      vmax=max(plot_df[perc_var]),
                      #yticklabels=['High','Medium','Low','No'],
                      cbar_kws={'label': label},
@@ -163,10 +216,11 @@ for var, label, color in zip(variables, labels, colors):
     ax.invert_yaxis()
     #plt.xlabel("a")
     #plt.ylabel("b")
-    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
-    plt.ylabel("Equity in Infection Burden Multiplier (b)")
-    plt.savefig("out/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig("out/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.xlabel("Equity in Vaccination Multiplier (a)")
+    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+
+    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
 
 variables = ["inf_1", "inf_2", "vac_1", "vac_2"]
@@ -185,34 +239,34 @@ for var, label, color in zip(variables, labels, colors):
     x = plot_df["a"]
     y = plot_df["b"]
     z = plot_df[perc_var]
-    
-    
+
+
     # Create grid values first.
     xi = np.arange(0, 1, step/2)
     yi = np.arange(0, 1, step/2)
-    
+
     # Linearly interpolate the data (x, y) on a grid defined by (xi, yi).
     triang = tri.Triangulation(x, y)
     interpolator = tri.LinearTriInterpolator(triang, z)
     Xi, Yi = np.meshgrid(xi, yi)
     zi = interpolator(Xi, Yi)
-    
+
     # Note that scipy.interpolate provides means to interpolate data on a grid
     # as well. The following would be an alternative to the four lines above:
     # from scipy.interpolate import griddata
     # zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method='linear')
-    
+
     #ax1.contour(xi, yi, zi, levels=14, linewidths=0.5, colors='k')
     cntr1 = ax1.contourf(xi, yi, zi, levels=14, cmap=color)
-    
+
     #fig.colorbar(cntr1, ax=ax1)
     #ax1.plot(x, y, 'ko', ms=3)
     ax1.set(xlim=(0,1), ylim=(0,1))
     cbar = plt.colorbar(cntr1)
     cbar.set_label(label)
 
-    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
-    plt.ylabel("Equity in Infection Burden Multiplier (b)")
-    plt.savefig("out/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig("out/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.xlabel("Equity in Vaccination Multiplier (a)")
+    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
 
+    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
