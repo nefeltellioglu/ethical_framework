@@ -9,6 +9,8 @@ import seaborn as sns
 from scipy.interpolate import griddata
 import matplotlib.tri as tri
 from matplotlib import cm
+import sys
+import os
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
@@ -135,8 +137,8 @@ cbar = plt.colorbar()
 cbar.set_label("No vacc in group 1")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/vac_group_1_across_all.png", dpi=300)
-#plt.savefig("out/vac_group_1_across_all.svg", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all.svg", dpi=300)
 plt.clf()
 
 
@@ -148,8 +150,8 @@ cbar = plt.colorbar()
 cbar.set_label("Vaccinations in group 1 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/vac_group_1_across_all_perc.png", dpi=300)
-#plt.savefig("out/vac_group_1_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -162,8 +164,8 @@ cbar.set_label("Vaccinations in group 2 (%)")
 #plt.ylabel("b")
 plt.xlabel("Equity in Vaccination Multiplier (a)")
 plt.ylabel("Equity in Clinical Burden Multiplier (b)")
-#plt.savefig("out/vac_group_2_across_all_perc.png", dpi=300)
-#plt.savefig("out/vac_group_2_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -174,8 +176,8 @@ cbar = plt.colorbar()
 cbar.set_label("Infections in group 2 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/inf_group_2_across_all_perc.png", dpi=300)
-#plt.savefig("out/inf_group_2_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -186,8 +188,8 @@ cbar = plt.colorbar()
 cbar.set_label("Infections in group 1 (%)")
 plt.xlabel("a")
 plt.ylabel("b")
-#plt.savefig("out/inf_group_1_across_all_perc.png", dpi=300)
-#plt.savefig("out/inf_group_1_across_all_perc.svg", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.png", dpi=300)
+#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.svg", dpi=300)
 
 plt.clf()
 
@@ -217,8 +219,8 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Multiplier (a)")
     plt.ylabel("Equity in Clinical Burden Multiplier (b)")
 
-    plt.savefig("out/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig("out/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
 
 
 variables = ["inf_1", "inf_2", "vac_1", "vac_2"]
@@ -266,5 +268,5 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Multiplier (a)")
     plt.ylabel("Equity in Clinical Burden Multiplier (b)")
 
-    plt.savefig("out/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig("out/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
