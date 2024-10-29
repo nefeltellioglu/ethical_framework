@@ -4,9 +4,9 @@ rule all:
         "out/grid_database.pkl",
         "out/vacc-vs-inf-group-1.png",
         #"out/example-optimisation-result.png"
-	"out/vacc-vs-inf-group-1.png",
-	"out/hm_vac_2_across_all_perc.png"
-	
+        "out/vacc-vs-inf-group-1.png",
+        "out/hm_vac_2_across_all_perc.png"
+
 
 rule make_grid_database_ode:
     input:
@@ -46,11 +46,11 @@ rule plot_all_optimization_results:
     output:
         "out/hm_vac_2_across_all_perc.png",
         "out/hm_vac_2_across_all_perc.svg",
-	"out/hm_vac_1_across_all_perc.png",
+        "out/hm_vac_1_across_all_perc.png",
         "out/hm_vac_1_across_all_perc.svg",
-	"out/hm_inf_1_across_all_perc.png",
+        "out/hm_inf_1_across_all_perc.png",
         "out/hm_inf_1_across_all_perc.svg",
-	"out/hm_inf_2_across_all_perc.png",
+        "out/hm_inf_2_across_all_perc.png",
         "out/hm_inf_2_across_all_perc.svg"
 
     shell:
