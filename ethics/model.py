@@ -99,6 +99,12 @@ class SIRInitialCondition:
         else:
             raise ValueError(f"Invalid population: {pop}.")
 
+    def total_number_vaccinated(self) -> int:
+        """
+        Returns the total number of vaccinated individuals in both populations.
+        """
+        return (self.s0_1_vp + self.s0_1_vu + self.s0_2_vp + self.s0_2_vu)
+
     @staticmethod
     def integer_initial_conditions(
         vacc_prop_1: float,
