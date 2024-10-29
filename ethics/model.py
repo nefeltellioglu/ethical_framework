@@ -103,7 +103,10 @@ class SIRInitialCondition:
         """
         Returns the total number of vaccinated individuals in both populations.
         """
-        return (self.s0_1_vp + self.s0_1_vu + self.s0_2_vp + self.s0_2_vu)
+        return (self.s0_1_vp + self.s0_1_vu +
+                self.i0_1_vu + self.r0_1_vu +
+                self.s0_2_vp + self.s0_2_vu +
+                self.i0_2_vu + self.r0_2_vu)
 
     @staticmethod
     def integer_initial_conditions(
