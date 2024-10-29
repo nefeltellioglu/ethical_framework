@@ -20,7 +20,7 @@ rule make_grid_database_ode:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
-        python {input.py} -i {input.config} -o {output}
+        python {input.py} {input.config}
         """
 
 
