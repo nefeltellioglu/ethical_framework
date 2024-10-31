@@ -94,10 +94,9 @@ step = CONFIG["grid_search_step"]["a_b_grid_step"]
 
 plot_df = []
 
-for ethical_a in np.arange(0.0, 1 , step):
-    for ethical_b in np.arange(0.0, 1 - ethical_a , step):
-
-
+for ethical_a in np.arange(0.0, 1 + step / 2, step):
+    for ethical_b in np.arange(0.0, 1 - ethical_a + step / 2, step):
+        
         foo, bar = eo.optimal_initial_condition(
             ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
         )
@@ -162,8 +161,8 @@ cbar = plt.colorbar()
 cbar.set_label("Vaccinations in group 2 (%)")
 #plt.xlabel("a")
 #plt.ylabel("b")
-plt.xlabel("Equity in Vaccination Multiplier (a)")
-plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
+plt.ylabel("Equity in Infection Burden Multiplier (b)")
 #plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.png", dpi=300)
 #plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.svg", dpi=300)
 
@@ -216,8 +215,8 @@ for var, label, color in zip(variables, labels, colors):
     ax.invert_yaxis()
     #plt.xlabel("a")
     #plt.ylabel("b")
-    plt.xlabel("Equity in Vaccination Multiplier (a)")
-    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
+    plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
     plt.savefig(f"{output_dir}/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig(f"{output_dir}/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
@@ -265,8 +264,8 @@ for var, label, color in zip(variables, labels, colors):
     cbar = plt.colorbar(cntr1)
     cbar.set_label(label)
 
-    plt.xlabel("Equity in Vaccination Multiplier (a)")
-    plt.ylabel("Equity in Clinical Burden Multiplier (b)")
+    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
+    plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
     plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
     plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
