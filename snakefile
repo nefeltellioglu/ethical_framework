@@ -4,10 +4,10 @@ rule all:
         "out/grid_database-2024-10-14_manuscript.pkl",
         "out/grid_database-2024-10-28_limited_vaccine.pkl",
         "out/2024-10-14_manuscript/example-optimisation-results.png",
-        "out/2024-10-14_manuscript/hm_vac_2_across_all_perc.png",
+        "out/2024-10-14_manuscript/hm_vac_2_perc_across_all.png",
         "out/2024-10-14_manuscript/vacc-vs-inf-group-1.png",
         "out/2024-10-28_limited_vaccine/example-optimisation-results.png",
-        "out/2024-10-28_limited_vaccine/hm_vac_2_across_all_perc.png",
+        "out/2024-10-28_limited_vaccine/hm_vac_2_perc_across_all.png",
         "out/2024-10-28_limited_vaccine/vacc-vs-inf-group-1.png",
 
 
@@ -51,14 +51,18 @@ rule plot_all_optimization_results:
         py = "plot-all-optimization-results.py",
         config = "config/config-{config_date_name}.json",
     output:
-        "out/{config_date_name}/hm_vac_2_across_all_perc.png",
-        "out/{config_date_name}/hm_vac_2_across_all_perc.svg",
-        "out/{config_date_name}/hm_vac_1_across_all_perc.png",
-        "out/{config_date_name}/hm_vac_1_across_all_perc.svg",
-        "out/{config_date_name}/hm_inf_1_across_all_perc.png",
-        "out/{config_date_name}/hm_inf_1_across_all_perc.svg",
-        "out/{config_date_name}/hm_inf_2_across_all_perc.png",
-        "out/{config_date_name}/hm_inf_2_across_all_perc.svg"
+        "out/{config_date_name}/hm_vac_2_perc_across_all.png",
+        "out/{config_date_name}/hm_vac_2_perc_across_all.svg",
+        "out/{config_date_name}/hm_vac_1_perc_across_all.png",
+        "out/{config_date_name}/hm_vac_1_perc_across_all.svg",
+        "out/{config_date_name}/hm_inf_1_perc_across_all.png",
+        "out/{config_date_name}/hm_inf_1_perc_across_all.svg",
+        "out/{config_date_name}/hm_inf_2_perc_across_all.png",
+        "out/{config_date_name}/hm_inf_2_perc_across_all.svg",
+	"out/{config_date_name}/hm_cli_burden_across_all.png",
+        "out/{config_date_name}/hm_cli_burden_across_all.svg",
+        "out/{config_date_name}/hm_total_vacc_across_all.png",
+        "out/{config_date_name}/hm_total_vacc_across_all.svg"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:

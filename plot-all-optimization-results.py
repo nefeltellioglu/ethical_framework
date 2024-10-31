@@ -74,6 +74,65 @@ db = {
 # ====================================================================
 
 
+
+
+
+
+
+#### ====================================================================
+#define function to calculate total burden from SIROutcome object
+def loss_clinical_burden_vacc(
+    sir_out: em.SIROutcome, disease_burden_params: em.BurdenParams,
+    calculate: str) -> float:
+
+    
+    #ttl_infs = sir_out.total_infections()
+    #ttl_vacc = sir_out.total_vaccinated()
+    
+    if calculate == "total_vaccination":
+        return sir_out.total_vac_1 + sir_out.total_vac_2
+    
+    elif calculate == "total_clinical_burden":
+        net_days_hosp_for_inf_no_vacc = disease_burden_params.prop_hosp_inf * (
+            disease_burden_params.days_hosp_inf_1 * sir_out.inf_1_no_vac
+            + disease_burden_params.days_hosp_inf_2 * sir_out.inf_2_no_vac
+        )
+    
+        net_days_hosp_for_inf_vacc = disease_burden_params.prop_hosp_inf * (
+            disease_burden_params.days_hosp_inf_1
+            * (1 - disease_burden_params.vacc_protection_from_disease_1)
+            * sir_out.inf_1_vu
+            + disease_burden_params.days_hosp_inf_2
+            * (1 - disease_burden_params.vacc_protection_from_disease_2)
+            * sir_out.inf_2_vu
+        )
+    
+        net_days_hosp_for_adverse = (
+            disease_burden_params.days_hosp_vacc_1
+            * sir_out.total_vac_1
+            * disease_burden_params.prop_hosp_vacc_1
+        ) + (
+            disease_burden_params.days_hosp_vacc_2
+            * sir_out.total_vac_2
+            * disease_burden_params.prop_hosp_vacc_2
+        )
+    
+        loss_clinical_burden = (
+            net_days_hosp_for_inf_no_vacc
+            + net_days_hosp_for_inf_vacc
+            + net_days_hosp_for_adverse
+        )
+        
+        return loss_clinical_burden
+    else:
+        sys.exit("calculate variable is not valid")
+        
+       
+
+
+
+#### ====================================================================
+
 # At the point where we need to make some plots!
 model_param_id = 0
 burden_param_id = 0
@@ -109,7 +168,10 @@ for ethical_a in np.arange(0.0, 1 + step / 2, step):
         best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
         best_inf_1 = _optimal_outcome[0]["outcome"].inf_1_no_vac
         best_inf_2 = _optimal_outcome[0]["outcome"].inf_2_no_vac
-
+        best_clinical_burden = loss_clinical_burden_vacc(
+                                _optimal_outcome[0]["outcome"], bp, "total_clinical_burden")
+        best_total_vaccination = loss_clinical_burden_vacc(
+                                _optimal_outcome[0]["outcome"], bp, "total_vaccination")
 
         plot_df.append(
             {   "a": ethical_a,
@@ -120,6 +182,8 @@ for ethical_a in np.arange(0.0, 1 + step / 2, step):
                 "vac_2": best_vac_2,
                 "inf_1": best_inf_1,
                 "inf_2": best_inf_2,
+                "cli_burden": best_clinical_burden,
+                "total_vacc": best_total_vaccination
                 #"loss": _optimal_outcome,
             }
         )
@@ -130,78 +194,22 @@ plot_df = pd.DataFrame(plot_df)
 # Use matplotlib to make a plot of the same data.
 # Put a single large red dot at the best outcome.
 
-plt.figure()
-plt.scatter(plot_df["a"], plot_df["b"], c=plot_df["vac_1"])
-cbar = plt.colorbar()
-cbar.set_label("No vacc in group 1")
-plt.xlabel("a")
-plt.ylabel("b")
-#plt.savefig(f"{output_dir}/vac_group_1_across_all.png", dpi=300)
-#plt.savefig(f"{output_dir}/vac_group_1_across_all.svg", dpi=300)
-plt.clf()
 
 
-
-plt.figure()
-plt.scatter(plot_df["a"], plot_df["b"],
-            c=100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
-cbar = plt.colorbar()
-cbar.set_label("Vaccinations in group 1 (%)")
-plt.xlabel("a")
-plt.ylabel("b")
-#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.png", dpi=300)
-#plt.savefig(f"{output_dir}/vac_group_1_across_all_perc.svg", dpi=300)
-
-plt.clf()
-
-plt.figure()
-plt.scatter(plot_df["a"], plot_df["b"],
-            c=100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"])
-cbar = plt.colorbar()
-cbar.set_label("Vaccinations in group 2 (%)")
-#plt.xlabel("a")
-#plt.ylabel("b")
-plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
-plt.ylabel("Equity in Infection Burden Multiplier (b)")
-#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.png", dpi=300)
-#plt.savefig(f"{output_dir}/vac_group_2_across_all_perc.svg", dpi=300)
-
-plt.clf()
-
-plt.figure()
-plt.scatter(plot_df["a"], plot_df["b"],
-            c=100 * plot_df["inf_2"]/CONFIG["population_parameters"]["pop_size_2"])
-cbar = plt.colorbar()
-cbar.set_label("Infections in group 2 (%)")
-plt.xlabel("a")
-plt.ylabel("b")
-#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.png", dpi=300)
-#plt.savefig(f"{output_dir}/inf_group_2_across_all_perc.svg", dpi=300)
-
-plt.clf()
-
-plt.figure()
-plt.scatter(plot_df["a"], plot_df["b"],
-            c=100 * plot_df["inf_1"]/CONFIG["population_parameters"]["pop_size_1"])
-cbar = plt.colorbar()
-cbar.set_label("Infections in group 1 (%)")
-plt.xlabel("a")
-plt.ylabel("b")
-#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.png", dpi=300)
-#plt.savefig(f"{output_dir}/inf_group_1_across_all_perc.svg", dpi=300)
-
-plt.clf()
-
-
-variables = ["inf_1", "inf_2", "vac_1", "vac_2"]
+variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
 labels = ["Infections in group 1 (%)",
           "Infections in group 2 (%)",
           "Vaccinations in group 1 (%)",
-          "Vaccinations in group 2 (%)"]
-colors = ["Reds", "Reds", "Purples", "Purples"]
+          "Vaccinations in group 2 (%)",
+          "Total Clinical Burden",
+          "Total Number of Vaccinated Individuals"]
+colors = ["Reds", "Reds", "Purples", "Purples", "Reds", "Purples"]
 for var, label, color in zip(variables, labels, colors):
-    perc_var = "%s_perc"%var
-    plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
+    if var in ["cli_burden", "total_vacc"]:
+        perc_var = var
+    else:
+        perc_var = "%s_perc"%var
+        plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
     data = plot_df.pivot(index="b", columns="a", values = perc_var)
@@ -218,21 +226,27 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
     plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
-    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/hm_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
 
 
-variables = ["inf_1", "inf_2", "vac_1", "vac_2"]
+variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
 labels = ["Infections in group 1 (%)",
           "Infections in group 2 (%)",
           "Vaccinations in group 1 (%)",
-          "Vaccinations in group 2 (%)"]
-colors = ["Reds", "Reds", "Purples", "Purples"]
+          "Vaccinations in group 2 (%)",
+          "Total Clinical Burden",
+          "Total Number of Vaccinated Individuals"]
+colors = ["Reds", "Reds", "Purples", "Purples", "Reds", "Purples"]
 for var, label, color in zip(variables, labels, colors):
     fig, ax1 = plt.subplots()
+    if var in ["cli_burden", "total_vacc"]:
+        perc_var = var
+    else:
+        perc_var = "%s_perc"%var
+        plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
 
-    perc_var = "%s_perc"%var
-    plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
+    
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
     x = plot_df["a"]
@@ -267,5 +281,5 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
     plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
-    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.png"%var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/cnt_%s_across_all_perc.svg"%var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/cnt_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/cnt_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
