@@ -149,12 +149,14 @@ configs = [
 config_ids = [c["id"] for c in configs]
 ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
 step = CONFIG["grid_search_step"]["a_b_grid_step"]
+grid_max = CONFIG["grid_search_step"]["a_b_grid_max"]
+grid_min = CONFIG["grid_search_step"]["a_b_grid_min"]
 
 
 plot_df = []
 
-for ethical_a in np.arange(0.0, 1 + step / 2, step):
-    for ethical_b in np.arange(0.0, 1 - ethical_a + step / 2, step):
+for ethical_a in np.arange(grid_min, grid_max, step):
+    for ethical_b in np.arange(grid_min, grid_max - ethical_a , step):
         
         foo, bar = eo.optimal_initial_condition(
             ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
