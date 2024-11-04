@@ -1,0 +1,58 @@
+This document contains derivation of the core model parameters used.
+Note that the definition of the differential equations can be found in
+the =sir_vacc= function in =ethics.model= (this is the function used
+by =create-grid-database.py=).
+
+#+begin_src R :session ethics
+  library(glue)
+  gprint <- \(s) print(glue(s))
+#+end_src
+
+#+RESULTS:
+
+* Parameters from the literature
+
+#+begin_src R :session ethics
+  pop_size <- 5000000
+  group_1_prop <- 0.89
+  group_2_prop <- 1 - group_1_prop
+  average_infectious_periods <- c(8.89, 6.87)
+#+end_src
+
+#+RESULTS:
+| 8.89 |
+| 6.87 |
+
+* Derived parameters                                                    :yes:
+
+#+begin_src R :session ethics
+  group_1_size <- group_1_prop * pop_size
+  group_2_size <- group_2_prop * pop_size
+
+  gprint("Group 1 size {group_1_size}\nGroup 2 size {group_2_size}")
+#+end_src
+
+#+RESULTS:
+| Group 1 size 4450000 |
+| Group 2 size 550000  |
+
+#+begin_src R :session ethics
+  gamma_est <- 1 / round(mean(average_infectious_periods))
+  gprint("Estimated removal rate {gamma_est}")
+#+end_src
+
+#+RESULTS:
+: Estimated removal rate 0.125
+
+People who are vaccinated but unprotected have the same dynamics as
+those who are unvaccinated. For the vaccinated and protected people,
+there is no infection possible.
+
+* Summary table and links
+
+| Parameter                  | Group 1 value | Group 2 value | Link   |
+|----------------------------+---------------+---------------+--------|
+| Age range                  |          0-70 |           +70 |        |
+| Population size, \(N_{i}\) |     4,450,000 |       550,000 | [[file:./config/config-2024-10-14_manuscript.json::10][config]] |
+| Removal rate, \(\gamma\)   |         0.125 |         0.125 | [[file:./config/config-2024-10-14_manuscript.json::8][config]] |
+| Initially infected         |             1 |             1 | [[file:./config/config-2024-10-14_manuscript.json::36][config]] |
