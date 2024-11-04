@@ -22,7 +22,6 @@ from ethics.model import (
     loss_equity_of_burden,
     loss_equity_of_vaccination,
     sir_vacc,
-    sir_vacc_SSA,
 )
 
 
