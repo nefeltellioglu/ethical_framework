@@ -15,6 +15,9 @@ by =create-grid-database.py=).
 
 * Parameters from the literature
 
+The proportion hospitalised is for delta and omicron following the
+reference given in the table.
+
 #+begin_src R :session ethics :exports both
   pop_size <- 5000000
   group_1_prop <- 0.89
@@ -25,13 +28,11 @@ by =create-grid-database.py=).
   average_hospital_stay_40_69 <- 4.98 * 0.79
   average_hospital_stay_70_xx <- 7.32 * 1.04
 
-  ## Delta and Omicron
-  prop_hospitalized <- c(0.033, 0.007)
+  prop_hospitalised <- list(age_under_70 = 0.0009, age_70_plus = 0.0378)
 #+end_src
 
 #+RESULTS:
-| 0.033 |
-| 0.007 |
+| 0.0009 | 0.0378 |
 
 ** Demographic details from data ABS
 
@@ -124,7 +125,8 @@ We also need the proportion in the age ranges 0--39, 40--69 and 70+.
 
 People who are vaccinated but unprotected have the same dynamics as
 those who are unvaccinated. For the vaccinated and protected people,
-there is no infection possible.
+there is no infection possible. The /average hospital stay/ (measured
+in days) is what we are using as out cost associated with infection.
 
 #+begin_src R :session ethics :exports both
   group_1_avg_hosp_days_cond <-
@@ -132,15 +134,14 @@ there is no infection possible.
     aus_prop_40_69 / (1 - aus_prop_70_plus) * average_hospital_stay_40_69
   group_2_avg_hosp_days_cond <- average_hospital_stay_70_xx
 
-  prob_hosp <- mean(prop_hospitalized)
-  group_1_avg_hosp_days <- prob_hosp * group_1_avg_hosp_days_cond
-  group_2_avg_hosp_days <- prob_hosp * group_2_avg_hosp_days_cond
+  group_1_avg_hosp_days <- prop_hospitalised$age_under_70 * group_1_avg_hosp_days_cond
+  group_2_avg_hosp_days <- prop_hospitalised$age_70_plus * group_2_avg_hosp_days_cond
   gprint("Group 1 average hospital stay {group_1_avg_hosp_days}\nGroup 2 average hospital stay {group_2_avg_hosp_days}")
 #+end_src
 
 #+RESULTS:
-| Group 1 average hospital stay 0.0574690399072483 |
-| Group 2 average hospital stay 0.152256           |
+| Group 1 average hospital stay 0.00258610679582617 |
+| Group 2 average hospital stay 0.28776384          |
 
 * Summary table and links
 
@@ -151,7 +152,7 @@ there is no infection possible.
 | Population size, \(N_{i}\)    |     4,450,000 |       550,000 | [[file:./config/config-2024-10-14_manuscript.json::10][config]] |
 | Removal rate, \(\gamma\)      |         0.125 |         0.125 | [[file:./config/config-2024-10-14_manuscript.json::8][config]] |
 | Initially infected            |             1 |             1 | [[file:./config/config-2024-10-14_manuscript.json::36][config]] |
-| Infection cost, \(C_{i}^{I}\) |        0.0575 |         0.152 |        |
+| Infection cost, \(C_{i}^{I}\) |       0.00259 |         0.288 |        |
 
 The infection cost never appears in this way, it only appears as the
 product of the probability of hospitalisation given infection (which
