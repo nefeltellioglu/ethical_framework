@@ -3,7 +3,7 @@ Note that the definition of the differential equations can be found in
 the =sir_vacc= function in =ethics.model= (this is the function used
 by =create-grid-database.py=).
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   library(glue)
   library(dplyr)
   library(ggplot2)
@@ -15,7 +15,7 @@ by =create-grid-database.py=).
 
 * Parameters from the literature
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   pop_size <- 5000000
   group_1_prop <- 0.89
   group_2_prop <- 1 - group_1_prop
@@ -35,7 +35,7 @@ by =create-grid-database.py=).
 
 ** Demographic details from data ABS
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   age_sex_csv <- "./extrascripts/demographics/Australia_National_Age_and_Sex_2023.csv"
   age_sex_df <-
     age_sex_csv |>
@@ -44,14 +44,15 @@ by =create-grid-database.py=).
     select(age, num) |>
     group_by(age) |>
     summarise(total_num = sum(num))
+
+  ## ggplot() +
+  ##   geom_line(age_sex_df, mapping = aes(x = age, y = total_num)) +
+  ##   theme_bw() +
+  ##   labs(x = "Age", y = "Frequency")
+  print(NULL)
 #+end_src
 
-#+begin_src R :session ethics
-    ggplot() +
-    geom_line(age_sex_df, mapping = aes(x = age, y = total_num)) +
-    theme_bw() +
-    labs(x = "Age", y = "Frequency")
-#+end_src
+#+RESULTS:
 
 * Derived parameters                                                    :yes:
 
@@ -59,7 +60,7 @@ These values are for Australia as a whole. The proportion of the
 national population below 70 is \(87.9\%\). The AIHW reports \(89\%\)
 which is what we have used (as given in the configuration file).
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   group_1_size_aus <- sum(age_sex_df[age_sex_df$age < 70,]$total_num)
   group_2_size_aus <- sum(age_sex_df[age_sex_df$age >= 70,]$total_num)
 
@@ -79,7 +80,7 @@ which is what we have used (as given in the configuration file).
 
 We also need the proportion in the age ranges 0--39, 40--69 and 70+.
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   aus_0_39 <- sum(age_sex_df[age_sex_df$age < 40,]$total_num)
   aus_40_69 <- sum(age_sex_df[(40 <= age_sex_df$age) & (age_sex_df$age < 70),]$total_num)
   aus_70_plus <- sum(age_sex_df[age_sex_df$age >= 70,]$total_num)
@@ -102,7 +103,7 @@ We also need the proportion in the age ranges 0--39, 40--69 and 70+.
 | Age 40-69 size 9448121 proportion 0.35440712064107  |
 | Age 70+ size 3232101 proportion 0.121238880093843   |
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   group_1_size <- group_1_prop * pop_size
   group_2_size <- group_2_prop * pop_size
 
@@ -113,7 +114,7 @@ We also need the proportion in the age ranges 0--39, 40--69 and 70+.
 | Group 1 size 4450000 |
 | Group 2 size 550000  |
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   gamma_est <- 1 / round(mean(average_infectious_periods))
   gprint("Estimated removal rate {gamma_est}")
 #+end_src
@@ -125,7 +126,7 @@ People who are vaccinated but unprotected have the same dynamics as
 those who are unvaccinated. For the vaccinated and protected people,
 there is no infection possible.
 
-#+begin_src R :session ethics
+#+begin_src R :session ethics :exports both
   group_1_avg_hosp_days_cond <-
     aus_prop_0_39 / (1 - aus_prop_70_plus) * average_hospital_stay_00_39 +
     aus_prop_40_69 / (1 - aus_prop_70_plus) * average_hospital_stay_40_69
