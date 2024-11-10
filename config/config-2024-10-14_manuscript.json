@@ -31,6 +31,7 @@
             "vacc_protection_from_disease_1": 0.825,
             "vacc_protection_from_disease_2": 0.825
     },
+    "vacc_protection_from_infection": 0.531,
     "initial_inf_rec":
     {
         "i0_1": 1,

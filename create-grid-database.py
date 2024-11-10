@@ -55,6 +55,7 @@ assert _num_model_parameters == 1
 
 pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
 pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
+vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 
 initial_conditions = []
 ic_ix = 0
@@ -64,6 +65,8 @@ for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
         print(
             f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
         )
+        s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
+        s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
         initial_conditions.append(
             {
                 "id": ic_ix,
@@ -74,10 +77,10 @@ for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
                     i0_2=1,
                     r0_1=0,
                     r0_2=0,
-                    s0_1_vp=num_vac_1,
-                    s0_2_vp=num_vac_2,
-                    s0_1_vu=0,
-                    s0_2_vu=0,
+                    s0_1_vp= s0_1_vp,
+                    s0_2_vp= s0_2_vp,
+                    s0_1_vu= num_vac_1 - s0_1_vp,
+                    s0_2_vu= num_vac_2 - s0_2_vp,
                     i0_1_vu=0,
                     i0_2_vu=0,
                     r0_1_vu=0,
