@@ -166,10 +166,13 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         _optimal_outcome = [
             o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
         ]
+        
         best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
         best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
-        best_inf_1 = _optimal_outcome[0]["outcome"].inf_1_no_vac
-        best_inf_2 = _optimal_outcome[0]["outcome"].inf_2_no_vac
+        best_inf_1 = (_optimal_outcome[0]["outcome"].inf_1_no_vac + 
+                      _optimal_outcome[0]["outcome"].inf_1_vu)
+        best_inf_2 = (_optimal_outcome[0]["outcome"].inf_2_no_vac + 
+                      _optimal_outcome[0]["outcome"].inf_2_vu)
         best_clinical_burden = loss_clinical_burden_vacc(
                                 _optimal_outcome[0]["outcome"], bp, "total_clinical_burden")
         best_total_vaccination = loss_clinical_burden_vacc(
