@@ -1,3 +1,5 @@
+#+title: Model parameterisation
+
 This document contains derivation of the core model parameters used.
 Note that the definition of the differential equations can be found in
 the =sir_vacc= function in =ethics.model= (this is the function used
@@ -15,19 +17,45 @@ by =create-grid-database.py=).
 
 * Parameters from the literature
 
-The proportion hospitalised is for delta and omicron following the
-reference given in the table.
+The population size an age group size is based off of Melbourne.
 
 #+begin_src R :session ethics :exports both
   pop_size <- 5000000
   group_1_prop <- 0.89
   group_2_prop <- 1 - group_1_prop
-  average_infectious_periods <- c(8.89, 6.87)
+#+end_src
 
+#+RESULTS:
+: 0.11
+
+The average duration of a hospital stay as part of the clinical burden
+comes from the average of a gamma distribution. These values are given
+in Table 3.
+
+#+begin_src R :session ethics :exports both
   average_hospital_stay_00_39 <- 2.27 * 0.95
   average_hospital_stay_40_69 <- 4.98 * 0.79
   average_hospital_stay_70_xx <- 7.32 * 1.04
+#+end_src
 
+#+RESULTS:
+: 7.6128
+
+Table 1 has the average /recovery period/ as 10.37 days. This gets
+used in the estimate of the rate of removal from the infectious
+compartment.
+
+#+begin_src R :session ethics :exports both
+  average_infectious_period <- 10.37
+#+end_src
+
+#+RESULTS:
+: 10.37
+
+The proportion hospitalised is for delta and omicron following the
+reference given in the table.
+
+#+begin_src R :session ethics :exports both
   prop_hospitalised <- list(age_under_70 = 0.0009, age_70_plus = 0.0378)
 #+end_src
 
@@ -116,12 +144,12 @@ We also need the proportion in the age ranges 0--39, 40--69 and 70+.
 | Group 2 size 550000  |
 
 #+begin_src R :session ethics :exports both
-  gamma_est <- 1 / round(mean(average_infectious_periods))
+  gamma_est <- 1 / average_infectious_period
   gprint("Estimated removal rate {gamma_est}")
 #+end_src
 
 #+RESULTS:
-: Estimated removal rate 0.125
+: Estimated removal rate 0.0964320154291225
 
 People who are vaccinated but unprotected have the same dynamics as
 those who are unvaccinated. For the vaccinated and protected people,
