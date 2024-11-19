@@ -69,7 +69,7 @@ from Table 3 of [[https://doi.org/10.1503/cmaj.230721][Skiwronski et al (2023)]]
 combined with the [[*Demographic details from data ABS]] to get the group
 specific proportions of infections that result in hospitalisation.
 
-#+begin_src
+#+begin_src R :session ethics :exports both
   ihr_list <- list(
     age_00_04 = 0.0041,
     age_05_09 = 0.0010,
@@ -83,6 +83,9 @@ specific proportions of infections that result in hospitalisation.
     age_80_pl = 0.0217
   )
 #+end_src
+
+#+RESULTS:
+| 0.0041 | 0.001 | 0.00013 | 0.00022 | 0.0004 | 0.0003 | 0.0006 | 0.0025 | 0.0042 | 0.0217 |
 
 ** Demographic details from data ABS
 
@@ -150,10 +153,22 @@ we compute these here.
     age_70_79 = sum(age_df[70 <= age_df$age & age_df$age <= 79, "proportion"]),
     age_80_pl = sum(age_df[80 <= age_df$age, "proportion"])
   )
+
+  data.frame(age = names(age_prop_list),
+             val = as.numeric(age_prop_list))
 #+end_src
 
 #+RESULTS:
-| 0.056900219768612 | 0.0604134491728631 | 0.122520138454076 | 0.137242924964631 | 0.147277266904906 | 0.127418643826456 | 0.120254370127433 | 0.106734106687181 | 0.0783156934774771 | 0.0429231866163661 |
+| age_00_04 |  0.056900219768612 |
+| age_05_09 | 0.0604134491728631 |
+| age_10_19 |  0.122520138454076 |
+| age_20_29 |  0.137242924964631 |
+| age_30_39 |  0.147277266904906 |
+| age_40_49 |  0.127418643826456 |
+| age_50_59 |  0.120254370127433 |
+| age_60_69 |  0.106734106687181 |
+| age_70_79 | 0.0783156934774771 |
+| age_80_pl | 0.0429231866163661 |
 
 ** Gamma removal rate
 
@@ -170,23 +185,39 @@ we compute these here.
 People who are vaccinated but unprotected have the same dynamics as
 those who are unvaccinated. For the vaccinated and protected people,
 there is no infection possible. The /average hospital stay/ (measured
-in days) is what we are using as out cost associated with infection.
+in days) is what we are using as our cost associated with infection.
+
+We have the proportion of infections that result in hospitalisation,
+via the IHR, and the average hopsital stay given hospitalisation; we
+can then combine these to get the average number of days in hospital
+given infection. Note that we conditioning on infection in an age
+group here so we need to divide through by the total proportion in
+that age group to get the age conditioning correct.
 
 #+begin_src R :session ethics :exports both
-  group_1_avg_hosp_days_cond <-
-    aus_prop_0_39 / (1 - aus_prop_70_plus) * average_hospital_stay_00_39 +
-    aus_prop_40_69 / (1 - aus_prop_70_plus) * average_hospital_stay_40_69
-  group_2_avg_hosp_days_cond <- average_hospital_stay_70_xx
+  avg_hosp_given_inf_group_1 <-
+    (average_hospital_stay_00_39 * ihr_list$age_00_04 * age_prop_list$age_00_04 +
+    average_hospital_stay_00_39 * ihr_list$age_05_09 * age_prop_list$age_05_09 +
+    average_hospital_stay_00_39 * ihr_list$age_10_19 * age_prop_list$age_10_19 +
+    average_hospital_stay_00_39 * ihr_list$age_20_29 * age_prop_list$age_20_29 +
+    average_hospital_stay_00_39 * ihr_list$age_30_39 * age_prop_list$age_30_39 +
+    average_hospital_stay_40_69 * ihr_list$age_40_49 * age_prop_list$age_40_49 +
+    average_hospital_stay_40_69 * ihr_list$age_50_59 * age_prop_list$age_50_59 +
+    average_hospital_stay_40_69 * ihr_list$age_60_69 * age_prop_list$age_60_69) / group_1_prop
 
-  stop("prop_hospitalised is being updated")
-  group_1_avg_hosp_days <- prop_hospitalised$age_under_70 * group_1_avg_hosp_days_cond
-  group_2_avg_hosp_days <- prop_hospitalised$age_70_plus * group_2_avg_hosp_days_cond
-  gprint("Group 1 average hospital stay {group_1_avg_hosp_days}\nGroup 2 average hospital stay {group_2_avg_hosp_days}")
+  avg_hosp_given_inf_group_2 <-
+    (average_hospital_stay_70_xx * ihr_list$age_70_79 * age_prop_list$age_70_79 +
+    average_hospital_stay_70_xx * ihr_list$age_80_pl * age_prop_list$age_80_pl) / group_2_prop
+
+  data.frame(
+    group = c("Group 1", "Group 2"),
+    val = c(avg_hosp_given_inf_group_1, avg_hosp_given_inf_group_2)
+  )
 #+end_src
 
 #+RESULTS:
-| Group 1 average hospital stay 0.00258610679582617 |
-| Group 2 average hospital stay 0.28776384          |
+| Group 1 | 0.00266728704577231 |
+| Group 2 |  0.0791401360779753 |
 
 * Summary table and links
 
