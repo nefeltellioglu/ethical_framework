@@ -17,6 +17,25 @@ by =create-grid-database.py=).
 
 * Parameters from the literature
 
+** Average hospitalisation given vaccination (clinical burden of vaccination)
+
+*** Proportion of vaccinations that result in hospitalisation
+
+This is the proportion of vaccinations that result in hospitalisation
+as described in Table 2.
+
+#+begin_src R :session ethics :exports both
+  vacc_hosp_rate_female_00_29 <- 2 / 10^5
+  vacc_hosp_rate_male_00_29 <- 20 / 10^5
+  vacc_hosp_rate_30_pl <- 2 / 10^5
+#+end_src
+
+*** Days in hospital given hospitalisation
+
+#+begin_src R :session ethics :exports both
+  average_vacc_hosp_stay <- 5.7
+#+end_src
+
 ** Melbourne population size total
 
 The population size is based off of Melbourne rounded to the nearest
