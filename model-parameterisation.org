@@ -223,6 +223,40 @@ given infection. Note that we conditioning on infection in an age
 group here so we need to divide through by the total proportion in
 that age group to get the age conditioning correct.
 
+*** Proportion of infections that end up hospitalised
+
+The following values are the probability of going to hospital, given
+you are infected. These values are needed for the simulation
+configuration file.
+
+#+begin_src R :session ethics :exports both
+  prob_hosp_given_inf_group_1 <-
+    (ihr_list$age_00_04 * age_prop_list$age_00_04 +
+    ihr_list$age_05_09 * age_prop_list$age_05_09 +
+    ihr_list$age_10_19 * age_prop_list$age_10_19 +
+    ihr_list$age_20_29 * age_prop_list$age_20_29 +
+    ihr_list$age_30_39 * age_prop_list$age_30_39 +
+    ihr_list$age_40_49 * age_prop_list$age_40_49 +
+    ihr_list$age_50_59 * age_prop_list$age_50_59 +
+    ihr_list$age_60_69 * age_prop_list$age_60_69) / group_1_prop
+
+  prob_hosp_given_inf_group_2 <-
+    (ihr_list$age_70_79 * age_prop_list$age_70_79 +
+    ihr_list$age_80_pl * age_prop_list$age_80_pl) / group_2_prop
+
+  data.frame(
+    group = c("Group 1", "Group 2"),
+    val = c(prob_hosp_given_inf_group_1, prob_hosp_given_inf_group_2)
+  )
+#+end_src
+
+#+RESULTS:
+| Group 1 | 0.000883004246367426 |
+| Group 2 |   0.0103956673074263 |
+
+
+*** Putting it all together
+
 #+begin_src R :session ethics :exports both
   avg_hosp_given_inf_group_1 <-
     (average_hospital_stay_00_39 * ihr_list$age_00_04 * age_prop_list$age_00_04 +
