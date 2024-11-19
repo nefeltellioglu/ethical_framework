@@ -254,6 +254,32 @@ configuration file.
 | Group 1 | 0.000883004246367426 |
 | Group 2 |   0.0103956673074263 |
 
+*** Average days in hospital for members of each group given hospitalised
+
+#+begin_src R :session ethics :exports both
+  avg_days_given_hosp_group_1 <-
+    (average_hospital_stay_00_39 * age_prop_list$age_00_04 +
+    average_hospital_stay_00_39 * age_prop_list$age_05_09 +
+    average_hospital_stay_00_39 * age_prop_list$age_10_19 +
+    average_hospital_stay_00_39 * age_prop_list$age_20_29 +
+    average_hospital_stay_00_39 * age_prop_list$age_30_39 +
+    average_hospital_stay_40_69 * age_prop_list$age_40_49 +
+    average_hospital_stay_40_69 * age_prop_list$age_50_59 +
+    average_hospital_stay_40_69 * age_prop_list$age_60_69) / group_1_prop
+
+  avg_days_given_hosp_group_2 <-
+    (average_hospital_stay_70_xx * age_prop_list$age_70_79 +
+    average_hospital_stay_70_xx * age_prop_list$age_80_pl) / group_2_prop
+
+  data.frame(
+    group = c("Group 1", "Group 2"),
+    val = c(avg_days_given_hosp_group_1, avg_days_given_hosp_group_2)
+  )
+#+end_src
+
+#+RESULTS:
+| Group 1 | 2.87345199536241 |
+| Group 2 |           7.6128 |
 
 *** Putting it all together
 
