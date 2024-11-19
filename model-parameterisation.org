@@ -52,15 +52,28 @@ compartment.
 #+RESULTS:
 : 10.37
 
-The proportion hospitalised is for delta and omicron following the
-reference given in the table.
+** Proportion hospitalised
 
-#+begin_src R :session ethics :exports both
-  prop_hospitalised <- list(age_under_70 = 0.0009, age_70_plus = 0.0378)
+The /infection hospitalistion ratio (rate)/ (IHR) is the proportion of
+infections that result in hospitalisation. The following data comes
+from Table 3 of [[https://doi.org/10.1503/cmaj.230721][Skiwronski et al (2023)]]. These values will need to be
+combined with the [[*Demographic details from data ABS]] to get the group
+specific proportions of infections that result in hospitalisation.
+
+#+begin_src
+  ihr_list <- list(
+    age_00_04 = 0.0041,
+    age_05_09 = 0.0010,
+    age_10_19 = 0.00013,
+    age_20_29 = 0.00022,
+    age_30_39 = 0.0004,
+    age_40_49 = 0.0003,
+    age_50_59 = 0.0006,
+    age_60_69 = 0.0025,
+    age_70_79 = 0.0042,
+    age_80_pl = 0.0217
+  )
 #+end_src
-
-#+RESULTS:
-| 0.0009 | 0.0378 |
 
 ** Demographic details from data ABS
 
