@@ -25,20 +25,30 @@ million.
 #+end_src
 
 #+RESULTS:
-: 0.11
+: 5000000.0
 
 The average duration of a hospital stay as part of the clinical burden
-comes from the average of a gamma distribution. These values are given
-in Table 3.
+(i.e. the average number of days in hospital given an individual is
+hospitalised due to infection) comes from the average of a gamma
+distribution. These values are given in Table 3.
 
 #+begin_src R :session ethics :exports both
   average_hospital_stay_00_39 <- 2.27 * 0.95
   average_hospital_stay_40_69 <- 4.98 * 0.79
   average_hospital_stay_70_xx <- 7.32 * 1.04
+
+  data.frame(
+    age = c("00-39", "40-69", "70 plus"),
+    val = c(average_hospital_stay_00_39,
+            average_hospital_stay_40_69,
+            average_hospital_stay_70_xx)
+  )
 #+end_src
 
 #+RESULTS:
-: 7.6128
+|   00-39 | 2.1565 |
+|   40-69 | 3.9342 |
+| 70 plus | 7.6128 |
 
 Table 1 has the average /recovery period/ as 10.37 days. This gets
 used in the estimate of the rate of removal from the infectious
