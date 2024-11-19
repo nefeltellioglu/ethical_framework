@@ -17,6 +17,8 @@ by =create-grid-database.py=).
 
 * Parameters from the literature
 
+** Melbourne population size total
+
 The population size is based off of Melbourne rounded to the nearest
 million.
 
@@ -26,6 +28,31 @@ million.
 
 #+RESULTS:
 : 5000000.0
+
+** Contact matrix
+
+The /beta/ contact matrix is
+
+#+begin_src R :session ethics :exports both
+  beta_matrix <- matrix(c(0.38, 0.14, 0.14, 0.34), ncol = 2)
+#+end_src
+
+#+RESULTS:
+| 0.38 | 0.14 |
+| 0.14 | 0.34 |
+
+** Reproduction number
+
+We have an estimate of the effective and basic reproduction number.
+The basic reproduction number estimate of 9.5 is based on relative
+values between strains. The effective reproduction number estimate is
+3.4.
+
+#+begin_src R
+  repro_num <- 3.4
+#+end_src
+
+** Average hospitalisation given infection (clinical burden of infection)
 
 The average duration of a hospital stay as part of the clinical burden
 (i.e. the average number of days in hospital given an individual is
@@ -50,6 +77,8 @@ distribution. These values are given in Table 3.
 |   40-69 | 3.9342 |
 | 70 plus | 7.6128 |
 
+** Average infectious period
+
 Table 1 has the average /recovery period/ as 10.37 days. This gets
 used in the estimate of the rate of removal from the infectious
 compartment.
@@ -61,7 +90,7 @@ compartment.
 #+RESULTS:
 : 10.37
 
-** Proportion hospitalised
+** Proportion hospitalised given infection
 
 The /infection hospitalistion ratio (rate)/ (IHR) is the proportion of
 infections that result in hospitalisation. The following data comes
