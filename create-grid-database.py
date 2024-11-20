@@ -17,12 +17,7 @@ from ethics.model import (
     SIRInitialCondition,
     SIRSolution,
     SIROutcome,
-    optimal_initial_conditions,
-    loss_clinical_burden,
-    loss_equity_of_burden,
-    loss_equity_of_vaccination,
     sir_vacc,
-    sir_vacc_SSA,
 )
 
 

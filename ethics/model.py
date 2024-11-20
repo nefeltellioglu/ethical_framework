@@ -807,34 +807,6 @@ def sir_vacc_SSA(
     return sir_sols
 
 
-# TODO This needs to be extended to include some sort of visualisation
-# of the cost associated with infections and vaccnations.
-# TODO: introduce fancy model
-def plot_SIRSolution(sir_sol: SIRSolution) -> None:
-    plt.figure(figsize=(12, 8))
-    plt.plot(sir_sol.times, sir_sol.s1, label="Susceptible 1")
-    plt.plot(sir_sol.times, sir_sol.s2, label="Susceptible 2")
-    plt.plot(sir_sol.times, sir_sol.i1, label="Infected 1")
-    plt.plot(sir_sol.times, sir_sol.i2, label="Infected 2")
-    plt.plot(sir_sol.times, sir_sol.r1, label="Recovered 1")
-    plt.plot(sir_sol.times, sir_sol.r2, label="Recovered 2")
-    plt.plot(sir_sol.times, sir_sol.s1_vp, label="Susceptible VP 1")
-    plt.plot(sir_sol.times, sir_sol.s1_vu, label="Susceptible VU 1")
-    plt.plot(sir_sol.times, sir_sol.s2_vp, label="Susceptible VP 2")
-    plt.plot(sir_sol.times, sir_sol.s2_vu, label="Susceptible VU 2")
-    plt.plot(sir_sol.times, sir_sol.i1_vu, label="Infected VU 1")
-    plt.plot(sir_sol.times, sir_sol.i2_vu, label="Infected VU 2")
-    plt.plot(sir_sol.times, sir_sol.r1_vu, label="Recovered VU 1")
-    plt.plot(sir_sol.times, sir_sol.r2_vu, label="Recovered VU 2")
-
-    plt.xlabel("Time (days)")
-    plt.ylabel("Population")
-    plt.legend()
-    plt.title("Disease Spread and Vaccination Dynamics")
-    plt.grid()
-    plt.show()
-    return None
-
 
 # TODO Make a consistent naming between "objective" and "loss".
 def objective_func_factory(
@@ -863,7 +835,6 @@ def objective_func_factory(
 
         if opt_params.model_type == "ODE":
             sir_sol = sir_vacc(params, init_cond, ts)
-            # plot_SIRSolution(sir_sol[0])
 
             return (
                 (1 - a - b) * loss_clinical_burden(sir_sol, disease_burden_params)[0]
@@ -872,7 +843,6 @@ def objective_func_factory(
             )
         elif opt_params.model_type in ["SSA", "Tau-Hybrid"]:
             sir_sols = sir_vacc_SSA(params, init_cond, opt_params, ts)
-            # plot_SIRSolution(sir_sols[0])
             loss_clinical_burden1 = loss_clinical_burden(
                 sir_sols, disease_burden_params
             )
