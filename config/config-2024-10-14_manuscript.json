@@ -9,8 +9,8 @@
     },
     "population_parameters":
     {
-	"pop_size_1": 4450000,
-	"pop_size_2": 550000
+	"pop_size_1": 4395000,
+	"pop_size_2": 605000
     },
     "grid_search_step":
     {
