@@ -180,7 +180,8 @@ burden_parameters = [
     {
         "id": 0,
         "parameters": BurdenParams(
-            prop_hosp_inf=CONFIG["burden_parameters"]["prop_hosp_inf"],
+            prop_hosp_inf_1=CONFIG["burden_parameters"]["prop_hosp_inf_1"],
+            prop_hosp_inf_2=CONFIG["burden_parameters"]["prop_hosp_inf_2"],
             days_hosp_inf_1=CONFIG["burden_parameters"]["days_hosp_inf_1"],
             days_hosp_inf_2=CONFIG["burden_parameters"]["days_hosp_inf_2"],
             prop_hosp_vacc_1=CONFIG["burden_parameters"]["prop_hosp_vacc_1"],
