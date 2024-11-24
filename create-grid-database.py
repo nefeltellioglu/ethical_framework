@@ -31,6 +31,34 @@ assert os.path.exists(config_file)
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
+########################
+#calculate beta values
+contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
+contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
+contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
+contact_per_capita_22=CONFIG["model_parameters"]["contact_per_capita_22"]
+gamma=CONFIG["model_parameters"]["gamma"]
+R0=CONFIG["model_parameters"]["R0"]
+
+
+#calculation of beta from R0 and contact_per_capita multipliers
+beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
+                         (contact_per_capita_11**2 
+                          - 2 * contact_per_capita_22 * contact_per_capita_11
+                          + contact_per_capita_22 ** 2
+                          + 4 * contact_per_capita_12 * contact_per_capita_22
+                          )**(0.5))
+
+
+CONFIG["model_parameters"]["beta_11"] = beta * contact_per_capita_11
+CONFIG["model_parameters"]["beta_12"] = beta * contact_per_capita_12
+CONFIG["model_parameters"]["beta_21"] = beta * contact_per_capita_21
+CONFIG["model_parameters"]["beta_22"] = beta * contact_per_capita_22
+
+########################
+
+
+
 
 model_parameters = [
     {

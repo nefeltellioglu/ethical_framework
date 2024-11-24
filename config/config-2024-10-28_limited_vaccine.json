@@ -1,11 +1,12 @@
 {
     "model_parameters":
     {
-            "beta_11": 0.38,
-            "beta_12": 0.14,
-            "beta_21": 0.14,
-            "beta_22": 0.34,
-            "gamma": 0.0964
+            "contact_per_capita_11": 0.38,
+            "contact_per_capita_12": 0.14,
+            "contact_per_capita_21": 0.14,
+            "contact_per_capita_22": 0.34,
+            "gamma": 0.0964,
+            "R0": 3.4
 
     },
     "population_parameters":
