@@ -5,8 +5,8 @@
             "beta_12": 0.14,
             "beta_21": 0.14,
             "beta_22": 0.34,
-            "gamma": 0.125,
-            "R0": 3.5,
+            "gamma": 0.0964
+
     },
     "population_parameters":
     {
