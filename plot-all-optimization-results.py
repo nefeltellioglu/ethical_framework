@@ -93,16 +93,18 @@ def loss_clinical_burden_vacc(
         return sir_out.total_vac_1 + sir_out.total_vac_2
     
     elif calculate == "total_clinical_burden":
-        net_days_hosp_for_inf_no_vacc = disease_burden_params.prop_hosp_inf * (
-            disease_burden_params.days_hosp_inf_1 * sir_out.inf_1_no_vac
-            + disease_burden_params.days_hosp_inf_2 * sir_out.inf_2_no_vac
+        net_days_hosp_for_inf_no_vacc = disease_burden_params.prop_hosp_inf_1 * (
+            disease_burden_params.days_hosp_inf_1 * sir_out.inf_1_no_vac) + \
+            disease_burden_params.prop_hosp_inf_2 * (
+            disease_burden_params.days_hosp_inf_2 * sir_out.inf_2_no_vac
         )
     
-        net_days_hosp_for_inf_vacc = disease_burden_params.prop_hosp_inf * (
+        net_days_hosp_for_inf_vacc = disease_burden_params.prop_hosp_inf_1 * (
             disease_burden_params.days_hosp_inf_1
             * (1 - disease_burden_params.vacc_protection_from_disease_1)
-            * sir_out.inf_1_vu
-            + disease_burden_params.days_hosp_inf_2
+            * sir_out.inf_1_vu) + \
+            disease_burden_params.prop_hosp_inf_2 * (
+            disease_burden_params.days_hosp_inf_2
             * (1 - disease_burden_params.vacc_protection_from_disease_2)
             * sir_out.inf_2_vu
         )

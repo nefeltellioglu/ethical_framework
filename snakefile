@@ -3,12 +3,28 @@ rule all:
     input:
         "out/grid_database-2024-10-14_manuscript.pkl",
         "out/grid_database-2024-10-28_limited_vaccine.pkl",
+        "out/grid_database-2024-12-02_limited_low_R0.pkl",
+        "out/grid_database-2024-12-02_limited_high_R0.pkl",
+        "out/grid_database-2024-12-02_unlimited_low_R0.pkl",
+        "out/grid_database-2024-12-02_unlimited_high_R0.pkl",
         "out/2024-10-14_manuscript/example-optimisation-results.png",
         "out/2024-10-14_manuscript/hm_vac_2_perc_across_all.png",
         "out/2024-10-14_manuscript/vacc-vs-inf-group-1.png",
         "out/2024-10-28_limited_vaccine/example-optimisation-results.png",
         "out/2024-10-28_limited_vaccine/hm_vac_2_perc_across_all.png",
         "out/2024-10-28_limited_vaccine/vacc-vs-inf-group-1.png",
+        "out/2024-12-02_limited_low_R0/example-optimisation-results.png",
+        "out/2024-12-02_limited_low_R0/hm_vac_2_perc_across_all.png",
+        "out/2024-12-02_limited_low_R0/vacc-vs-inf-group-1.png",
+        "out/2024-12-02_limited_high_R0/example-optimisation-results.png",
+        "out/2024-12-02_limited_high_R0/hm_vac_2_perc_across_all.png",
+        "out/2024-12-02_limited_high_R0/vacc-vs-inf-group-1.png",
+        "out/2024-12-02_unlimited_high_R0/example-optimisation-results.png",
+        "out/2024-12-02_unlimited_high_R0/hm_vac_2_perc_across_all.png",
+        "out/2024-12-02_unlimited_high_R0/vacc-vs-inf-group-1.png",
+        "out/2024-12-02_unlimited_low_R0/example-optimisation-results.png",
+        "out/2024-12-02_unlimited_low_R0/hm_vac_2_perc_across_all.png",
+        "out/2024-12-02_unlimited_low_R0/vacc-vs-inf-group-1.png"
 
 
 rule make_grid_database_ode:
@@ -19,7 +35,7 @@ rule make_grid_database_ode:
     output:
         "out/grid_database-{config_date_name}.pkl"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
         python {input.py} {input.config}
@@ -36,7 +52,7 @@ rule plot_example_optimisation_result:
     output:
         "out/{config_date_name}/example-optimisation-results.png"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
         python {input.py} {input.config}
@@ -64,7 +80,7 @@ rule plot_all_optimization_results:
         "out/{config_date_name}/hm_total_vacc_across_all.png",
         "out/{config_date_name}/hm_total_vacc_across_all.svg"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
         python {input.py} {input.config}
@@ -84,7 +100,7 @@ rule plot_grid_infection_outcomes:
         "out/{config_date_name}/vacc-vs-inf-group-2.png",
         "out/{config_date_name}/vacc-vs-inf-group-2.svg"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
         python {input.py} {input.config}

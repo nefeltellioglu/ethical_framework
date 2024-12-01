@@ -33,6 +33,7 @@ with open(config_file, "r") as f:
 
 ########################
 #calculate beta values
+#contact_per_capita_ij are the rescaled values
 contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
 contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
 contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
