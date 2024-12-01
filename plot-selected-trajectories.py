@@ -1,14 +1,17 @@
-import scipy.integrate
-import scipy.optimize
-import matplotlib.pyplot as plt
-from dataclasses import dataclass
-import itertools
 import json
-import numpy as np
-import pandas as pd
 import pickle
-import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import ethics.model as em
+import ethics.optimisation as eo
+import seaborn as sns
+from scipy.interpolate import griddata
+import matplotlib.tri as tri
+from matplotlib import cm
 import sys
+import os
+import itertools
 
 from ethics.model import (
     OptParams,
@@ -20,21 +23,34 @@ from ethics.model import (
     sir_vacc,
 )
 
-
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
-    print(config_file)
 else:
-    print("no config file manuscript one is assigned")
-    #config_file = "config/config-2024-08-07.json"
-    config_file = "config/config-2024-10-14_manuscript.json"
-
+    # config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-10-28_limited_vaccine.json"
 assert os.path.exists(config_file)
+# NOTE This assumes the configuration file is named with the format
+# `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
+# as the name for the output directory.
+config_date_name = os.path.basename(config_file).replace("config-", "").replace(".json", "")
 
+print(70 * "=")
+print("Ethics plotting example results")
+print(f"Using config file: {config_file}")
+print(70 * "=")
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-########################
+output_dir = f"out/{config_date_name}"
+os.makedirs(output_dir, exist_ok=True)
+
+with open(CONFIG["database_file"], "rb") as f:
+    db = pickle.load(f)
+
+assert len(db["model_parameters"]) == 1
+
+
+# ====================================================================
 #calculate beta values
 #contact_per_capita_ij are the rescaled values
 contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
@@ -86,8 +102,10 @@ vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 
 initial_conditions = []
 ic_ix = 0
-for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
-    for num_vac_2 in range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]):
+
+selected_vaccinations = [(int(pop_size_1 * 0.5), int(pop_size_2 * 0.5)), 
+                         (int(pop_size_1 * 0.2), int(pop_size_2 * 0.8))]
+for (num_vac_1, num_vac_2) in selected_vaccinations:
         # Print out the initial condition being added to the list
         print(
             f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
@@ -117,10 +135,7 @@ for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
         )
         ic_ix += 1
 _num_initial_conditions = len(initial_conditions)
-assert _num_initial_conditions == (
-    len(range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"])) * \
-    len(range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]))
-)
+assert _num_initial_conditions == (len(selected_vaccinations))
 
 configurations = [
     {"id": c_ix, "model_parameters_id": mp["id"], "initial_condition_id": ic["id"]}

@@ -45,5 +45,5 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
-    "database_file": "out/grid_database-2024-10-14_manuscript.pkl"
+    "database_file": "out/grid_database-2024-12-02_unlimited_low_R0.pkl"
 }
