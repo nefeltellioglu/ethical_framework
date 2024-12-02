@@ -149,7 +149,7 @@ def _compute_sol(config) -> SIRSolution:
         ),
         None,
     )
-    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 700, 701))[0]
+    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 2000, 2001))[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
@@ -178,6 +178,12 @@ outcomes = [
 ]
 _num_outcomes = len(outcomes)
 assert _num_outcomes == _num_solutions
+
+for sol in solutions:
+    _total_i = sol.i1[-1] + sol.i1_vu[-1] + sol.i2[-1] + sol.i2_vu[-1]
+    if _total_i > 0: 
+        print(_total_i)
+    assert _total_i <= 0
 
 
 burden_parameters = [
