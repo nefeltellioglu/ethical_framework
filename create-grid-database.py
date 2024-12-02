@@ -149,7 +149,7 @@ def _compute_sol(config) -> SIRSolution:
         ),
         None,
     )
-    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 100, 100))[0]
+    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 700, 701))[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
