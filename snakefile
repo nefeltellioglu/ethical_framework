@@ -24,7 +24,13 @@ rule all:
         "out/2024-12-02_unlimited_high_R0/vacc-vs-inf-group-1.png",
         "out/2024-12-02_unlimited_low_R0/example-optimisation-results.png",
         "out/2024-12-02_unlimited_low_R0/hm_vac_2_perc_across_all.png",
-        "out/2024-12-02_unlimited_low_R0/vacc-vs-inf-group-1.png"
+        "out/2024-12-02_unlimited_low_R0/vacc-vs-inf-group-1.png",
+        "out/2024-10-14_manuscript/tractectories.png",
+        "out/2024-10-28_limited_vaccine/tractectories.png",
+        "out/2024-12-02_limited_low_R0/tractectories.png",
+        "out/2024-12-02_limited_high_R0/tractectories.png",
+        "out/2024-12-02_unlimited_high_R0/tractectories.png",
+        "out/2024-12-02_unlimited_low_R0/tractectories.png"
 
 rule make_grid_database_ode:
     input:
@@ -104,3 +110,24 @@ rule plot_grid_infection_outcomes:
         """
         python {input.py} {input.config}
         """
+
+
+rule plot_selected_trajectories:
+    input:
+        "ethics/model.py",
+        "ethics/optimisation.py",
+        "out/grid_database-{config_date_name}.pkl",
+        py = "plot-selected-trajectories.py",
+        config = "config/config-{config_date_name}.json",
+    output:
+        "out/{config_date_name}/tractectories.png",
+        "out/{config_date_name}/tractectories.svg",
+        
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+    shell:
+        """
+        python {input.py} {input.config}
+        """
+        
+

@@ -26,8 +26,8 @@ from ethics.model import (
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    # config_file = "config/config-2024-10-14_manuscript.json"
-    config_file = "config/config-2024-10-28_limited_vaccine.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
+    #config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
@@ -104,7 +104,7 @@ initial_conditions = []
 ic_ix = 0
 
 selected_vaccinations = [(int(pop_size_1 * 0.5), int(pop_size_2 * 0.5)), 
-                         (int(pop_size_1 * 0.2), int(pop_size_2 * 0.8))]
+                         (int(pop_size_1 * 0.0), int(pop_size_2 * 0.0))]
 for (num_vac_1, num_vac_2) in selected_vaccinations:
         # Print out the initial condition being added to the list
         print(
@@ -164,7 +164,7 @@ def _compute_sol(config) -> SIRSolution:
         ),
         None,
     )
-    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 100, 100))[0]
+    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 300, 301))[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
@@ -173,60 +173,59 @@ assert _num_solutions == _num_configurations
 
 # NOTE the seed is always 0 because we are not using any randomness in
 # the model
-outcomes = [
-    {
-        "id": o_ix,
-        "configuration_id": c["id"],
-        "seed": 0,
-        "outcome": SIROutcome(
-            inf_1_no_vac=sol.r1[-1],
-            inf_1_vu=sol.r1_vu[-1],
-            inf_1_vp=0,
-            total_vac_1=sol.s1_vu[0] + sol.s1_vp[0],
-            inf_2_no_vac=sol.r2[-1],
-            inf_2_vu=sol.r2_vu[-1],
-            inf_2_vp=0,
-            total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
-        ),
-    }
-    for o_ix, (c, sol) in enumerate(zip(configurations, solutions))
-]
-_num_outcomes = len(outcomes)
-assert _num_outcomes == _num_solutions
 
+figsize=(8,2.5)#no in x axis, no in yaxis
+fig, axs = plt.subplots(1, 2, figsize=figsize)
+labels = ('a', 'b', 'c', 'd', 'e', 'f')
+i = 0
+    
 
-burden_parameters = [
-    {
-        "id": 0,
-        "parameters": BurdenParams(
-            prop_hosp_inf_1=CONFIG["burden_parameters"]["prop_hosp_inf_1"],
-            prop_hosp_inf_2=CONFIG["burden_parameters"]["prop_hosp_inf_2"],
-            days_hosp_inf_1=CONFIG["burden_parameters"]["days_hosp_inf_1"],
-            days_hosp_inf_2=CONFIG["burden_parameters"]["days_hosp_inf_2"],
-            prop_hosp_vacc_1=CONFIG["burden_parameters"]["prop_hosp_vacc_1"],
-            prop_hosp_vacc_2=CONFIG["burden_parameters"]["prop_hosp_vacc_2"],
-            days_hosp_vacc_1=CONFIG["burden_parameters"]["days_hosp_vacc_1"],
-            days_hosp_vacc_2=CONFIG["burden_parameters"]["days_hosp_vacc_2"],
-            vacc_protection_from_disease_1=CONFIG["burden_parameters"][
-                "vacc_protection_from_disease_1"
-            ],
-            vacc_protection_from_disease_2=CONFIG["burden_parameters"][
-                "vacc_protection_from_disease_2"
-            ],
-        ),
-    }
-]
-_num_burden_parameters = len(burden_parameters)
-assert _num_burden_parameters == 1
+for o_ix, (c, sol) in enumerate(zip(configurations, solutions)):
+    
+    ax = axs[i]
+    ax.text(-0.15, 1.15, labels[i], transform=ax.transAxes,
+      fontsize=12, fontweight='bold', va='top', ha='right')
+    i += 1
 
-db = {
-    "model_parameters": model_parameters,
-    "initial_conditions": initial_conditions,
-    "configurations": configurations,
-    "outcomes": outcomes,
-    "burden_parameters": burden_parameters,
-}
+    
+    total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
+    total_s2 = 100 * (sol.s2 + sol.s2_vp + sol.s2_vu) / pop_size_2
+    
+    total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
+    total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
 
-output_file = CONFIG["database_file"]
-with open(output_file, "wb") as f:
-    pickle.dump(db, f)
+    ax.plot(sol.times, total_s1,color = "tab:blue",label = "S1"
+             )
+    ax.plot(sol.times, total_s2,color = "tab:green",label = "S2"
+             )
+    ax.plot(sol.times, total_i1,color = "tab:red",label = "I1"
+             )
+    ax.plot(sol.times, total_i2,color = "tab:orange",label = "I2"
+             )
+    
+    #ax.plot(sol.times, 100 * sol.s1_vp/ pop_size_1 ,color = "tab:purple",label = "test"
+    #         )
+    #ax.plot(sol.times, 100 * (pop_size_1 - (sol.s1 + sol.s1_vp + sol.s1_vu)
+    #           - sol.r1 - sol.r1_vu)/ pop_size_1 ,color = "tab:purple",
+    #        label = "test I1")
+    
+    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[o_ix], (pop_size_1, pop_size_2))]
+    
+
+    ax.set_title(f'{vacc[0]}% Group 1 & {vacc[1]}% Group 2 vaccinated', fontweight="bold", size = 8)
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Prevalence (% per group)')
+    
+    ax.legend().set_visible(False) 
+
+ax.legend().set_visible(True) 
+ax.legend(loc= "lower center", bbox_to_anchor=(-0.2,-0.55), ncol= 2)
+plt.subplots_adjust(left=0.1,
+            bottom=0.1, 
+            right=0.9, 
+            top=0.9, 
+            wspace=0.3, 
+            hspace=0.4)
+
+fig.savefig(f"{output_dir}/tractectories.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/tractectories.svg", bbox_inches='tight', dpi=300)
