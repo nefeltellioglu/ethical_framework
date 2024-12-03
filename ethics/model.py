@@ -291,7 +291,10 @@ def loss_clinical_burden(
             * ttl_vacc["vacc_2"]
             * disease_burden_params.prop_hosp_vacc_2
         )
-
+#CZ suggestion:
+# TODO: this value needs to be scaled relative to the baseline 'no intervention' scenario
+# This will (typically) produce values in the range [0, 1] (unless the intervention causes higher net harm)
+# We need to do this so that the loss function is not dominated by the clinical burden term
         loss_clinical_burden = (
             net_days_hosp_for_inf_no_vacc
             + net_days_hosp_for_inf_vacc
@@ -350,6 +353,29 @@ def loss_equity_of_burden(
         exp_burden_1 = total_inf_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
         exp_burden_2 = total_inf_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
 
+#CZ suggestion:
+# TODO: this value needs to be scaled to the range [0, 1] by re-scaling to the worst-case scenario.
+# here's a way to do that: 
+# --- variables ---- 
+    # b1 : burden in group 1
+    # b2 : burden in group 2
+    # n1 : population of group 1
+    # n2 : population of group 2
+    
+# --- derived quantities ---
+    # p1 = n1/(n1 + n2)
+    # p2 = n2/(n1 + n2)
+    # BPP1 = b1/n1 burden per person in group 1
+    # BPP2 = b2/n2 burden per person in group 2
+    # B1 = b1/(b1 + b2)
+    # B2 = b2/(b1 + b2)
+# --- loss function --- #
+    # if BPP1 > BPP2 (group 1 has higher burden per person) 
+     # loss = B1 - p1
+    # else 
+     # loss = B2 - p2
+
+        
         loss_equity_of_burden = abs(exp_burden_1 - obs_burden_1) + abs(
             exp_burden_2 - obs_burden_2
         )
@@ -392,6 +418,8 @@ def loss_equity_of_vaccination(
         exp_vacc_1 = total_vacc_burden * (ttl_pop["pop_1"] / ttl_pop["total"])
         exp_vacc_2 = total_vacc_burden * (ttl_pop["pop_2"] / ttl_pop["total"])
 
+#CZ suggestion:
+# TODO: this value needs to be scaled to the range [0, 1] (can use the 2-group Gini coefficient as described above )
         loss_equity_of_vaccination = abs(exp_vacc_1 - obs_vacc_1) + abs(
             exp_vacc_2 - obs_vacc_2
         )
