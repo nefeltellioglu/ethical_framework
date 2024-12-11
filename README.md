@@ -136,3 +136,12 @@ def optimal_initial_condition(model_param_id: int,
                               burden_param_id: int,
                               db: dict) -> int:
 ```
+
+## FAQ
+
+#### What are these weird errors about `numpy._core`?
+
+The pipeline is picky about always using the same version of numpy. If
+you are getting an error about `numpy._core` you will need to
+regenerate your pickle files. This won't take long, the easiest way is
+to just remove everything from `out/` and start again.
