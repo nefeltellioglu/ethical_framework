@@ -10,12 +10,7 @@ from ethics.model import (
     SIRParams,
     SIRSolution,
     SIROutcome,
-    optimal_initial_conditions,
-    loss_clinical_burden,
-    loss_equity_of_burden,
-    loss_equity_of_vaccination,
-    sir_vacc,
-    sir_vacc_SSA,
+    sir_vacc
 )
 
 if len(sys.argv) > 1:
