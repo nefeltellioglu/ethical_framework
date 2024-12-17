@@ -17,7 +17,7 @@
     },
     "vaccine_parameters":
     {
-	"maximum_vacc_rollout": 600000
+	"maximum_vacc_rollout": 1000000
     },
     "grid_search_step":
     {
@@ -32,8 +32,8 @@
         "prop_hosp_inf_2": 0.0104,
         "days_hosp_inf_1": 2.87,
         "days_hosp_inf_2": 7.613,
-        "prop_hosp_vacc_1": 0.00002,
-        "prop_hosp_vacc_2": 0.00006,
+        "prop_hosp_vacc_1": 0.00006,
+        "prop_hosp_vacc_2": 0.00002,
         "days_hosp_vacc_1": 5.7,
         "days_hosp_vacc_2": 5.7,
         "vacc_protection_from_disease_1": 0.627,

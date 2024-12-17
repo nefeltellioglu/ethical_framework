@@ -12,6 +12,7 @@ from matplotlib import cm
 import sys
 import os
 
+
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
@@ -143,6 +144,22 @@ def burden_infections_group_2_Vacc(
             dbp.days_hosp_inf_2 * 
             sir.inf_2_vu )
 
+# total infection burden group 1
+def total_burden_infections_group_1(
+    sir: em.SIROutcome, dbp: em.BurdenParams    
+    ) -> float:
+    tot= (burden_infections_group_1_noVacc(sir, dbp) + 
+            burden_infections_group_1_Vacc(sir, dbp))
+    return (tot)
+
+def total_burden_infections_group_2(
+    sir: em.SIROutcome, dbp: em.BurdenParams    
+    ) -> float:
+    tot= (burden_infections_group_2_noVacc(sir, dbp) + 
+            burden_infections_group_2_Vacc(sir, dbp))
+    return (tot)
+
+
 def total_vaccinations(sir: em.SIROutcome) -> float:
     return (sir.total_vac_1 + sir.total_vac_2)
 
@@ -150,10 +167,8 @@ def total_vaccinations(sir: em.SIROutcome) -> float:
 def total_burden_infections(
     sir: em.SIROutcome, dbp: em.BurdenParams    
     ) -> float:
-    tot_1 = (burden_infections_group_1_noVacc(sir, dbp) + 
-            burden_infections_group_1_Vacc(sir, dbp))
-    tot_2 = (burden_infections_group_2_noVacc(sir, dbp) + 
-            burden_infections_group_2_Vacc(sir, dbp))
+    tot_1 = total_burden_infections_group_1(sir, dbp)
+    tot_2 = total_burden_infections_group_2(sir, dbp)
     return (tot_1 + tot_2)
 
 def total_burden_adverse(sir: em.SIROutcome, dbp: em.BurdenParams) -> float: 
@@ -163,6 +178,38 @@ def total_burden_adverse(sir: em.SIROutcome, dbp: em.BurdenParams) -> float:
 def total_clinical_burden(sir:em.SIROutcome, dbp: em.BurdenParams) -> float:
     return (total_burden_infections(sir, dbp) + 
             total_burden_adverse(sir, dbp))
+
+
+# per-capita burdens: 
+def pop_1(ic: em.SIRInitialCondition) -> int:
+    return ic.pop_size(1)
+
+def pop_2(ic: em.SIRInitialCondition) -> int:
+    return ic.pop_size(2)
+
+def total_pop(ic: em.SIRInitialCondition) -> int:
+    return (pop_1(ic) + pop_2(ic))
+
+def adverse_per_capita_1(sir: em.SIROutcome, 
+                         dbp: em.BurdenParams, 
+                         ic: em.SIRInitialCondition) -> float:
+    return(burden_adverse_group_1(sir, dbp) / pop_1(ic))
+
+def adverse_per_capita_2(sir: em.SIROutcome, 
+                         dbp: em.BurdenParams, 
+                         ic: em.SIRInitialCondition) -> float:
+    return(burden_adverse_group_2(sir, dbp) / pop_2(ic)) 
+
+def infection_burden_per_capita_1(sir: em.SIROutcome, 
+                                  dbp: em.BurdenParams, 
+                                  ic: em.SIRInitialCondition) -> float:
+    return(total_burden_infections_group_1(sir, dbp) / pop_1(ic))
+
+def infection_burden_per_capita_2(sir: em.SIROutcome, 
+                                  dbp: em.BurdenParams, 
+                                  ic: em.SIRInitialCondition) -> float:
+    return(total_burden_infections_group_2(sir, dbp) / pop_2(ic)) 
+
 
 '''
 def loss_clinical_burden_vacc(
@@ -254,21 +301,26 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         # _optimal_outcome is of type em.SIROutcome
         _optimal_outcome = [o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]]
 
+        ic_ab = _optimal_ic[0]["value"]
+
         oc_ab = _optimal_outcome[0]["outcome"]
 
         # this is where outcomes are logged
-        vac_1 = count_vaccinations_group_1(oc_ab)
-        vac_2 = count_vaccinations_group_2(oc_ab)
+        vac_1 = count_vaccinations_group_1(oc_ab) / pop_1(ic_ab)
+        vac_2 = count_vaccinations_group_2(oc_ab) / pop_2(ic_ab)
 
-        inf_1 = count_infections_group_1(oc_ab)
-        inf_2 = count_infections_group_2(oc_ab)
+        inf_1 = count_infections_group_1(oc_ab) / pop_1(ic_ab)
+        inf_2 = count_infections_group_2(oc_ab) / pop_2(ic_ab)
         
         clinical_burden = total_clinical_burden(oc_ab, bp)
         
         total_vaccination = total_vaccinations(oc_ab)
 
-        EQ_adverse_1 = burden_adverse_group_1(oc_ab, bp)
-        EQ_adverse_2 = burden_adverse_group_2(oc_ab, bp)
+        p_adverse_1 = adverse_per_capita_1(oc_ab, bp, ic_ab)
+        p_adverse_2 = adverse_per_capita_2(oc_ab, bp, ic_ab)
+
+        p_infection_burden_1 = infection_burden_per_capita_1(oc_ab, bp, ic_ab)
+        p_infection_burden_2 = infection_burden_per_capita_2(oc_ab, bp, ic_ab)
 
 
 
@@ -283,7 +335,11 @@ for ethical_a in np.arange(grid_min, grid_max, step):
                 "inf_1": inf_1,
                 "inf_2": inf_2,
                 "cli_burden": clinical_burden,
-                "total_vacc": total_vaccination
+                "total_vacc": total_vaccination,
+                "p_adverse_1": p_adverse_1,
+                "p_adverse_2": p_adverse_2,
+                "p_infburd_1": p_infection_burden_1,
+                "p_infburd_2": p_infection_burden_2
                 #"loss": _opti mal_outcome,
             }
         )
@@ -296,44 +352,66 @@ plot_df = pd.DataFrame(plot_df)
 
 
 # plot heatmaps (no interpolation.)
-variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
+variables = ["inf_1", 
+             "inf_2", 
+             "vac_1", 
+             "vac_2", 
+             "cli_burden", 
+             "total_vacc",
+             "p_adverse_1",
+             "p_adverse_2",
+             "p_infburd_1",
+             "p_infburd_2" ]
 
-labels = ["Infections in group 1 (%)",
-          "Infections in group 2 (%)",
-          "Vaccinations in group 1 (%)",
-          "Vaccinations in group 2 (%)",
+labels = ["Prop. infected in group 1",
+          "Prop. infected in group 2",
+          "Prop. vaccinated in group 1",
+          "Prop. vaccinated in group 2",
           "Total Clinical Burden",
-          "Total Number of Vaccinated Individuals"]
+          "Total Number of Vaccinated Individuals",
+          "per-capita adverse event burden (group 1)",
+          "per-capita adverse event burden (group 2)",
+          "per-capita infection burden (group 1)",
+          "per-capita infection burden (group 2)"]
 
-colors = ["Reds", "Reds", "Purples", "Purples", "Reds", "Purples"]
+colors = ["Reds", 
+          "Reds", 
+          "Purples", 
+          "Purples", 
+          "Reds", 
+          "Purples",
+          "Oranges",
+          "Oranges",
+          "Blues",
+          "Blues"]
 
 for var, label, color in zip(variables, labels, colors):
-    if var in ["cli_burden", "total_vacc"]:
-        perc_var = var
-    else:
-        perc_var = "%s_perc"%var
-        plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
     
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
     
-    data = plot_df.pivot(index="b", columns="a", values = perc_var)
+    data = plot_df.pivot(index="b", columns="a", values = var)
     
     plt.figure()
-    ax = sns.heatmap(data, linewidth=0.5,
-                     vmin=min(plot_df[perc_var]),
-                     vmax=max(plot_df[perc_var]),
+    ax = sns.heatmap(data, 
+                     linewidth=0.5,
+                     vmin=min(plot_df[var]),
+                     vmax=max(plot_df[var]),
                      #yticklabels=['High','Medium','Low','No'],
                      cbar_kws={'label': label},
-                     cmap=color,annot=False, fmt='.0f')
+                     cmap=color,
+                     annot=True,
+                     annot_kws={"fontsize":2},
+                     fmt='.3e'
+                     )
     ax.invert_yaxis()
     #plt.xlabel("a")
     #plt.ylabel("b")
     plt.xlabel("Equity in Infection Burden Multiplier (a)")
     plt.ylabel("Equity in Vaccination Burden Multiplier (b)")
 
-    plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{output_dir}/hm_%s_across_all.png"%var, bbox_inches='tight', dpi=300)
     #plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
 
 
