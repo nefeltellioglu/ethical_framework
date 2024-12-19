@@ -232,9 +232,11 @@ for var, label, color in zip(variables, labels, colors):
     #plt.ylabel("b")
     plt.xlabel("Equity in Infection Burden Multiplier (a)")
     plt.ylabel("Equity in Vaccination Burden Multiplier (b)")
-
-    plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
+    if var == "total_vacc":
+        plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+        
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
 
 
 variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
@@ -288,5 +290,5 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
     plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
-    plt.savefig(f"{output_dir}/cnt_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/cnt_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/cnt_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/cnt_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
