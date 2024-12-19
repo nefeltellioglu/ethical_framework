@@ -12,8 +12,8 @@
     },
     "population_parameters":
     {
-	"pop_size_1": 4395000,
-	"pop_size_2": 605000
+	"pop_size_2": 4395000,
+	"pop_size_1": 605000
     },
     "vaccine_parameters":
     {
@@ -51,5 +51,5 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
-    "database_file": "out/grid_database-2024-12-16_limited_low_R0_CZ_test.pkl"
+    "database_file": "out/grid_database-2024-12-16_CZ_test_EQTO.pkl"
 }
