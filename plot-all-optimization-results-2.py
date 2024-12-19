@@ -17,6 +17,7 @@ if len(sys.argv) > 1:
 else:
     # config_file = "config/config-2024-10-14_manuscript.json"
     config_file = "config/config-2024-10-28_limited_vaccine.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
@@ -256,7 +257,8 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         # this is where outcomes are logged
         vac_1 = count_vaccinations_group_1(oc_ab) / pop_1(ic_ab)
         vac_2 = count_vaccinations_group_2(oc_ab) / pop_2(ic_ab)
-
+        if vac_2 >= 1:
+            print("here")
         inf_1 = count_infections_group_1(oc_ab) / pop_1(ic_ab)
         inf_2 = count_infections_group_2(oc_ab) / pop_2(ic_ab)
         
@@ -350,7 +352,7 @@ plt.subplots_adjust(left=0.1,
 
 fig.savefig(f"{output_dir}/hm_all_burdens.png", bbox_inches='tight', dpi=300)
 
-figsize=(8,8)#no in x axis, no in yaxis
+figsize=(7,8)#no in x axis, no in yaxis
 labels = ('A', 'B', 'C', 'D', 'E', 'F')
 j = 0
 fig = plt.figure(figsize=figsize)
@@ -370,6 +372,10 @@ for var, title, color in zip(variables, titles, colors):
     
     if var in ["cli_burden", "total_vacc", "inf_burden", "adv_burden"]:
         perc_var = var
+    elif var in [ "inf_1", "inf_2","vac_1", "vac_2"]:
+        perc_var = "%s_perc"%var
+        plot_df[perc_var] = 100 * plot_df[var]
+    
     else:
         perc_var = "%s_perc"%var
         plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
@@ -385,9 +391,14 @@ for var, title, color in zip(variables, titles, colors):
                      cbar_kws={'label': title,"location":'bottom',
                                "pad":0.25},
                      cmap=color,annot=False, fmt='.0f')
+    #plt.gca().collections[0].set_clim(min(plot_df[perc_var]),max(plot_df[perc_var]))
+    if var in [ "vac_1", "vac_2"]:
+        plt.gca().collections[0].set_clim(0,100)
     #plt.setp(ax._legend.legendHandles, fontsize=16)
     cax = ax.figure.axes[-1]
-    cax.tick_params(labelsize=8)
+    cax.tick_params(labelsize=10)
+    #if var == "vac_2":
+    #    cax.tick_params(labelsize=6)
     #ax.legend(fontsize = 10)
     ax.invert_yaxis()
     #plt.xlabel("a")
@@ -404,4 +415,44 @@ plt.subplots_adjust(left=0.1,
 
 fig.savefig(f"{output_dir}/hm_inf_vacc.png", bbox_inches='tight', dpi=300)
 
+
+variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
+labels = ["Infections in group 1 (%)",
+          "Infections in group 2 (%)",
+          "Vaccinations in group 1 (%)",
+          "Vaccinations in group 2 (%)",
+          "Total Clinical Burden",
+          "Total Number of Vaccinated Individuals"]
+colors = ["Reds", "Reds", "Purples", "Purples", "Reds", "Purples"]
+for var, label, color in zip(variables, labels, colors):
+    if var in ["cli_burden", "total_vacc"]:
+        perc_var = var
+    elif var in [ "inf_1", "inf_2","vac_1", "vac_2"]:
+        perc_var = "%s_perc"%var
+        plot_df[perc_var] = 100 * plot_df[var]
+    else:
+        perc_var = "%s_perc"%var
+        plot_df[perc_var] = 100 * plot_df[var]
+    plot_df["a"] = [round(i,2) for i in plot_df["a"]]
+    plot_df["b"] = [round(i,2) for i in plot_df["b"]]
+    data = plot_df.pivot(index="b", columns="a", values = perc_var)
+    plt.figure()
+    ax = sns.heatmap(data, linewidth=0.5,
+                     vmin=min(plot_df[perc_var]),
+                     vmax=max(plot_df[perc_var]),
+                     #yticklabels=['High','Medium','Low','No'],
+                     cbar_kws={'label': label},
+                     cmap=color,annot=False, fmt='.0f')
+    if var in [ "vac_1", "vac_2"]:
+        plt.gca().collections[0].set_clim(0,100)
+    ax.invert_yaxis()
+    #plt.xlabel("a")
+    #plt.ylabel("b")
+    plt.xlabel("Equity in Infection Burden Multiplier (a)")
+    plt.ylabel("Equity in Vaccination Burden Multiplier (b)")
+    if var == "total_vacc":
+        plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+        
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
 

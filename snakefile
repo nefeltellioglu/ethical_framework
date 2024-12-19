@@ -40,24 +40,6 @@ rule make_grid_database_ode:
         python {input.py} {input.config}
         """
 
-
-rule plot_all_optimization_results:
-    input:
-        "ethics/model.py",
-        "ethics/optimisation.py",
-        "out/grid_database-{config_date_name}.pkl",
-        py = "plot-all-optimization-results.py",
-        config = "config/config-{config_date_name}.json",
-    output:
-        "out/{config_date_name}/hm_total_vacc_across_all.png",
-        
-    wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
-    shell:
-        """
-        python {input.py} {input.config}
-        """
-
 rule plot_all_optimization_results_2:
     input:
         "ethics/model.py",
@@ -68,6 +50,7 @@ rule plot_all_optimization_results_2:
     output:
         "out/{config_date_name}/hm_inf_vacc.png",
         "out/{config_date_name}/hm_all_burdens.png",
+	"out/{config_date_name}/hm_total_vacc_across_all.png"
         
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
@@ -75,9 +58,6 @@ rule plot_all_optimization_results_2:
         """
         python {input.py} {input.config}
         """
-
-
-
 
 
 rule plot_selected_trajectories:
