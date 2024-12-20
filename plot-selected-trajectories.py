@@ -257,84 +257,65 @@ assert _num_solutions == _num_configurations
 #plot three trajectories
 # ====================================================================
 
-# NOTE the seed is always 0 because we are not using any randomness in
-# the model
+fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
+subplot_labels = ['A', 'B', 'C']
 
-figsize=(10,2.5)#no in x axis, no in yaxis
-fig, axs = plt.subplots(1, 3, figsize=figsize)
-labels = ('A', 'B', 'C', 'D', 'E', 'F')
-i = 0
-    
+# TODO These colour codes should not be hard-coded, but they are just
+# colorbrewer2 8-class Dark2 values so they shouldn't be too
+# mysterious for now.
+green_hex = "#1b9e77"
+orange_hex = "#d95f02"
 
-for o_ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
-    
-    ax = axs[i]
-    ax.text(-0.25, 1.15, labels[i], transform=ax.transAxes,
-      fontsize=12, fontweight='bold', va='top', ha='right')
-    i += 1
+for ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
+    ax = axs[ix]
+    ax.text(-0.25, 1.15, subplot_labels[ix], transform=ax.transAxes,
+            fontsize=12, fontweight='bold', va='top', ha='right')
 
-    
     total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
     total_s2 = 100 * (sol.s2 + sol.s2_vp + sol.s2_vu) / pop_size_2
-    
     total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
     total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
 
-    ax.plot(sol.times, total_s1,color = "tab:blue",label = "S1"
-             )
-    ax.plot(sol.times, total_s2,color = "tab:green",label = "S2"
-             )
-    ax.plot(sol.times, total_i1,color = "tab:red",label = "I1"
-             )
-    ax.plot(sol.times, total_i2,color = "tab:orange",label = "I2"
-             )
-    
-    #ax.plot(sol.times, 100 * sol.s1_vp/ pop_size_1 ,color = "tab:purple",label = "test"
-    #         )
-    #ax.plot(sol.times, 100 * (pop_size_1 - (sol.s1 + sol.s1_vp + sol.s1_vu)
-    #           - sol.r1 - sol.r1_vu)/ pop_size_1 ,color = "tab:purple",
-    #        label = "test I1")
-    
-    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[o_ix], (pop_size_1, pop_size_2))]
-    
+    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 susceptibles")
+    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 susceptibles")
+    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 infectious")
+    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 infectious")
+
+    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
+
     ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
                  )
-    
+
     textstr = '\n'.join((
-        'Vaccinations',
+        'Optimal vaccination',
     f'Group 1: {vacc[0]}%',
     f'Group 2: {vacc[1]}%',
     ))
 
-    props = dict(#boxstyle='round', 
-                 facecolor='white', 
-                 alpha=0.5)
+    props = {"facecolor":"white", "alpha":1.0}
     if (total_s1[-1] > 60) or (total_s2[-1] > 60):
         ax.text(0.975, 0.5, textstr, transform=ax.transAxes, #fontsize=14,
-            verticalalignment='top', horizontalalignment='right', bbox=props)
+            verticalalignment='top', horizontalalignment='left', bbox=props)
     else:
         # place a text box in upper left in axes coords
-        ax.text(0.975, 0.97, textstr, transform=ax.transAxes, #fontsize=14,
-            verticalalignment='top', horizontalalignment='right', bbox=props)
-    
-    
-    #ax.set_title(f'{vacc[0]}% Group 1 & {vacc[1]}% Group 2 vaccinated', fontweight="bold", size = 8)
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Prevalence (% per group)')
-    
-    ax.legend().set_visible(False) 
+        ax.text(0.300, 0.955, textstr, transform=ax.transAxes, #fontsize=14,
+            verticalalignment='top', horizontalalignment='left', bbox=props)
 
-ax.legend().set_visible(True) 
+    ax.set_xlabel('Day')
+    ax.set_ylabel('Group percentage (%)')
+    ax.legend().set_visible(False)
+
+ax.legend().set_visible(True)
 ax.legend(loc= "lower center", bbox_to_anchor=(-0.9,-0.55), ncol= 2)
 plt.subplots_adjust(left=0.1,
-            bottom=0.1, 
-            right=0.9, 
-            top=0.9, 
-            wspace=0.4, 
+            bottom=0.1,
+            right=0.9,
+            top=0.9,
+            wspace=0.4,
             hspace=0.4)
 
-fig.savefig(f"{output_dir}/tractectories.png", bbox_inches='tight', dpi=300)
-#fig.savefig(f"{output_dir}/tractectories.svg", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/trajectories.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/trajectories.svg", bbox_inches='tight')
 
 
 # ====================================================================
