@@ -17,7 +17,8 @@ if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
     # config_file = "config/config-2024-10-14_manuscript.json"
-    config_file = "config/config-2024-12-16_CZ_test.json"
+    #config_file = "config/config-2024-12-16_CZ_test_baseline.json"
+    config_file = "config/config-2024-12-16_CZ_test_EQTO.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used

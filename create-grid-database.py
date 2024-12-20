@@ -25,7 +25,7 @@ if len(sys.argv) > 1:
     config_file = sys.argv[1]
     print(config_file)
 else:
-    print("no config file manuscript one is assigned")
+    print("no config file specified - using default")
     #config_file = "config/config-2024-08-07.json"
     config_file = "config/config-2024-12-16_CZ_test_II.json"
 
