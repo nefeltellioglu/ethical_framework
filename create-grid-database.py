@@ -27,7 +27,7 @@ if len(sys.argv) > 1:
 else:
     print("no config file manuscript one is assigned")
     #config_file = "config/config-2024-08-07.json"
-    config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-12-16_CZ_test_II.json"
 
 assert os.path.exists(config_file)
 

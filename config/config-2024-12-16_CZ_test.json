@@ -4,16 +4,16 @@
             "contact_per_capita_11": 0.38,
             "contact_per_capita_12": 0.14,
             "contact_per_capita_21": 0.14,
-            "contact_per_capita_22": 0.34,
+            "contact_per_capita_22": 0.38,
             "gamma": 0.096,
-            "R0": 1.5
+            "R0": 9.5
             
 
     },
     "population_parameters":
     {
-	"pop_size_1": 4395000,
-	"pop_size_2": 605000
+	"pop_size_1": 1000000,
+	"pop_size_2": 4000000
     },
     "vaccine_parameters":
     {
@@ -28,18 +28,18 @@
     },
     "burden_parameters":
     {
-        "prop_hosp_inf_1": 0.00088,
-        "prop_hosp_inf_2": 0.0104,
-        "days_hosp_inf_1": 2.87,
-        "days_hosp_inf_2": 7.613,
-        "prop_hosp_vacc_1": 0.00006,
-        "prop_hosp_vacc_2": 0.00002,
+        "prop_hosp_inf_1": 1.000,
+        "prop_hosp_inf_2": 1.000,
+        "days_hosp_inf_1": 3.0,
+        "days_hosp_inf_2": 1.0,
+        "prop_hosp_vacc_1": 0.0000001,
+        "prop_hosp_vacc_2": 0.0000001,
         "days_hosp_vacc_1": 5.7,
         "days_hosp_vacc_2": 5.7,
-        "vacc_protection_from_disease_1": 0.627,
-        "vacc_protection_from_disease_2": 0.627
+        "vacc_protection_from_disease_1": 0.75,
+        "vacc_protection_from_disease_2": 0.75
 },
-"vacc_protection_from_infection": 0.531,
+"vacc_protection_from_infection": 0.0,
     "initial_inf_rec":
     {
         "i0_1": 1,
@@ -51,5 +51,5 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
-    "database_file": "out/grid_database-2024-12-16_limited_low_R0_CZ_test.pkl"
+    "database_file": "out/grid_database-2024-12-16_CZ_test.pkl"
 }
