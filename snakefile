@@ -19,12 +19,12 @@ rule all:
         "out/2024-12-02_unlimited_high_R0/hm_inf_vacc.png",
         "out/2024-12-02_unlimited_low_R0/example-optimisation-results-perc.png",
         "out/2024-12-02_unlimited_low_R0/hm_inf_vacc.png",
-        "out/2024-10-14_manuscript/tractectories.png",
-        "out/2024-10-28_limited_vaccine/tractectories.png",
-        "out/2024-12-02_limited_low_R0/tractectories.png",
-        "out/2024-12-02_limited_high_R0/tractectories.png",
-        "out/2024-12-02_unlimited_high_R0/tractectories.png",
-        "out/2024-12-02_unlimited_low_R0/tractectories.png"
+        # "out/2024-10-14_manuscript/trajectories.png",
+        "out/2024-10-28_limited_vaccine/trajectories.png",
+        # "out/2024-12-02_limited_low_R0/trajectories.png",
+        # "out/2024-12-02_limited_high_R0/trajectories.png",
+        # "out/2024-12-02_unlimited_high_R0/trajectories.png",
+        # "out/2024-12-02_unlimited_low_R0/trajectories.png"
 
 rule make_grid_database_ode:
     input:
@@ -68,7 +68,7 @@ rule plot_selected_trajectories:
         py = "plot-selected-trajectories.py",
         config = "config/config-{config_date_name}.json",
     output:
-        "out/{config_date_name}/tractectories.png",
+        "out/{config_date_name}/trajectories.png",
         "out/{config_date_name}/example-optimisation-results-perc.png"
         
     wildcard_constraints:
