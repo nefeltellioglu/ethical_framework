@@ -85,20 +85,20 @@ def loss_clinical_burden_vacc(
     sir_out: em.SIROutcome, disease_burden_params: em.BurdenParams,
     calculate: str) -> float:
 
-    
+
     #ttl_infs = sir_out.total_infections()
     #ttl_vacc = sir_out.total_vaccinated()
-    
+
     if calculate == "total_vaccination":
         return sir_out.total_vac_1 + sir_out.total_vac_2
-    
+
     elif calculate == "total_clinical_burden":
         net_days_hosp_for_inf_no_vacc = disease_burden_params.prop_hosp_inf_1 * (
             disease_burden_params.days_hosp_inf_1 * sir_out.inf_1_no_vac) + \
             disease_burden_params.prop_hosp_inf_2 * (
             disease_burden_params.days_hosp_inf_2 * sir_out.inf_2_no_vac
         )
-    
+
         net_days_hosp_for_inf_vacc = disease_burden_params.prop_hosp_inf_1 * (
             disease_burden_params.days_hosp_inf_1
             * (1 - disease_burden_params.vacc_protection_from_disease_1)
@@ -108,7 +108,7 @@ def loss_clinical_burden_vacc(
             * (1 - disease_burden_params.vacc_protection_from_disease_2)
             * sir_out.inf_2_vu
         )
-    
+
         net_days_hosp_for_adverse = (
             disease_burden_params.days_hosp_vacc_1
             * sir_out.total_vac_1
@@ -118,18 +118,18 @@ def loss_clinical_burden_vacc(
             * sir_out.total_vac_2
             * disease_burden_params.prop_hosp_vacc_2
         )
-    
+
         loss_clinical_burden = (
             net_days_hosp_for_inf_no_vacc
             + net_days_hosp_for_inf_vacc
             + net_days_hosp_for_adverse
         )
-        
+
         return loss_clinical_burden
     else:
         sys.exit("calculate variable is not valid")
-        
-       
+
+
 
 
 
@@ -159,7 +159,7 @@ plot_df = []
 
 for ethical_a in np.arange(grid_min, grid_max, step):
     for ethical_b in np.arange(grid_min, grid_max - ethical_a , step):
-        
+
         foo, bar = eo.optimal_initial_condition(
             ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
         )
@@ -168,12 +168,12 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         _optimal_outcome = [
             o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
         ]
-        
+
         best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
         best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
-        best_inf_1 = (_optimal_outcome[0]["outcome"].inf_1_no_vac + 
+        best_inf_1 = (_optimal_outcome[0]["outcome"].inf_1_no_vac +
                       _optimal_outcome[0]["outcome"].inf_1_vu)
-        best_inf_2 = (_optimal_outcome[0]["outcome"].inf_2_no_vac + 
+        best_inf_2 = (_optimal_outcome[0]["outcome"].inf_2_no_vac +
                       _optimal_outcome[0]["outcome"].inf_2_vu)
         best_clinical_burden = loss_clinical_burden_vacc(
                                 _optimal_outcome[0]["outcome"], bp, "total_clinical_burden")
@@ -230,11 +230,13 @@ for var, label, color in zip(variables, labels, colors):
     ax.invert_yaxis()
     #plt.xlabel("a")
     #plt.ylabel("b")
-    plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
-    plt.ylabel("Equity in Infection Burden Multiplier (b)")
-
-    plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
+    plt.xlabel("Equity in Infection Burden Multiplier (a)")
+    plt.ylabel("Equity in Vaccination Burden Multiplier (b)")
+    if var == "total_vacc":
+        plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+        
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/hm_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
 
 
 variables = ["inf_1", "inf_2", "vac_1", "vac_2", "cli_burden", "total_vacc"]
@@ -253,7 +255,7 @@ for var, label, color in zip(variables, labels, colors):
         perc_var = "%s_perc"%var
         plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
 
-    
+
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
     x = plot_df["a"]
@@ -288,5 +290,5 @@ for var, label, color in zip(variables, labels, colors):
     plt.xlabel("Equity in Vaccination Burden Multiplier (a)")
     plt.ylabel("Equity in Infection Burden Multiplier (b)")
 
-    plt.savefig(f"{output_dir}/cnt_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
-    plt.savefig(f"{output_dir}/cnt_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/cnt_%s_across_all.png"%perc_var, bbox_inches='tight', dpi=300)
+    #plt.savefig(f"{output_dir}/cnt_%s_across_all.svg"%perc_var, bbox_inches='tight', dpi=300)

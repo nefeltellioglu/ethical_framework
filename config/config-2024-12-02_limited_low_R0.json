@@ -28,8 +28,8 @@
     },
     "burden_parameters":
     {
-            "prop_hosp_inf_1": 0.0088,
-            "prop_hosp_inf_2": 1.04,
+            "prop_hosp_inf_1": 0.00088,
+            "prop_hosp_inf_2": 0.0104,
             "days_hosp_inf_1": 2.87,
             "days_hosp_inf_2": 7.613,
             "prop_hosp_vacc_1": 0.00006,

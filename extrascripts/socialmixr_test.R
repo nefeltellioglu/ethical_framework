@@ -1,5 +1,5 @@
 # try out implementation using only socialmixr: 
-
+#install.packages('socialmixr', repos = c('https://epiforecasts.r-universe.dev', 'https://cloud.r-project.org'))
 
 
 library(socialmixr)

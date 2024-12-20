@@ -727,22 +727,24 @@ def loss_terms(
         * burden_params.days_hosp_inf_2
         * (1 - burden_params.vacc_protection_from_disease_2)
     )
-    obs_cb_1 = obs_ib_1_no_vac + obs_ib_1_vu + obs_vb_1
-    obs_cb_2 = obs_ib_2_no_vac + obs_ib_2_vu + obs_vb_2
 
-    exp_cb_1 = (obs_cb_1 + obs_cb_2) * (pop_size_1 / total_pop)
-    exp_cb_2 = (obs_cb_1 + obs_cb_2) * (pop_size_2 / total_pop)
-    exp_vb_1 = (obs_vb_1 + obs_vb_2) * (pop_size_1 / total_pop)
-    exp_vb_2 = (obs_vb_1 + obs_vb_2) * (pop_size_2 / total_pop)
+    obs_vb_tot = obs_vb_1 + obs_vb_2
 
-    loss_total_clinical_burden = obs_cb_1 + obs_cb_2 + obs_vb_1 + obs_vb_2
-    loss_equity_of_clinical_burden = abs(exp_cb_1 - obs_cb_1) + abs(exp_cb_2 - obs_cb_2)
-    loss_equity_of_vaccination_burden = abs(exp_vb_1 - obs_vb_1) + abs(
-        exp_vb_2 - obs_vb_2
-    )
+    obs_cbi_1 = obs_ib_1_no_vac + obs_ib_1_vu
+    obs_cbi_2 = obs_ib_2_no_vac + obs_ib_2_vu
+    obs_cbi_tot = obs_cbi_1 + obs_cbi_2
+
+    exp_cbi_1 = obs_cbi_tot * (pop_size_1 / total_pop)
+    exp_cbi_2 = obs_cbi_tot * (pop_size_2 / total_pop)
+    exp_vb_1 = obs_vb_tot * (pop_size_1 / total_pop)
+    exp_vb_2 = obs_vb_tot * (pop_size_2 / total_pop)
+
+    loss_total_clinical_burden = obs_cbi_1 + obs_cbi_2 + obs_vb_1 + obs_vb_2
+    loss_equity_of_infection_burden = abs(exp_cbi_1 - obs_cbi_1) + abs(exp_cbi_2 - obs_cbi_2)
+    loss_equity_of_vaccination_burden = abs(exp_vb_1 - obs_vb_1) + abs(exp_vb_2 - obs_vb_2)
 
     return (
         loss_total_clinical_burden,
-        loss_equity_of_clinical_burden,
+        loss_equity_of_infection_burden,
         loss_equity_of_vaccination_burden,
     )
