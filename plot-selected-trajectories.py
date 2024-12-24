@@ -579,7 +579,7 @@ fnames = ["Burden", "Normalized_individual_loss", "Individual_loss"]
 #myvars = ["cli_burden","teib"]
 #myvars = ["loss"]
 for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
-    fig, axs = plt.subplots(1, 3, figsize=(14, 2.5))
+    fig, axs = plt.subplots(1, 3, figsize=(10,4))
     subplot_labels1 = ['a', 'b', 'c']
     subplot_labels = ['A', 'B', 'C']
     
@@ -590,17 +590,19 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
                 fontsize=12, fontweight='bold', va='top', ha='right')
         cax1 = ax.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"],
                     100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"],
-                    c=plot_df[myvar]#, norm=mpl.colors.LogNorm()
+                    c=plot_df[myvar], cmap = "viridis_r"#, norm=mpl.colors.LogNorm()
                     )
         x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
-        cbar = fig.colorbar(cax1, ax=ax)
+        cbar = fig.colorbar(cax1, ax=ax, location ='bottom',
+                  pad = 0.23)
         
         #cbar = plt.colorbar(ax = ax)
-        if mylabel in ["Loss in equity in\ninfection burden", 
+        """if mylabel in ["Loss in equity in\ninfection burden", 
                        "Loss in equity in\nvaccination burden"]:
             cbar.set_label(mylabel,rotation=270, labelpad = 20, )
         else:
-            cbar.set_label(mylabel,rotation=270, labelpad = 10, )
+            cbar.set_label(mylabel,rotation=270, labelpad = 10, )"""
+        cbar.set_label(mylabel)
         ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
         ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
         
@@ -627,16 +629,12 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
                         #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
                         #s=500,  marker="o"
                         )
-    if mylabels[0] in ["Loss in clinical burden", 
-                       "Total clinical burden"]:
-        wspace = 0.5
-    else:
-        wspace = 0.3
+    
     plt.subplots_adjust(left=0.1,
                 bottom=0.1, 
                 right=0.9, 
                 top=0.9, 
-                wspace=wspace, 
+                wspace=0.4, 
                 hspace=0.6)
     plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
                 bbox_inches='tight', dpi=300)
@@ -647,7 +645,7 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
 fname = "Aggregated_loss"
 myvar = "loss"
 mylabel = "$L$"
-fig, axs = plt.subplots(1, 3, figsize=(14, 2.5))
+fig, axs = plt.subplots(1, 3, figsize=(10, 4))
 subplot_labels = ['A', 'B', 'C']
 
 
@@ -657,13 +655,13 @@ for ix, plot_df in enumerate(plot_df_list):
             fontsize=12, fontweight='bold', va='top', ha='right')
     cax1 = ax.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"],
                 100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"],
-                c=plot_df[myvar]#, norm=mpl.colors.LogNorm()
+                c=plot_df[myvar], cmap = "viridis_r"#, norm=mpl.colors.LogNorm()
                 )
     x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
-    cbar = fig.colorbar(cax1, ax=ax)
-    
+    cbar = fig.colorbar(cax1, ax=ax, location ='bottom',
+              pad = 0.23)
     #cbar = plt.colorbar(ax = ax)
-    cbar.set_label(mylabel,rotation=270, labelpad = 10, )
+    cbar.set_label(mylabel)
     ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
     ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
     
@@ -678,7 +676,7 @@ plt.subplots_adjust(left=0.1,
             bottom=0.1, 
             right=0.9, 
             top=0.9, 
-            wspace=0.3, 
+            wspace=0.4, 
             hspace=0.6)
 plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
             bbox_inches='tight', dpi=300)
