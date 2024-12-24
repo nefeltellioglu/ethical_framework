@@ -627,11 +627,16 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
                         #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
                         #s=500,  marker="o"
                         )
+    if mylabels[0] in ["Loss in clinical burden", 
+                       "Total clinical burden"]:
+        wspace = 0.5
+    else:
+        wspace = 0.3
     plt.subplots_adjust(left=0.1,
                 bottom=0.1, 
                 right=0.9, 
                 top=0.9, 
-                wspace=0.5, 
+                wspace=wspace, 
                 hspace=0.6)
     plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
                 bbox_inches='tight', dpi=300)
@@ -673,7 +678,7 @@ plt.subplots_adjust(left=0.1,
             bottom=0.1, 
             right=0.9, 
             top=0.9, 
-            wspace=0.5, 
+            wspace=0.3, 
             hspace=0.6)
 plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
             bbox_inches='tight', dpi=300)
