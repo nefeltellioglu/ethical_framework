@@ -5,7 +5,56 @@ import typing as tp
 LossTermTransformer = tp.Callable[
     tp.Tuple[float, float, float], tp.Tuple[float, float, float]
 ]
-
+def get_extreme_burdens(model_param_id: int,
+            burden_param_id: int,
+            db: dict,):
+    
+    _, max_tcb = extreme_initial_condition(
+        0.0, 0.0, model_param_id, burden_param_id, db, minimise=False
+    )
+    _, min_tcb = extreme_initial_condition(
+        0.0, 0.0, model_param_id, burden_param_id, db, minimise=True
+    )
+    _, max_eib = extreme_initial_condition(
+        1.0, 0.0, model_param_id, burden_param_id, db, minimise=False
+    )
+    _, min_eib = extreme_initial_condition(
+        1.0, 0.0, model_param_id, burden_param_id, db, minimise=True
+    )
+    _, max_evb = extreme_initial_condition(
+        0.0, 1.0, model_param_id, burden_param_id, db, minimise=False
+    )
+    _, min_evb = extreme_initial_condition(
+        0.0, 1.0, model_param_id, burden_param_id, db, minimise=True
+    )
+    
+    return (min_tcb, max_tcb, min_eib, max_eib, min_evb, max_evb)
+    
+def normalisation(
+        a: float,
+        b: float,
+        oc, 
+        tmp_ic, 
+        bp, 
+        extreme_burdens
+    ):
+    
+    (min_tcb, max_tcb, min_eib, max_eib, min_evb, max_evb) = extreme_burdens
+   
+    transform = lambda x: (
+        (x[0] - min_tcb) / (max_tcb - min_tcb),
+        (x[1] - min_eib) / (max_eib - min_eib),
+        (x[2] - min_evb) / (max_evb - min_evb),
+    )
+    
+    tmp_loss_tcb_nonnorm, tmp_loss_eib_nonnorm, tmp_loss_evb_nonnorm = \
+                em.loss_terms(oc, tmp_ic, bp) 
+    
+    tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = transform(
+        (tmp_loss_tcb_nonnorm, tmp_loss_eib_nonnorm, tmp_loss_evb_nonnorm)
+    )
+    return tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb,\
+            tmp_loss_tcb_nonnorm, tmp_loss_eib_nonnorm, tmp_loss_evb_nonnorm
 
 def optimal_initial_condition(
     a: float,
@@ -36,34 +85,19 @@ def optimal_initial_condition(
         # 2. Construct a transformation that normalises them to a range [0, 1].
         # 3. Get the optimal initial condition with normalised loss terms.
 
-        _, max_tcb = extreme_initial_condition(
-            0.0, 0.0, model_param_id, burden_param_id, db, minimise=False
-        )
-        _, min_tcb = extreme_initial_condition(
-            0.0, 0.0, model_param_id, burden_param_id, db, minimise=True
-        )
-        _, max_ecb = extreme_initial_condition(
-            1.0, 0.0, model_param_id, burden_param_id, db, minimise=False
-        )
-        _, min_ecb = extreme_initial_condition(
-            1.0, 0.0, model_param_id, burden_param_id, db, minimise=True
-        )
-        _, max_evb = extreme_initial_condition(
-            0.0, 1.0, model_param_id, burden_param_id, db, minimise=False
-        )
-        _, min_evb = extreme_initial_condition(
-            0.0, 1.0, model_param_id, burden_param_id, db, minimise=True
-        )
 
+        (min_tcb, max_tcb, min_eib, max_eib, min_evb, max_evb) = \
+            get_extreme_burdens(model_param_id, burden_param_id, db)
+        
         print("--------------------------------------------------------")
         print("Optimising initial condition with normalised loss terms.")
         print("Normalising loss terms based on the following ranges:")
         print(f"TCB range: [{min_tcb}, {max_tcb}]")
-        print(f"ECB range: [{min_ecb}, {max_ecb}]")
+        print(f"EIB range: [{min_eib}, {max_eib}]")
         print(f"EVB range: [{min_evb}, {max_evb}]")
         transform = lambda x: (
             (x[0] - min_tcb) / (max_tcb - min_tcb),
-            (x[1] - min_ecb) / (max_ecb - min_ecb),
+            (x[1] - min_eib) / (max_eib - min_eib),
             (x[2] - min_evb) / (max_evb - min_evb),
         )
 

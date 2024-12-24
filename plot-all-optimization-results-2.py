@@ -17,7 +17,8 @@ if len(sys.argv) > 1:
 else:
     # config_file = "config/config-2024-10-14_manuscript.json"
     config_file = "config/config-2024-10-28_limited_vaccine.json"
-    config_file = "config/config-2024-10-14_manuscript.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
@@ -309,8 +310,8 @@ fig = plt.figure(figsize=figsize)
 variables = ["cli_burden", "inf_burden", "adv_burden"]
 titles = ["Total Clinical Burden",
           "Total Infection Burden",
-          "Total Adverse Burden"]
-colors = ["Reds", "Reds", "Reds"]
+          "Total Vaccination Burden"]
+colors = ["rocket_r", "rocket_r", "rocket_r"]
 
 for var, title, color in zip(variables, titles, colors):
     no = 131 + j
@@ -361,7 +362,7 @@ titles = ["Infections in group 1 (%)",
           "Infections in group 2 (%)",
           "Vaccinations in group 1 (%)",
           "Vaccinations in group 2 (%)"]
-colors = ["Reds", "Reds", "Purples", "Purples"]
+colors = ["rocket_r", "rocket_r", "viridis_r", "viridis_r"]
 #sns.set(font_scale = 0.9)
 for var, title, color in zip(variables, titles, colors):
     no = 221 + j
@@ -423,7 +424,7 @@ labels = ["Infections in group 1 (%)",
           "Vaccinations in group 2 (%)",
           "Total Clinical Burden",
           "Total Number of Vaccinated Individuals"]
-colors = ["Reds", "Reds", "Purples", "Purples", "Reds", "Purples"]
+colors = ["rocket_r", "rocket_r", "viridis_r", "viridis_r", "rocket_r", "viridis_r"]
 for var, label, color in zip(variables, labels, colors):
     if var in ["cli_burden", "total_vacc"]:
         perc_var = var
