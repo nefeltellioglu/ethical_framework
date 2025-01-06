@@ -44,6 +44,8 @@ with open(CONFIG["database_file"], "rb") as f:
 # We only want the simulation results that use an amount of vaccine
 # less than the maximum amount specified in the configuration file so
 # we filter the results in the database to only include those records.
+# If a vaccination limit is not given in the configuration, it assumes
+# that there is an unlimited supply.
 # ====================================================================
 if "vaccine_parameters" in CONFIG:
     max_vacc = CONFIG["vaccine_parameters"]['maximum_vacc_rollout']
@@ -72,6 +74,25 @@ db = {
     "outcomes": valid_outcomes,
     "burden_parameters": db["burden_parameters"]
 }
+
+# --------------------------------------------------------------------
+# In the following figure generation we assume that there is a single
+# set of model parametrs and burden parameters. We can then avoid a
+# lot of computation below by extracting some data based on this.
+
+all_model_param_ids = [p['id'] for p in db['model_parameters']]
+assert len(all_model_param_ids) == 1, "There should only be one model parameter set in the database."
+unique_model_param_id = all_model_param_ids[0]
+
+configs = [c for c in db["configurations"] if c["model_parameters_id"] == unique_model_param_id]
+
+all_burden_param_ids = [p['id'] for p in db['burden_parameters']]
+assert len(all_burden_param_ids) == 1, "There should only be one burden parameter set in the database."
+unique_burden_param_id = all_burden_param_ids[0]
+unique_burden_param = [
+    bp for bp in db["burden_parameters"] if
+    bp["id"] == unique_burden_param_id][0]["parameters"]
+# --------------------------------------------------------------------
 # ====================================================================
 
 
@@ -213,6 +234,7 @@ def infection_burden_per_capita_2(sir: em.SIROutcome,
 
 ethical_a_b_list = [(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
 
+# TODO We should really remove this hard-coded value.
 times = 500
 if "low" in config_file:
    times = int(times * 20)
@@ -221,27 +243,13 @@ elif "high" in config_file:
 
 selected_vaccinations = []
 for (ethical_a, ethical_b) in ethical_a_b_list:
-    #ethical_a = 0.1
-    #ethical_b = 0.1
-
-    model_param_id = 0
-    burden_param_id = 0
-
-    bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
-        "parameters"
-    ]
-
-    configs = [
-        c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
-    ]
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
 
 
     foo, bar = eo.optimal_initial_condition(
-        ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
+        ethical_a, ethical_b, unique_model_param_id, unique_burden_param_id, db, normalise=True
     )
-    _optimal_ic = [ic for ic in db["initial_conditions"] if ic["id"] == foo]
     _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
     _optimal_outcome = [
         o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
@@ -453,23 +461,12 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     #ethical_b = 0.1
     plot_df = []
 
-    model_param_id = 0
-    burden_param_id = 0
-
-    bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
-        "parameters"
-    ]
-
-    configs = [
-        c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
-    ]
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
 
     foo, bar = eo.optimal_initial_condition(
-        ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
+        ethical_a, ethical_b, unique_model_param_id, unique_burden_param_id, db, normalise=True
     )
-    _optimal_ic = [ic for ic in db["initial_conditions"] if ic["id"] == foo]
     _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
     _optimal_outcome = [
         o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
@@ -478,7 +475,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
 
     selected_vaccinations.append((int(best_vac_1), int(best_vac_2)))
-    extreme_burdens = eo.get_extreme_burdens(model_param_id, burden_param_id, db)
+    extreme_burdens = eo.get_extreme_burdens(unique_model_param_id, unique_burden_param_id, db)
 
     for oc in ocs:
         tmp_config_id = oc["configuration_id"]
@@ -494,9 +491,9 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
         inf_1 = count_infections_group_1(oc["outcome"]) / pop_1(tmp_ic)
         inf_2 = count_infections_group_2(oc["outcome"]) / pop_2(tmp_ic)
 
-        clinical_burden = total_clinical_burden(oc["outcome"], bp)
-        infections_burden = total_burden_infections(oc["outcome"], bp)
-        adverse_burden = total_burden_adverse(oc["outcome"], bp)
+        clinical_burden = total_clinical_burden(oc["outcome"], unique_burden_param)
+        infections_burden = total_burden_infections(oc["outcome"], unique_burden_param)
+        adverse_burden = total_burden_adverse(oc["outcome"], unique_burden_param)
 
         total_vaccination = total_vaccinations(oc["outcome"])
 
