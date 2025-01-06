@@ -5,32 +5,20 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import sys
 import os
-import itertools 
+import itertools
 import ethics.model as em
 import ethics.optimisation as eo
 import numpy as np
-
-from ethics.model import (
-    OptParams,
-    BurdenParams,
-    SIRParams,
-    SIRInitialCondition,
-    SIRSolution,
-    SIROutcome,
-    sir_vacc,
-)
-
-from ethics.optimisation import normalisation, get_extreme_burdens
-
 
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    #config_file = "config/config-2024-10-14_manuscript.json"
-    config_file = "config/config-2024-10-28_limited_vaccine.json"
-    config_file = "config/config-2024-12-02_limited_low_R0.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
+    # config_file = "config/config-2024-10-28_limited_vaccine.json"
+    # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
+
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
 # as the name for the output directory.
@@ -91,7 +79,7 @@ db = {
 #define function to calculate total burden from SIROutcome object
 # burden from adverse vaccination reactions (group 1)
 def burden_adverse_group_1(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
     return (dbp.days_hosp_vacc_1
             * sir.total_vac_1
@@ -99,7 +87,7 @@ def burden_adverse_group_1(
 
 # burden from adverse vaccination reactions (group 2)
 def burden_adverse_group_2(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
     return (dbp.days_hosp_vacc_2
             * sir.total_vac_2
@@ -120,48 +108,48 @@ def count_vaccinations_group_2(sir: em.SIROutcome) -> float:
 
 #burden from infections in unvaccinated people (group 1)
 def burden_infections_group_1_noVacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    return (dbp.prop_hosp_inf_1 * 
+    return (dbp.prop_hosp_inf_1 *
             dbp.days_hosp_inf_1 * sir.inf_1_no_vac)
 
 # burden from infections in unvaccinated people (group 2)
 def burden_infections_group_2_noVacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    return (dbp.prop_hosp_inf_2 * 
+    return (dbp.prop_hosp_inf_2 *
             dbp.days_hosp_inf_2 * sir.inf_2_no_vac)
 
 #burden from infections in vaccinated people (group 1)
 def burden_infections_group_1_Vacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    return (dbp.prop_hosp_inf_1 * 
-            (1 - dbp.vacc_protection_from_disease_1) * 
-            dbp.days_hosp_inf_1 * 
+    return (dbp.prop_hosp_inf_1 *
+            (1 - dbp.vacc_protection_from_disease_1) *
+            dbp.days_hosp_inf_1 *
             sir.inf_1_vu )
 
 #burden from infections in vaccinated people (group 2)
 def burden_infections_group_2_Vacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    return (dbp.prop_hosp_inf_2 * 
-            (1 - dbp.vacc_protection_from_disease_2) * 
-            dbp.days_hosp_inf_2 * 
+    return (dbp.prop_hosp_inf_2 *
+            (1 - dbp.vacc_protection_from_disease_2) *
+            dbp.days_hosp_inf_2 *
             sir.inf_2_vu )
 
 # total infection burden group 1
 def total_burden_infections_group_1(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    tot= (burden_infections_group_1_noVacc(sir, dbp) + 
+    tot= (burden_infections_group_1_noVacc(sir, dbp) +
             burden_infections_group_1_Vacc(sir, dbp))
     return (tot)
 
 def total_burden_infections_group_2(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
-    tot= (burden_infections_group_2_noVacc(sir, dbp) + 
+    tot= (burden_infections_group_2_noVacc(sir, dbp) +
             burden_infections_group_2_Vacc(sir, dbp))
     return (tot)
 
@@ -169,24 +157,24 @@ def total_burden_infections_group_2(
 def total_vaccinations(sir: em.SIROutcome) -> float:
     return (sir.total_vac_1 + sir.total_vac_2)
 
-# aggregate burden components 
+# aggregate burden components
 def total_burden_infections(
-    sir: em.SIROutcome, dbp: em.BurdenParams    
+    sir: em.SIROutcome, dbp: em.BurdenParams
     ) -> float:
     tot_1 = total_burden_infections_group_1(sir, dbp)
     tot_2 = total_burden_infections_group_2(sir, dbp)
     return (tot_1 + tot_2)
 
-def total_burden_adverse(sir: em.SIROutcome, dbp: em.BurdenParams) -> float: 
-    return(burden_adverse_group_1(sir, dbp) + 
+def total_burden_adverse(sir: em.SIROutcome, dbp: em.BurdenParams) -> float:
+    return(burden_adverse_group_1(sir, dbp) +
            burden_adverse_group_2(sir, dbp))
 
 def total_clinical_burden(sir:em.SIROutcome, dbp: em.BurdenParams) -> float:
-    return (total_burden_infections(sir, dbp) + 
+    return (total_burden_infections(sir, dbp) +
             total_burden_adverse(sir, dbp))
 
 
-# per-capita burdens: 
+# per-capita burdens:
 def pop_1(ic: em.SIRInitialCondition) -> int:
     return ic.pop_size(1)
 
@@ -196,25 +184,25 @@ def pop_2(ic: em.SIRInitialCondition) -> int:
 def total_pop(ic: em.SIRInitialCondition) -> int:
     return (pop_1(ic) + pop_2(ic))
 
-def adverse_per_capita_1(sir: em.SIROutcome, 
-                         dbp: em.BurdenParams, 
+def adverse_per_capita_1(sir: em.SIROutcome,
+                         dbp: em.BurdenParams,
                          ic: em.SIRInitialCondition) -> float:
     return(burden_adverse_group_1(sir, dbp) / pop_1(ic))
 
-def adverse_per_capita_2(sir: em.SIROutcome, 
-                         dbp: em.BurdenParams, 
+def adverse_per_capita_2(sir: em.SIROutcome,
+                         dbp: em.BurdenParams,
                          ic: em.SIRInitialCondition) -> float:
-    return(burden_adverse_group_2(sir, dbp) / pop_2(ic)) 
+    return(burden_adverse_group_2(sir, dbp) / pop_2(ic))
 
-def infection_burden_per_capita_1(sir: em.SIROutcome, 
-                                  dbp: em.BurdenParams, 
+def infection_burden_per_capita_1(sir: em.SIROutcome,
+                                  dbp: em.BurdenParams,
                                   ic: em.SIRInitialCondition) -> float:
     return(total_burden_infections_group_1(sir, dbp) / pop_1(ic))
 
-def infection_burden_per_capita_2(sir: em.SIROutcome, 
-                                  dbp: em.BurdenParams, 
+def infection_burden_per_capita_2(sir: em.SIROutcome,
+                                  dbp: em.BurdenParams,
                                   ic: em.SIRInitialCondition) -> float:
-    return(total_burden_infections_group_2(sir, dbp) / pop_2(ic)) 
+    return(total_burden_infections_group_2(sir, dbp) / pop_2(ic))
 
 
 
@@ -226,30 +214,30 @@ def infection_burden_per_capita_2(sir: em.SIROutcome,
 ethical_a_b_list = [(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
 
 times = 500
-if "low" in config_file: 
+if "low" in config_file:
    times = int(times * 20)
-elif "high" in config_file: 
+elif "high" in config_file:
    times = int(times * 0.5)
-   
+
 selected_vaccinations = []
 for (ethical_a, ethical_b) in ethical_a_b_list:
     #ethical_a = 0.1
     #ethical_b = 0.1
-    
+
     model_param_id = 0
     burden_param_id = 0
-    
+
     bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
         "parameters"
     ]
-    
+
     configs = [
         c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
     ]
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
-    
-    
+
+
     foo, bar = eo.optimal_initial_condition(
         ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
     )
@@ -260,7 +248,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     ]
     best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
     best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
-    
+
     selected_vaccinations.append((int(best_vac_1), int(best_vac_2)))
 
 
@@ -280,7 +268,7 @@ R0=CONFIG["model_parameters"]["R0"]
 
 #calculation of beta from R0 and contact_per_capita multipliers
 beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
-                         (contact_per_capita_11** 2 
+                         (contact_per_capita_11** 2
                           - 2 * contact_per_capita_22 * contact_per_capita_11
                           + contact_per_capita_22 ** 2
                           + 4 * contact_per_capita_12 * contact_per_capita_22
@@ -298,7 +286,7 @@ CONFIG["model_parameters"]["beta_22"] = beta * contact_per_capita_22
 model_parameters = [
     {
         "id": 0,
-        "parameters": SIRParams(
+        "parameters": em.SIRParams(
             beta_11=CONFIG["model_parameters"]["beta_11"],
             beta_12=CONFIG["model_parameters"]["beta_12"],
             beta_21=CONFIG["model_parameters"]["beta_21"],
@@ -318,7 +306,7 @@ vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 initial_conditions = []
 ic_ix = 0
 
-#selected_vaccinations = [(int(pop_size_1 * 0.5), int(pop_size_2 * 0.5)), 
+#selected_vaccinations = [(int(pop_size_1 * 0.5), int(pop_size_2 * 0.5)),
 #                         (int(pop_size_1 * 0.0), int(pop_size_2 * 0.0))]
 for (num_vac_1, num_vac_2) in selected_vaccinations:
         # Print out the initial condition being added to the list
@@ -330,7 +318,7 @@ for (num_vac_1, num_vac_2) in selected_vaccinations:
         initial_conditions.append(
             {
                 "id": ic_ix,
-                "value": SIRInitialCondition(
+                "value": em.SIRInitialCondition(
                     s0_1=pop_size_1 - num_vac_1 - 1,
                     s0_2=pop_size_2 - num_vac_2 - 1,
                     i0_1=1,
@@ -362,7 +350,7 @@ _num_configurations = len(configurations)
 assert _num_configurations == _num_model_parameters * _num_initial_conditions
 
 
-def _compute_sol(config) -> SIRSolution:
+def _compute_sol(config) -> em.SIRSolution:
     model_params = next(
         (
             mp["parameters"]
@@ -379,7 +367,7 @@ def _compute_sol(config) -> SIRSolution:
         ),
         None,
     )
-    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, times, times + 1))[0]
+    return em.sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, times, times + 1))[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
@@ -467,17 +455,17 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
 
     model_param_id = 0
     burden_param_id = 0
-    
+
     bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
         "parameters"
     ]
-    
+
     configs = [
         c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
     ]
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
-    
+
     foo, bar = eo.optimal_initial_condition(
         ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
     )
@@ -488,10 +476,10 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     ]
     best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
     best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
-    
+
     selected_vaccinations.append((int(best_vac_1), int(best_vac_2)))
-    extreme_burdens = get_extreme_burdens(model_param_id, burden_param_id, db)
-    
+    extreme_burdens = eo.get_extreme_burdens(model_param_id, burden_param_id, db)
+
     for oc in ocs:
         tmp_config_id = oc["configuration_id"]
 
@@ -501,15 +489,15 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
             if ic["id"]
             == [c for c in configs if c["id"] == tmp_config_id][0]["initial_condition_id"]
         ][0]["value"]
-        
+
 
         inf_1 = count_infections_group_1(oc["outcome"]) / pop_1(tmp_ic)
         inf_2 = count_infections_group_2(oc["outcome"]) / pop_2(tmp_ic)
-        
+
         clinical_burden = total_clinical_burden(oc["outcome"], bp)
         infections_burden = total_burden_infections(oc["outcome"], bp)
         adverse_burden = total_burden_adverse(oc["outcome"], bp)
-        
+
         total_vaccination = total_vaccinations(oc["outcome"])
 
         p_adverse_1 = adverse_per_capita_1(oc["outcome"], bp, tmp_ic)
@@ -517,22 +505,22 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
 
         p_infection_burden_1 = infection_burden_per_capita_1(oc["outcome"], bp, tmp_ic)
         p_infection_burden_2 = infection_burden_per_capita_2(oc["outcome"], bp, tmp_ic)
-        
+
         (tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb,
-        tmp_loss_tcb_nonnorm, tmp_loss_ecb_nonnorm, tmp_loss_evb_nonnorm) = normalisation( 
+        tmp_loss_tcb_nonnorm, tmp_loss_ecb_nonnorm, tmp_loss_evb_nonnorm) = eo.normalisation(
             ethical_a,
             ethical_b,
-            oc["outcome"], 
-            tmp_ic, 
-            bp, 
+            oc["outcome"],
+            tmp_ic,
+            bp,
             extreme_burdens)
         tmp_loss = (
             (1 - ethical_a - ethical_b) * tmp_loss_tcb
             + ethical_a * tmp_loss_ecb
             + ethical_b * tmp_loss_evb
         )
-        
-       
+
+
         plot_df.append(
             {
                 "outcome_id": oc["id"],
@@ -553,12 +541,12 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
                 "loss_tcb": tmp_loss_tcb,
                 "loss_eib": tmp_loss_ecb,
                 "loss_evb": tmp_loss_evb,
-                "tcb": tmp_loss_tcb_nonnorm, 
+                "tcb": tmp_loss_tcb_nonnorm,
                 "teib": tmp_loss_ecb_nonnorm,
                 "tevb": tmp_loss_evb_nonnorm,
             }
         )
-    
+
     plot_df = pd.DataFrame(plot_df)
     plot_df_list.append(plot_df)
 
@@ -572,8 +560,8 @@ myvars_list = [["cli_burden", "inf_burden", "adv_burden"],
           ["tcb", "teib", "tevb"]]
 mylabels_list = [["Total clinical burden", "Infection burden", "Vaccination burden"],
           [f"$L_{{CB}}$", f"$L_{{EI}}$", f"$L_{{EV}}$"],
-          ["Loss in clinical burden", 
-           "Loss in equity in\ninfection burden", 
+          ["Loss in clinical burden",
+           "Loss in equity in\ninfection burden",
            "Loss in equity in\nvaccination burden"]]
 fnames = ["Burden", "Normalized_individual_loss", "Individual_loss"]
 #myvars = ["cli_burden","teib"]
@@ -582,8 +570,8 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
     fig, axs = plt.subplots(1, 3, figsize=(10,4))
     subplot_labels1 = ['a', 'b', 'c']
     subplot_labels = ['A', 'B', 'C']
-    
-    
+
+
     for ix, (myvar, mylabel) in enumerate(zip(myvars, mylabels)):
         ax = axs[ix]
         ax.text(-0.25, 1.05, subplot_labels1[ix], transform=ax.transAxes,
@@ -595,9 +583,9 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
         x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
         cbar = fig.colorbar(cax1, ax=ax, location ='bottom',
                   pad = 0.23)
-        
+
         #cbar = plt.colorbar(ax = ax)
-        """if mylabel in ["Loss in equity in\ninfection burden", 
+        """if mylabel in ["Loss in equity in\ninfection burden",
                        "Loss in equity in\nvaccination burden"]:
             cbar.set_label(mylabel,rotation=270, labelpad = 20, )
         else:
@@ -605,43 +593,43 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
         cbar.set_label(mylabel)
         ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
         ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
-        
-        
+
+
         for o_ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
             vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[o_ix], (pop_size_1, pop_size_2))]
-            props = dict(boxstyle='round', 
-                         facecolor='white', 
+            props = dict(boxstyle='round',
+                         facecolor='white',
                          alpha=1)
-            idx = [i for  i,v in enumerate(selected_vaccinations) 
+            idx = [i for  i,v in enumerate(selected_vaccinations)
                    if v == selected_vaccinations[o_ix]]
             if len(idx) == 1:
                 label = subplot_labels[idx[0]]
                 coordx, coordy = vacc[0],vacc[1]
-            else: 
+            else:
                 label = subplot_labels[o_ix]#labels[idx[-1]]
                 coordx, coordy = vacc[0],vacc[1]
                 label = " - ".join([subplot_labels[i] for i in idx])
                 if label != subplot_labels[idx[0]]:
                     coordx, coordy = vacc[0] -1/10 * x_max,vacc[1]
-            
-            
+
+
             ax.text(coordx, coordy,label ,bbox=props,c="black",weight="bold",#transform=ax.transAxes,
                         #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
                         #s=500,  marker="o"
                         )
-    
+
     plt.subplots_adjust(left=0.1,
-                bottom=0.1, 
-                right=0.9, 
-                top=0.9, 
-                wspace=0.4, 
+                bottom=0.1,
+                right=0.9,
+                top=0.9,
+                wspace=0.4,
                 hspace=0.6)
-    plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
+    plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname,
                 bbox_inches='tight', dpi=300)
     #plt.savefig(f"{output_dir}/example-optimisation-results-perc.svg")
     #plt.show()
     #plt.clf()
-    
+
 fname = "Aggregated_loss"
 myvar = "loss"
 mylabel = "$L$"
@@ -664,21 +652,21 @@ for ix, plot_df in enumerate(plot_df_list):
     cbar.set_label(mylabel)
     ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
     ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
-    
+
     vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
-    
+
     ax.text(vacc[0],vacc[1],subplot_labels[ix],bbox=props,c="black",weight="bold",#transform=ax.transAxes,
                 #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
                 #s=500,  marker="o"
                 )
 
 plt.subplots_adjust(left=0.1,
-            bottom=0.1, 
-            right=0.9, 
-            top=0.9, 
-            wspace=0.4, 
+            bottom=0.1,
+            right=0.9,
+            top=0.9,
+            wspace=0.4,
             hspace=0.6)
-plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
+plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname,
             bbox_inches='tight', dpi=300)
 #plt.savefig(f"{output_dir}/example-optimisation-results-perc.svg")
 #plt.show()
