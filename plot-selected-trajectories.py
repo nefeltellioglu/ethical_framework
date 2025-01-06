@@ -83,6 +83,9 @@ db = {
 all_model_param_ids = [p['id'] for p in db['model_parameters']]
 assert len(all_model_param_ids) == 1, "There should only be one model parameter set in the database."
 unique_model_param_id = all_model_param_ids[0]
+unique_model_param = [
+    mp for mp in db["model_parameters"] if
+    mp["id"] == unique_model_param_id][0]["parameters"]
 
 configs = [c for c in db["configurations"] if c["model_parameters_id"] == unique_model_param_id]
 
@@ -226,13 +229,65 @@ def infection_burden_per_capita_2(sir: em.SIROutcome,
     return(total_burden_infections_group_2(sir, dbp) / pop_2(ic))
 
 
-
-
 # ====================================================================
-#find best vacc parameters
+# Find best the best vaccination strategy for each of the given
+# combinations of ethical parameters a and b so that we know which
+# trajectories to plot later on.
 # ====================================================================
 
 ethical_a_b_list = [(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
+
+opt_vacc_strat = {}
+for (ethical_a, ethical_b) in ethical_a_b_list:
+    config_ids = [c["id"] for c in configs]
+    ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
+
+    best_ic_id, _ = eo.optimal_initial_condition(
+        ethical_a, ethical_b, unique_model_param_id, unique_burden_param_id, db, normalise=True
+    )
+    _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == best_ic_id]
+    _optimal_outcome = [
+        o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
+    ]
+    best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
+    best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
+
+    opt_vacc_strat[(ethical_a, ethical_b)] = (int(best_vac_1), int(best_vac_2))
+
+
+pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
+pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
+vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
+
+initial_conditions = {}
+for ethical_a_b in ethical_a_b_list:
+    num_vac_1, num_vac_2 = opt_vacc_strat[ethical_a_b]
+    print(
+        f"""
+        For ethical (a, b) =  {ethical_a_b}, adding
+        initial condition with {num_vac_1} vaccinated in population 1
+        and {num_vac_2} vaccinated in population 2.
+        """
+    )
+    s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
+    s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
+    initial_conditions[ethical_a_b] = em.SIRInitialCondition(
+        s0_1=pop_size_1 - num_vac_1 - 1,
+        s0_2=pop_size_2 - num_vac_2 - 1,
+        i0_1=1,
+        i0_2=1,
+        r0_1=0,
+        r0_2=0,
+        s0_1_vp= s0_1_vp,
+        s0_2_vp= s0_2_vp,
+        s0_1_vu= num_vac_1 - s0_1_vp,
+        s0_2_vu= num_vac_2 - s0_2_vp,
+        i0_1_vu=0,
+        i0_2_vu=0,
+        r0_1_vu=0,
+        r0_2_vu=0,
+    )
+
 
 # TODO We should really remove this hard-coded value.
 times = 500
@@ -241,147 +296,9 @@ if "low" in config_file:
 elif "high" in config_file:
    times = int(times * 0.5)
 
-selected_vaccinations = []
-for (ethical_a, ethical_b) in ethical_a_b_list:
-    config_ids = [c["id"] for c in configs]
-    ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
 
-
-    foo, bar = eo.optimal_initial_condition(
-        ethical_a, ethical_b, unique_model_param_id, unique_burden_param_id, db, normalise=True
-    )
-    _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
-    _optimal_outcome = [
-        o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
-    ]
-    best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
-    best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
-
-    selected_vaccinations.append((int(best_vac_1), int(best_vac_2)))
-
-
-
-# ====================================================================
-#calculate beta values
-#contact_per_capita_ij are the rescaled values
-# ====================================================================
-
-contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
-contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
-contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
-contact_per_capita_22=CONFIG["model_parameters"]["contact_per_capita_22"]
-gamma=CONFIG["model_parameters"]["gamma"]
-R0=CONFIG["model_parameters"]["R0"]
-
-
-#calculation of beta from R0 and contact_per_capita multipliers
-beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
-                         (contact_per_capita_11** 2
-                          - 2 * contact_per_capita_22 * contact_per_capita_11
-                          + contact_per_capita_22 ** 2
-                          + 4 * contact_per_capita_12 * contact_per_capita_22
-                          )**(0.5))
-
-
-CONFIG["model_parameters"]["beta_11"] = beta * contact_per_capita_11
-CONFIG["model_parameters"]["beta_12"] = beta * contact_per_capita_12
-CONFIG["model_parameters"]["beta_21"] = beta * contact_per_capita_21
-CONFIG["model_parameters"]["beta_22"] = beta * contact_per_capita_22
-
-########################
-
-
-model_parameters = [
-    {
-        "id": 0,
-        "parameters": em.SIRParams(
-            beta_11=CONFIG["model_parameters"]["beta_11"],
-            beta_12=CONFIG["model_parameters"]["beta_12"],
-            beta_21=CONFIG["model_parameters"]["beta_21"],
-            beta_22=CONFIG["model_parameters"]["beta_22"],
-            gamma=CONFIG["model_parameters"]["gamma"],
-        ),
-    }
-]
-
-_num_model_parameters = len(model_parameters)
-assert _num_model_parameters == 1
-
-pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
-pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
-vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
-
-initial_conditions = []
-ic_ix = 0
-
-#selected_vaccinations = [(int(pop_size_1 * 0.5), int(pop_size_2 * 0.5)),
-#                         (int(pop_size_1 * 0.0), int(pop_size_2 * 0.0))]
-for (num_vac_1, num_vac_2) in selected_vaccinations:
-        # Print out the initial condition being added to the list
-        print(
-            f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
-        )
-        s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
-        s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
-        initial_conditions.append(
-            {
-                "id": ic_ix,
-                "value": em.SIRInitialCondition(
-                    s0_1=pop_size_1 - num_vac_1 - 1,
-                    s0_2=pop_size_2 - num_vac_2 - 1,
-                    i0_1=1,
-                    i0_2=1,
-                    r0_1=0,
-                    r0_2=0,
-                    s0_1_vp= s0_1_vp,
-                    s0_2_vp= s0_2_vp,
-                    s0_1_vu= num_vac_1 - s0_1_vp,
-                    s0_2_vu= num_vac_2 - s0_2_vp,
-                    i0_1_vu=0,
-                    i0_2_vu=0,
-                    r0_1_vu=0,
-                    r0_2_vu=0,
-                ),
-            }
-        )
-        ic_ix += 1
-_num_initial_conditions = len(initial_conditions)
-assert _num_initial_conditions == (len(selected_vaccinations))
-
-configurations = [
-    {"id": c_ix, "model_parameters_id": mp["id"], "initial_condition_id": ic["id"]}
-    for c_ix, (mp, ic) in enumerate(
-        itertools.product(model_parameters, initial_conditions)
-    )
-]
-_num_configurations = len(configurations)
-assert _num_configurations == _num_model_parameters * _num_initial_conditions
-
-
-def _compute_sol(config) -> em.SIRSolution:
-    model_params = next(
-        (
-            mp["parameters"]
-            for mp in model_parameters
-            if mp["id"] == config["model_parameters_id"]
-        ),
-        None,
-    )
-    ic = next(
-        (
-            ic["value"]
-            for ic in initial_conditions
-            if ic["id"] == config["initial_condition_id"]
-        ),
-        None,
-    )
-    return em.sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, times, times + 1))[0]
-
-
-solutions = [_compute_sol(c) for c in configurations]
-_num_solutions = len(solutions)
-assert _num_solutions == _num_configurations
-
+solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, sir_0=initial_conditions[ethical_a_b], ts=np.linspace(0, times, times + 1))[0]
+             for ethical_a_b in ethical_a_b_list}
 
 # ====================================================================
 #plot three trajectories
@@ -396,11 +313,12 @@ subplot_labels = ['A', 'B', 'C']
 green_hex = "#1b9e77"
 orange_hex = "#d95f02"
 
-for ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
+for ix, ethical_a_b in enumerate(ethical_a_b_list):
+    a, b = ethical_a_b
     ax = axs[ix]
     ax.text(-0.25, 1.15, subplot_labels[ix], transform=ax.transAxes,
             fontsize=12, fontweight='bold', va='top', ha='right')
-
+    sol = solutions[ethical_a_b]
     total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
     total_s2 = 100 * (sol.s2 + sol.s2_vp + sol.s2_vu) / pop_size_2
     total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
@@ -411,7 +329,7 @@ for ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_
     ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 Infecteds")
     ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 Infecteds")
 
-    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
+    vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
     ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
                  )
@@ -455,7 +373,7 @@ fig.savefig(f"{output_dir}/trajectories.svg", bbox_inches='tight')
 
 plot_df_list = []
 
-selected_vaccinations = []
+opt_vacc_strat = []
 for (ethical_a, ethical_b) in ethical_a_b_list:
     #ethical_a = 0.1
     #ethical_b = 0.1
@@ -464,7 +382,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     config_ids = [c["id"] for c in configs]
     ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
 
-    foo, bar = eo.optimal_initial_condition(
+    foo, _ = eo.optimal_initial_condition(
         ethical_a, ethical_b, unique_model_param_id, unique_burden_param_id, db, normalise=True
     )
     _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
@@ -474,7 +392,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     best_vac_1 = _optimal_outcome[0]["outcome"].total_vac_1
     best_vac_2 = _optimal_outcome[0]["outcome"].total_vac_2
 
-    selected_vaccinations.append((int(best_vac_1), int(best_vac_2)))
+    opt_vacc_strat.append((int(best_vac_1), int(best_vac_2)))
     extreme_burdens = eo.get_extreme_burdens(unique_model_param_id, unique_burden_param_id, db)
 
     for oc in ocs:
@@ -593,12 +511,12 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
 
 
         for o_ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
-            vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[o_ix], (pop_size_1, pop_size_2))]
+            vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[o_ix], (pop_size_1, pop_size_2))]
             props = dict(boxstyle='round',
                          facecolor='white',
                          alpha=1)
-            idx = [i for  i,v in enumerate(selected_vaccinations)
-                   if v == selected_vaccinations[o_ix]]
+            idx = [i for  i,v in enumerate(opt_vacc_strat)
+                   if v == opt_vacc_strat[o_ix]]
             if len(idx) == 1:
                 label = subplot_labels[idx[0]]
                 coordx, coordy = vacc[0],vacc[1]
@@ -650,7 +568,7 @@ for ix, plot_df in enumerate(plot_df_list):
     ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
     ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
 
-    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
+    vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ix], (pop_size_1, pop_size_2))]
 
     ax.text(vacc[0],vacc[1],subplot_labels[ix],bbox=props,c="black",weight="bold",#transform=ax.transAxes,
                 #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
