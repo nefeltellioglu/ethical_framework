@@ -301,7 +301,8 @@ solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, sir_0=initial_c
              for ethical_a_b in ethical_a_b_list}
 
 # ====================================================================
-#plot three trajectories
+# Plot the optimal trajectories for each ethical configuration so we
+# can see what the results look like.
 # ====================================================================
 
 fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
@@ -324,10 +325,10 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
     total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
     total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
 
-    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 Susceptibles")
-    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 Susceptibles")
-    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 Infecteds")
-    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 Infecteds")
+    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 susceptible")
+    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 susceptible")
+    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 infectious")
+    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 infectious")
 
     vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
@@ -367,16 +368,155 @@ fig.savefig(f"{output_dir}/trajectories.svg", bbox_inches='tight')
 
 
 # ====================================================================
-#plot where opt vaccinations stays in the all vaccinations
+# Plot the loss surfaces for each of the different components along
+# with their component specific optimal and the global optimal.
+# ====================================================================
+
+# We start by constructing a mapping from the initial conditions to
+# the outcomes given these initial conditions so that it is easy to
+# get the data into a plottable format.
+ics_ids = {ic["value"].number_vaccinated_by_group(): ic["id"]
+           for ic in db["initial_conditions"]}
+ics_objs = {ic["value"].number_vaccinated_by_group(): ic["value"]
+            for ic in db["initial_conditions"]}
+_num_ics_ids = len(ics_ids.values())
+ocs = {o["configuration_id"]: o["outcome"] for o in db["outcomes"]}
+_num_ocs = len(ocs.values())
+cfs = {c["initial_condition_id"]: c["id"] for c in db["configurations"]}
+_num_cfs = len(cfs.values())
+assert _num_ics_ids == _num_ocs
+assert _num_ocs == _num_cfs
+assert _num_cfs == _num_ics_ids
+
+g1_vac_nums, g2_vac_nums = zip(*list(ics_ids.keys()))
+uniq_sorted = lambda x: sorted(list(set(x)))
+g1_vac_nums = uniq_sorted(g1_vac_nums)
+g2_vac_nums = uniq_sorted(g2_vac_nums)
+
+loss_mtx_cb = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+loss_mtx_ei = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+loss_mtx_ev = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+for ix, g1_vac_num in enumerate(g1_vac_nums):
+    for jx, g2_vac_num in enumerate(g2_vac_nums):
+        ic_key = (g1_vac_num, g2_vac_num)
+        ic_obj = ics_objs[ic_key]
+        ic_id = ics_ids[ic_key]
+        cf_id = cfs[ic_id]
+        oc = ocs[cf_id]
+        l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
+        loss_mtx_cb[ix, jx] = l_cb
+        loss_mtx_ei[ix, jx] = l_ei
+        loss_mtx_ev[ix, jx] = l_ev
+
+# --------------------------------------------------------------------
+# Draw the actual figure
+# --------------------------------------------------------------------
+x_ann_shift = 5
+y_ann_shift = 5
+
+def setup_axes(im, my_ax, g2_vac_nums, g1_vac_nums):
+    my_ax.set_xticks(range(len(g2_vac_nums)), labels=g2_vac_nums, rotation=45)
+    my_ax.set_xlabel("Group 2 vaccinations")
+    y_ticks_thinned = range(0, len(g1_vac_nums), 7)
+    y_labels_thinned = [g1_vac_nums[i] for i in y_ticks_thinned]
+    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned)
+    my_ax.set_ylabel("Group 1 vaccinations")
+    my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
+    my_ax.figure.colorbar(im, ax=my_ax)
+
+def annotate_global_opt(my_ax, loss_mtx):
+    min_idx = np.argmin(loss_mtx)
+    min_idx_g1, min_idx_g2 = np.unravel_index(min_idx, loss_mtx_cb.shape)
+    print(f"Global optimal at ({g2_vac_nums[min_idx_g2]}, {g1_vac_nums[min_idx_g1]})")
+    my_ax.scatter(min_idx_g2, min_idx_g1, color="blue", s=100, marker="o", zorder=0)
+    tmp = min_idx_g1 - 2 * y_ann_shift
+    y_ann_ix = tmp if tmp > 0 else min_idx_g1 + 2 * y_ann_shift
+    tmp = min_idx_g2 - x_ann_shift
+    x_ann_ix = tmp if tmp > 0 else min_idx_g2
+    my_ax.annotate("Global optimal", (x_ann_ix, y_ann_ix), color="blue")
+
+def annotate_vacc_opt_choice(my_ax, opt_vacc_strat):
+    for (name, (g1_v, g2_v)) in zip(["A", "B", "C"], opt_vacc_strat.values()):
+        x_index = g2_vac_nums.index(g2_v)
+        y_index = g1_vac_nums.index(g1_v)
+        my_ax.annotate(name + " optimal", (x_index - x_ann_shift, y_index - y_ann_shift), color="red")
+        my_ax.scatter(x_index, y_index, color="red", s=100, marker="o")
+
+# ....................................................................
+fig, ax = plt.subplots(3, 1, figsize=(9, 15))
+ax_cb = ax[0]
+ax_ei = ax[1]
+ax_ev = ax[2]
+# ....................................................................
+im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
+ax_cb.set_title("Total clinical burden", fontweight="bold")
+setup_axes(im, ax_cb, g2_vac_nums, g1_vac_nums)
+annotate_vacc_opt_choice(ax_cb, opt_vacc_strat)
+annotate_global_opt(ax_cb, loss_mtx_cb)
+# ....................................................................
+im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
+ax_ei.set_title("Inequity of infection burden", fontweight="bold")
+setup_axes(im, ax_ei, g2_vac_nums, g1_vac_nums)
+annotate_vacc_opt_choice(ax_ei, opt_vacc_strat)
+annotate_global_opt(ax_ei, loss_mtx_ei)
+# ....................................................................
+im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
+ax_ev.set_title("Inquity of vaccination burden", fontweight="bold")
+setup_axes(im, ax_ev, g2_vac_nums, g1_vac_nums)
+annotate_vacc_opt_choice(ax_ev, opt_vacc_strat)
+annotate_global_opt(ax_ev, loss_mtx_ev)
+# ....................................................................
+fig.tight_layout()
+fig.savefig(f"{output_dir}/loss_surfaces.png", bbox_inches='tight', dpi=300)
+# --------------------------------------------------------------------
+
+raise Exception("Stop here unless you really know what you are doing.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ====================================================================
+# plot where opt vaccinations stays in the all vaccinations
 # ====================================================================
 
 
 plot_df_list = []
 
 opt_vacc_strat = []
-for (ethical_a, ethical_b) in ethical_a_b_list:
-    #ethical_a = 0.1
-    #ethical_b = 0.1
+for ethical_a_b in ethical_a_b_list:
+    ethical_a, ethical_b = ethical_a_b
     plot_df = []
 
     config_ids = [c["id"] for c in configs]
