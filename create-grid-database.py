@@ -141,7 +141,12 @@ def _compute_sol(config) -> em.SIRSolution:
         ),
         None,
     )
-    return em.sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 50000, 50001))[0]
+    sim_times = np.linspace(
+        CONFIG["time_parameters"]["start_time"],
+        CONFIG["time_parameters"]["finish_time"],
+        num = CONFIG["time_parameters"]["num_points"]
+    )
+    return em.sir_vacc(params=model_params, sir_0=ic, ts=sim_times)[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
@@ -171,12 +176,22 @@ outcomes = [
 _num_outcomes = len(outcomes)
 assert _num_outcomes == _num_solutions
 
+
+# --------------------------------------------------------------------
+# Check that the total number of infected individuals at the end of
+# the simulation is 0. If this is not the case, then the simulation
+# has *probably* not run for long enough. In this case you should try
+# extending the final time in the configuration file.
 for sol in solutions:
     _total_i = round(sol.i1[-1], 0) + round(sol.i1_vu[-1],0) + \
             round(sol.i2[-1],0) + round(sol.i2_vu[-1],0)
     if round(_total_i, 0) > 0:
-        print(_total_i)
-    assert round(_total_i, 0) <= 0
+        raise ValueError(f"""
+        Total infected at the end of the simulation is {_total_i} and should round to 0.
+        This might be because you haven't run the simulation for long enough.
+        Try increasing the value of the final time in the configuration file.
+        """)
+# --------------------------------------------------------------------
 
 
 burden_parameters = [

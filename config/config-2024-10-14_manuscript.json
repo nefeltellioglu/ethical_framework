@@ -45,5 +45,10 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
+    "time_parameters": {
+	"start_time": 0.0,
+	"finish_time": 1000.0,
+	"num_points": 5000
+    },
     "database_file": "out/grid_database-2024-10-14_manuscript.pkl"
 }
