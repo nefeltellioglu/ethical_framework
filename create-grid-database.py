@@ -3,7 +3,8 @@
 #
 # The "database" created by this script is saved in a pickle file as a
 # dictionary of lists (representing a set of tables). The schema for
-# the database that is produced is in the README.md file.
+# the database that is produced is in the README.md file. There is a
+# graphical representation of the schema in database-schema.png.
 #
 import scipy.integrate
 import scipy.optimize
@@ -74,12 +75,34 @@ model_parameters = [
 _num_model_parameters = len(model_parameters)
 assert _num_model_parameters == 1
 
+vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
 pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
-pop_grid_step_size = CONFIG["grid_search_step"]["grid_step"]
-vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 
-vac_12_combinations = itertools.product(range(0, pop_size_1, pop_grid_step_size), range(0, pop_size_2, pop_grid_step_size))
+# --------------------------------------------------------------------
+# Construct an iterator which contains all the possible combinations
+# of the number of vaccinated individuals in each population and make
+# a couple of assertions to ensure that the 0 and all vaccinated
+# options are included. This is because we want to make sure out
+# database covers a good range of possible options.
+pop_grid_step_size = CONFIG["grid_search_step"]["grid_step"]
+_vac_vals_pop_1 = list(range(0, pop_size_1, pop_grid_step_size))
+if 0 not in _vac_vals_pop_1:
+    _vac_vals_pop_1.append(0)
+if pop_size_1 not in _vac_vals_pop_1:
+    _vac_vals_pop_1.append(pop_size_1)
+_vac_vals_pop_2 = list(range(0, pop_size_2, pop_grid_step_size))
+if 0 not in _vac_vals_pop_2:
+    _vac_vals_pop_2.append(0)
+if pop_size_2 not in _vac_vals_pop_2:
+    _vac_vals_pop_2.append(pop_size_2)
+assert 0 in _vac_vals_pop_1, "Must have 0 vaccinated in population 1 as an option."
+assert pop_size_1 in _vac_vals_pop_1, "Must have all vaccinated in population 1 as an option."
+assert 0 in _vac_vals_pop_2, "Must have 0 vaccinated in population 2 as an option."
+assert pop_size_2 in _vac_vals_pop_2, "Must have all vaccinated in population 2 as an option."
+vac_12_combinations = itertools.product(_vac_vals_pop_1, _vac_vals_pop_2)
+# --------------------------------------------------------------------
+
 initial_conditions = []
 for ic_ix, (num_vac_1, num_vac_2) in enumerate(vac_12_combinations):
     print(
@@ -109,10 +132,6 @@ for ic_ix, (num_vac_1, num_vac_2) in enumerate(vac_12_combinations):
         }
     )
 _num_initial_conditions = len(initial_conditions)
-assert _num_initial_conditions == (
-    len(range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"])) * \
-    len(range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]))
-)
 
 configurations = [
     {"id": c_ix, "model_parameters_id": mp["id"], "initial_condition_id": ic["id"]}
