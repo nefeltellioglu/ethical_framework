@@ -47,6 +47,9 @@ source of truth regarding parameter values. If you want to change one
 of the parameters, it should simply be a matter of adjusting this
 file.
 
+Consult the [FAQs](#faqs) if you want to modify this configuration.
+There might be helpful information in there.
+
 ## `grid-search-opt` branch goals
 
 - TODO Double check that the percentages in the `BurdenParams` class
@@ -146,7 +149,14 @@ def optimal_initial_condition(model_param_id: int,
                               db: dict) -> int:
 ```
 
-## FAQ
+## FAQs
+
+#### How do I change the resolution of levels of vaccination?
+
+In the `grid_search_step` section of the configuration file, the
+`grid_step` value is the size of the steps taken. If you make this a
+smaller value, the resolution will improve but computations will take
+longer.
 
 #### What are these weird errors about `numpy._core`?
 
