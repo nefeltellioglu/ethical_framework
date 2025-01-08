@@ -9,16 +9,7 @@ import pandas as pd
 import pickle
 import os
 import sys
-
-from ethics.model import (
-    OptParams,
-    BurdenParams,
-    SIRParams,
-    SIRInitialCondition,
-    SIRSolution,
-    SIROutcome,
-    sir_vacc,
-)
+import ethics.model as em
 
 
 if len(sys.argv) > 1:
@@ -47,7 +38,7 @@ R0=CONFIG["model_parameters"]["R0"]
 
 #calculation of beta from R0 and contact_per_capita multipliers
 beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
-                         (contact_per_capita_11**2 
+                         (contact_per_capita_11**2
                           - 2 * contact_per_capita_22 * contact_per_capita_11
                           + contact_per_capita_22 ** 2
                           + 4 * contact_per_capita_12 * contact_per_capita_22
@@ -67,7 +58,7 @@ CONFIG["model_parameters"]["beta_22"] = beta * contact_per_capita_22
 model_parameters = [
     {
         "id": 0,
-        "parameters": SIRParams(
+        "parameters": em.SIRParams(
             beta_11=CONFIG["model_parameters"]["beta_11"],
             beta_12=CONFIG["model_parameters"]["beta_12"],
             beta_21=CONFIG["model_parameters"]["beta_21"],
@@ -97,7 +88,7 @@ for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
         initial_conditions.append(
             {
                 "id": ic_ix,
-                "value": SIRInitialCondition(
+                "value": em.SIRInitialCondition(
                     s0_1=pop_size_1 - num_vac_1 - 1,
                     s0_2=pop_size_2 - num_vac_2 - 1,
                     i0_1=1,
@@ -132,7 +123,7 @@ _num_configurations = len(configurations)
 assert _num_configurations == _num_model_parameters * _num_initial_conditions
 
 
-def _compute_sol(config) -> SIRSolution:
+def _compute_sol(config) -> em.SIRSolution:
     model_params = next(
         (
             mp["parameters"]
@@ -149,7 +140,7 @@ def _compute_sol(config) -> SIRSolution:
         ),
         None,
     )
-    return sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 50000, 50001))[0]
+    return em.sir_vacc(params=model_params, sir_0=ic, ts=np.linspace(0, 50000, 50001))[0]
 
 
 solutions = [_compute_sol(c) for c in configurations]
@@ -163,7 +154,7 @@ outcomes = [
         "id": o_ix,
         "configuration_id": c["id"],
         "seed": 0,
-        "outcome": SIROutcome(
+        "outcome": em.SIROutcome(
             inf_1_no_vac=sol.r1[-1],
             inf_1_vu=sol.r1_vu[-1],
             inf_1_vp=0,
@@ -182,7 +173,7 @@ assert _num_outcomes == _num_solutions
 for sol in solutions:
     _total_i = round(sol.i1[-1], 0) + round(sol.i1_vu[-1],0) + \
             round(sol.i2[-1],0) + round(sol.i2_vu[-1],0)
-    if round(_total_i, 0) > 0: 
+    if round(_total_i, 0) > 0:
         print(_total_i)
     assert round(_total_i, 0) <= 0
 
@@ -190,7 +181,7 @@ for sol in solutions:
 burden_parameters = [
     {
         "id": 0,
-        "parameters": BurdenParams(
+        "parameters": em.BurdenParams(
             prop_hosp_inf_1=CONFIG["burden_parameters"]["prop_hosp_inf_1"],
             prop_hosp_inf_2=CONFIG["burden_parameters"]["prop_hosp_inf_2"],
             days_hosp_inf_1=CONFIG["burden_parameters"]["days_hosp_inf_1"],
