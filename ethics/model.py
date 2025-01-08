@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import gillespy2
+import typing as tp
 
 
 @dataclass
@@ -104,8 +105,15 @@ class SIRInitialCondition:
         """
         Returns the total number of vaccinated individuals in both populations.
         """
+        num_vac_1, num_vac_2 = self.number_vaccinated_by_group()
+        return num_vac_1 + num_vac_2
+
+    def number_vaccinated_by_group(self) -> tp.Tuple[int, int]:
+        """
+        Returns the number of vaccinated individuals in each population.
+        """
         return (self.s0_1_vp + self.s0_1_vu +
-                self.i0_1_vu + self.r0_1_vu +
+                self.i0_1_vu + self.r0_1_vu,
                 self.s0_2_vp + self.s0_2_vu +
                 self.i0_2_vu + self.r0_2_vu)
 
