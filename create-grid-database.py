@@ -69,40 +69,38 @@ assert _num_model_parameters == 1
 
 pop_size_1 = CONFIG["population_parameters"]["pop_size_1"]
 pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
+pop_grid_step_size = CONFIG["grid_search_step"]["grid_step"]
 vac_protection_from_inf = CONFIG["vacc_protection_from_infection"]
 
+vac_12_combinations = itertools.product(range(0, pop_size_1, pop_grid_step_size), range(0, pop_size_2, pop_grid_step_size))
 initial_conditions = []
-ic_ix = 0
-for num_vac_1 in range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"]):
-    for num_vac_2 in range(0, pop_size_2, CONFIG["grid_search_step"]["grid_step"]):
-        # Print out the initial condition being added to the list
-        print(
-            f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
-        )
-        s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
-        s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
-        initial_conditions.append(
-            {
-                "id": ic_ix,
-                "value": em.SIRInitialCondition(
-                    s0_1=pop_size_1 - num_vac_1 - 1,
-                    s0_2=pop_size_2 - num_vac_2 - 1,
-                    i0_1=1,
-                    i0_2=1,
-                    r0_1=0,
-                    r0_2=0,
-                    s0_1_vp= s0_1_vp,
-                    s0_2_vp= s0_2_vp,
-                    s0_1_vu= num_vac_1 - s0_1_vp,
-                    s0_2_vu= num_vac_2 - s0_2_vp,
-                    i0_1_vu=0,
-                    i0_2_vu=0,
-                    r0_1_vu=0,
-                    r0_2_vu=0,
-                ),
-            }
-        )
-        ic_ix += 1
+for ic_ix, (num_vac_1, num_vac_2) in enumerate(vac_12_combinations):
+    print(
+        f"Adding initial condition {ic_ix} with {num_vac_1} vaccinated in population 1 and {num_vac_2} vaccinated in population 2."
+    )
+    s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
+    s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
+    initial_conditions.append(
+        {
+            "id": ic_ix,
+            "value": em.SIRInitialCondition(
+                s0_1=pop_size_1 - num_vac_1 - 1,
+                s0_2=pop_size_2 - num_vac_2 - 1,
+                i0_1=1,
+                i0_2=1,
+                r0_1=0,
+                r0_2=0,
+                s0_1_vp= s0_1_vp,
+                s0_2_vp= s0_2_vp,
+                s0_1_vu= num_vac_1 - s0_1_vp,
+                s0_2_vu= num_vac_2 - s0_2_vp,
+                i0_1_vu=0,
+                i0_2_vu=0,
+                r0_1_vu=0,
+                r0_2_vu=0,
+            ),
+        }
+    )
 _num_initial_conditions = len(initial_conditions)
 assert _num_initial_conditions == (
     len(range(0, pop_size_1, CONFIG["grid_search_step"]["grid_step"])) * \
