@@ -1,3 +1,10 @@
+# Create a database of the solutions for our SIR model with varying
+# levels of vaccination.
+#
+# The "database" created by this script is saved in a pickle file as a
+# dictionary of lists (representing a set of tables). The schema for
+# the database that is produced is in the README.md file.
+#
 import scipy.integrate
 import scipy.optimize
 import matplotlib.pyplot as plt

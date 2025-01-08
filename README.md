@@ -125,6 +125,8 @@ parameter2 REAL
 );
 ```
 
+![](database-schema.png)
+
 Note that we have split the `outcome` and the `configuration` table
 because when using a stochastic model the outcomes are random
 variables and this allows us to reference a shared configuration
