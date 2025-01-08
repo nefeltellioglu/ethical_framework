@@ -32,6 +32,13 @@ To lint the code and keep documentation up to date:
 $ bash housekeeping.sh
 ```
 
+## Gallery
+
+[Foobar plot](./plot-glamorous-trajectories-and-loss-surfaces.py)
+
+![plot (demo I)](./out/2024-10-14_manuscript/glamorous-trajectories.png)
+![plot (demo II)](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
+
 ## Configuration
 
 To avoid magic numbers appearing thoughout the code, there is a single
