@@ -27,8 +27,8 @@ from ethics.optimisation import normalisation, get_extreme_burdens
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-10-14_manuscript.json"
-    #config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-10-28_limited_vaccine.json"
     #config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
@@ -223,7 +223,7 @@ def infection_burden_per_capita_2(sir: em.SIROutcome,
 #find best vacc parameters
 # ====================================================================
 
-ethical_a_b_list = [(0.85, 0.05)]#[(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
+ethical_a_b_list = [(0.0, 0.0), (0.99, 0.0), (0.0, 0.99)]#[(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
 
 times = 500
 if "low" in config_file: 
@@ -598,9 +598,14 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list, fnames):
         ax.text(-0.25, 1.05, subplot_labels1[ix], transform=ax.transAxes,
                 fontsize=12, fontweight='bold', va='top', ha='right')
         
+        if min(abs(plot_df[myvar])) == 0:
+            v_min = 0.01
+        else:
+            v_min = min(abs(plot_df[myvar]))
+        
         cax1 = ax.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"],
                     100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"],
-                    c=plot_df[myvar], cmap = "viridis_r"#, norm=mpl.colors.LogNorm()
+                    c=abs(plot_df[myvar]), cmap = "viridis_r", norm=mpl.colors.LogNorm(vmin = v_min, vmax = None)
                     )
         
         x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
@@ -632,9 +637,9 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list, fnames):
             else: 
                 label = subplot_labels[o_ix]#labels[idx[-1]]
                 coordx, coordy = vacc[0],vacc[1]
-                label = " - ".join([subplot_labels[i] for i in idx])
+                label = ", ".join([subplot_labels[i] for i in idx])
                 if label != subplot_labels[idx[0]]:
-                    coordx, coordy = vacc[0] -1/10 * x_max,vacc[1]
+                    coordx, coordy = vacc[0] -1/10 * x_max, vacc[1] + 1/10 * x_max
             
             
             ax.text(coordx, coordy,label ,bbox=props,c="black",weight="bold",#transform=ax.transAxes,
@@ -665,9 +670,16 @@ for ix, plot_df in enumerate(plot_df_list):
     ax = axs[ix]
     ax.text(-0.25, 1.05, subplot_labels[ix], transform=ax.transAxes,
             fontsize=12, fontweight='bold', va='top', ha='right')
+    
+    if min(abs(plot_df[myvar])) == 0:
+        v_min = 0.01
+    else:
+        v_min = min(abs(plot_df[myvar]))
+        
+
     cax1 = ax.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"],
                 100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"],
-                c=plot_df[myvar], cmap = "viridis_r"#, norm=mpl.colors.LogNorm()
+                c=abs(plot_df[myvar]), cmap = "viridis_r", norm=mpl.colors.LogNorm(vmin = v_min, vmax = None)
                 )
     x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
     cbar = fig.colorbar(cax1, ax=ax, location ='bottom',
