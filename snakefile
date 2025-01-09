@@ -24,6 +24,9 @@ rule all:
         "out/2024-10-14_manuscript/glamorous-trajectories.png",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
 
+        # New plots added by AEZ on 2025-01-08
+        "out/2024-10-14_manuscript/ab-heatmap-vaccination-part-1.png"
+
 rule make_grid_database_ode:
     input:
         "ethics/model.py",
@@ -49,7 +52,7 @@ rule plot_all_optimization_results_2:
         "out/{config_date_name}/hm_inf_vacc.png",
         "out/{config_date_name}/hm_all_burdens.png",
 	"out/{config_date_name}/hm_total_vacc_across_all.png"
-        
+
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
@@ -88,6 +91,22 @@ rule plot_glamorous_trajectories_and_loss:
     output:
         "out/{config_date_name}/glamorous-trajectories.png",
         "out/{config_date_name}/glamorous-loss_surfaces.png",
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript"
+    shell:
+        """
+        python {input.py} {input.config}
+        """
+
+rule plot_ab_heatmaps_vaccination:
+    input:
+        "ethics/model.py",
+        "ethics/optimisation.py",
+        "out/grid_database-{config_date_name}.pkl",
+        py = "plot-ab-vaccination-heatmaps.py",
+        config = "config/config-{config_date_name}.json",
+    output:
+        "out/{config_date_name}/ab-heatmap-vaccination-part-1.png"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript"
     shell:
