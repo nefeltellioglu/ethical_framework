@@ -1,3 +1,12 @@
+# This script will generate a CSV file that has all the data needed to
+# generate the AB heatmaps.
+#
+# For example: ./out/2024-10-14_manuscript/ab-heatmap-vaccination-part-1.png
+#
+# This code is takes a non-trivial amount of time to run, so it is
+# nice to be able to generate the CSV once and then plot different
+# slices of it in other scripts.
+#
 import json
 import pickle
 import pandas as pd
