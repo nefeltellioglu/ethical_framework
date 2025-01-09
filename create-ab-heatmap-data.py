@@ -259,61 +259,62 @@ burden_param_id = 0
 bp = [bp for bp in db["burden_parameters"] if bp["id"] == burden_param_id][0][
     "parameters"
 ]
-
 configs = [
     c for c in db["configurations"] if c["model_parameters_id"] == model_param_id
 ]
 config_ids = [c["id"] for c in configs]
 ocs = [o for o in db["outcomes"] if o["configuration_id"] in config_ids]
-step = CONFIG["grid_search_step"]["a_b_grid_step"]
+assert "a_b_grid_step" not in CONFIG["grid_search_step"], """
+
+Remove 'a_b_grid_step' from the configuration file.
+This is not supported.
+Instead set 'a_b_grid_num_points'.
+
+"""
+num_points = CONFIG["grid_search_step"]["a_b_grid_num_points"]
 grid_max = CONFIG["grid_search_step"]["a_b_grid_max"]
 grid_min = CONFIG["grid_search_step"]["a_b_grid_min"]
 
-
 plot_df = []
 
-for ethical_a in np.arange(grid_min, grid_max, step):
-    for ethical_b in np.arange(grid_min, grid_max - ethical_a , step):
+eth_a_vals = np.linspace(grid_min, grid_max, num_points)
+eth_b_vals = np.linspace(grid_min, grid_max, num_points)
+for eth_a, eth_b in itertools.product(eth_a_vals, eth_b_vals):
+    if eth_a + eth_b > 1:
+        continue
+    opt_ix, _ = eo.optimal_initial_condition(
+        eth_a, eth_b, model_param_id, burden_param_id, db, normalise=True
+    )
+    _optimal_ic = [ic for ic in db["initial_conditions"] if ic["id"] == opt_ix]
+    _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == opt_ix]
+    _optimal_outcome = [
+        o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
+    ]
+    ic_ab = _optimal_ic[0]["value"]
+    oc_ab = _optimal_outcome[0]["outcome"]
+    vac_1 = oc_ab.total_vac_1 / ic_ab.pop_size(1)
+    vac_2 = oc_ab.total_vac_2 / ic_ab.pop_size(2)
+    inf_1 = (oc_ab.inf_1_no_vac + oc_ab.inf_1_vu) / ic_ab.pop_size(1)
+    inf_2 = (oc_ab.inf_2_no_vac + oc_ab.inf_2_vu) / ic_ab.pop_size(2)
+    clinical_burden = total_clinical_burden(oc_ab, bp)
+    infections_burden = total_burden_infections(oc_ab, bp)
+    adverse_burden = total_burden_adverse(oc_ab, bp)
+    total_vaccination = total_vaccinations(oc_ab)
+    total_vaccination_perc = 100 * total_vaccination / (ic_ab.pop_size(1) + ic_ab.pop_size(2))
+    plot_df.append(
+        {   "a": eth_a,
+            "b": eth_b,
+            "vac_1": vac_1,
+            "vac_2": vac_2,
+            "inf_1": inf_1,
+            "inf_2": inf_2,
+            "cli_burden": clinical_burden,
+            "inf_burden": infections_burden,
+            "adv_burden": adverse_burden,
+            "total_vacc": total_vaccination,
+            "total_vacc_perc": total_vaccination_perc,
+         }
+    )
 
-        foo, _ = eo.optimal_initial_condition(
-            ethical_a, ethical_b, model_param_id, burden_param_id, db, normalise=True
-        )
-        _optimal_ic = [ic for ic in db["initial_conditions"] if ic["id"] == foo]
-        _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == foo]
-        _optimal_outcome = [
-            o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
-        ]
-        ic_ab = _optimal_ic[0]["value"]
-        oc_ab = _optimal_outcome[0]["outcome"]
-
-        # this is where outcomes are logged
-        vac_1 = oc_ab.total_vac_1 / ic_ab.pop_size(1)
-        vac_2 = oc_ab.total_vac_2 / ic_ab.pop_size(2)
-        inf_1 = (oc_ab.inf_1_no_vac + oc_ab.inf_1_vu) / ic_ab.pop_size(1)
-        inf_2 = (oc_ab.inf_2_no_vac + oc_ab.inf_2_vu) / ic_ab.pop_size(2)
-
-        clinical_burden = total_clinical_burden(oc_ab, bp)
-        infections_burden = total_burden_infections(oc_ab, bp)
-        adverse_burden = total_burden_adverse(oc_ab, bp)
-        total_vaccination = total_vaccinations(oc_ab)
-        total_vaccination_perc = 100 * total_vaccination / (ic_ab.pop_size(1) + ic_ab.pop_size(2))
-
-
-        plot_df.append(
-            {   "a": ethical_a,
-                "b": ethical_b,
-                "vac_1": vac_1,
-                "vac_2": vac_2,
-                "inf_1": inf_1,
-                "inf_2": inf_2,
-                "cli_burden": clinical_burden,
-                "inf_burden": infections_burden,
-                "adv_burden": adverse_burden,
-                "total_vacc": total_vaccination,
-                "total_vacc_perc": total_vaccination_perc,
-            }
-        )
 plot_df = pd.DataFrame(plot_df)
-
-
 plot_df.to_csv(f"{output_dir}/ab-heatmap-data.csv", index=False)
