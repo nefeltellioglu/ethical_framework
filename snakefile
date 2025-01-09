@@ -25,6 +25,7 @@ rule all:
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
 
         # New plots added by AEZ on 2025-01-08
+        "out/2024-10-14_manuscript/ab-heatmap-data.csv",
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-part-1.png"
 
 rule make_grid_database_ode:
@@ -98,11 +99,29 @@ rule plot_glamorous_trajectories_and_loss:
         python {input.py} {input.config}
         """
 
-rule plot_ab_heatmaps_vaccination:
+
+rule make_ab_heatmap_data:
     input:
         "ethics/model.py",
         "ethics/optimisation.py",
         "out/grid_database-{config_date_name}.pkl",
+        py = "create-ab-heatmap-data.py",
+        config = "config/config-{config_date_name}.json",
+    output:
+        "out/{config_date_name}/ab-heatmap-data.csv"
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript"
+    shell:
+        """
+        python {input.py} {input.config}
+        """
+
+
+rule plot_ab_heatmaps_vaccination:
+    input:
+        "ethics/model.py",
+        "ethics/optimisation.py",
+        "out/{config_date_name}/ab-heatmap-data.csv",
         py = "plot-ab-vaccination-heatmaps.py",
         config = "config/config-{config_date_name}.json",
     output:
