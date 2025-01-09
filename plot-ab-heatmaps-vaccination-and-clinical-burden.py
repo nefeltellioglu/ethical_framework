@@ -99,4 +99,4 @@ plt.subplots_adjust(left=0.1,
                     wspace=0.4,
                     hspace=0.1)
 
-fig.savefig(f"{output_dir}/ab-heatmap-vaccination-part-1.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/ab-heatmap-vaccination-and-clinical-burden.png", bbox_inches='tight', dpi=300)

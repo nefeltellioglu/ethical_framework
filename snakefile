@@ -26,7 +26,7 @@ rule all:
 
         # New plots added by AEZ on 2025-01-08
         "out/2024-10-14_manuscript/ab-heatmap-data.csv",
-        "out/2024-10-14_manuscript/ab-heatmap-vaccination-part-1.png"
+        "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png"
 
 rule make_grid_database_ode:
     input:
@@ -117,15 +117,15 @@ rule make_ab_heatmap_data:
         """
 
 
-rule plot_ab_heatmaps_vaccination:
+rule plot_ab_heatmaps_vaccination_and_clinical_burden:
     input:
         "ethics/model.py",
         "ethics/optimisation.py",
         "out/{config_date_name}/ab-heatmap-data.csv",
-        py = "plot-ab-vaccination-heatmaps.py",
+        py = "plot-ab-heatmaps-vaccination-and-clinical-burden.py",
         config = "config/config-{config_date_name}.json",
     output:
-        "out/{config_date_name}/ab-heatmap-vaccination-part-1.png"
+        "out/{config_date_name}/ab-heatmap-vaccination-and-clinical-burden.png"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript"
     shell:
