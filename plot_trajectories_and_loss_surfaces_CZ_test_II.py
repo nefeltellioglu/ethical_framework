@@ -51,6 +51,11 @@ with open(CONFIG["database_file"], "rb") as f:
 # If a vaccination limit is not given in the configuration, it assumes
 # that there is an unlimited supply.
 # ====================================================================
+
+print(70 * "=")
+print("filtering vaccination combos")
+print(70 * "=")
+
 if "vaccine_parameters" in CONFIG:
     max_vacc = CONFIG["vaccine_parameters"]['maximum_vacc_rollout']
 else:
@@ -122,6 +127,10 @@ unique_burden_param = [
 # combinations of ethical parameters a and b so that we know which
 # trajectories to plot later on.
 # ====================================================================
+
+print(70 * "=")
+print("locating optimal strategies for (a, b) examples")
+print(70 * "=")
 
 ethical_a_b_list = [(0.0, 0.0), (0.99, 0.0), (0.0, 0.99)]
 

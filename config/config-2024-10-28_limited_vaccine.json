@@ -20,7 +20,7 @@
     },
     "grid_search_step":
     {
-	"grid_step": 50000,
+	"grid_step": 20000,
 	"a_b_grid_step": 0.05,
 	"a_b_grid_max": 1,
 	"a_b_grid_min": 0
@@ -49,6 +49,11 @@
         "i0_2_vu" : 0,
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
+    },
+     "time_parameters": {
+	"start_time": 0.0,
+	"finish_time": 1000.0,
+	"num_points": 5000
     },
     "database_file": "out/grid_database-2024-10-28_limited_vaccine.pkl"
 }
