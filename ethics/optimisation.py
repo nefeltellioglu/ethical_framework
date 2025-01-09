@@ -5,6 +5,9 @@ import typing as tp
 LossTermTransformer = tp.Callable[
     tp.Tuple[float, float, float], tp.Tuple[float, float, float]
 ]
+
+
+
 def get_extreme_burdens(model_param_id: int,
             burden_param_id: int,
             db: dict,):
@@ -29,7 +32,11 @@ def get_extreme_burdens(model_param_id: int,
     )
     
     return (min_tcb, max_tcb, min_eib, max_eib, min_evb, max_evb)
-    
+
+
+
+
+
 def normalisation(
         a: float,
         b: float,
@@ -55,6 +62,10 @@ def normalisation(
     )
     return tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb,\
             tmp_loss_tcb_nonnorm, tmp_loss_eib_nonnorm, tmp_loss_evb_nonnorm
+
+
+
+
 
 def optimal_initial_condition(
     a: float,
@@ -119,6 +130,8 @@ def optimal_initial_condition(
         )
         print(f"Best loss: {best_loss}")
         return best_ic_id, best_loss
+
+
 
 
 def extreme_initial_condition(

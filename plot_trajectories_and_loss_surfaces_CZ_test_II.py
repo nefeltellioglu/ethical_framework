@@ -15,8 +15,8 @@ import seaborn as sns
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-10-14_manuscript.json"
-    # config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+     config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -303,19 +303,27 @@ g2_vac_nums = uniq_sorted(g2_vac_nums)
 loss_mtx_cb = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
 loss_mtx_ei = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
 loss_mtx_ev = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+# TODO: these need to be taken from the valid configurations. 
 for ix, g1_vac_num in enumerate(g1_vac_nums):
     for jx, g2_vac_num in enumerate(g2_vac_nums):
         ic_key = (g1_vac_num, g2_vac_num)
-        ic_obj = ics_objs[ic_key]
-        ic_id = ics_ids[ic_key]
-        cf_id = cfs[ic_id]
-        oc = ocs[cf_id]
 
-        l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
+        if ic_key in ics_objs:
 
-        loss_mtx_cb[ix, jx] = l_cb
-        loss_mtx_ei[ix, jx] = l_ei
-        loss_mtx_ev[ix, jx] = l_ev
+            ic_obj = ics_objs[ic_key]
+            ic_id = ics_ids[ic_key]
+            cf_id = cfs[ic_id]
+            oc = ocs[cf_id]
+
+            l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
+
+            loss_mtx_cb[ix, jx] = l_cb
+            loss_mtx_ei[ix, jx] = l_ei
+            loss_mtx_ev[ix, jx] = l_ev
+        else: 
+            loss_mtx_cb[ix, jx] = float("nan")
+            loss_mtx_ei[ix, jx] = float("nan")
+            loss_mtx_ev[ix, jx] = float("nan")
 
 
 # --------------------------------------------------------------------
@@ -387,23 +395,31 @@ fig.savefig(f"{output_dir}/glamorous-loss_surfaces.svg", bbox_inches='tight')
 
 loss_mtxs_ab = {}
 
-for i_ab, ethical_a_b in enumerate(ethical_a_b_list):
+for i_ab, (a, b) in enumerate(ethical_a_b_list):
 
-    loss_mtxs_ab[ethical_a_b] = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+    loss_mtxs_ab[(a, b)] = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
 
     for ix, g1_vac_num in enumerate(g1_vac_nums):
         for jx, g2_vac_num in enumerate(g2_vac_nums):
             ic_key = (g1_vac_num, g2_vac_num)
-            ic_obj = ics_objs[ic_key]
-            ic_id = ics_ids[ic_key]
-            cf_id = cfs[ic_id]
-            oc = ocs[cf_id]
 
-            l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
+            if ic_key in ics_objs:
+                ic_obj = ics_objs[ic_key]
+                ic_id = ics_ids[ic_key]
+                cf_id = cfs[ic_id]
+                oc = ocs[cf_id]
 
-            loss = em.global_loss(l_cb, l_ei, l_ev, ethical_a_b[0], ethical_a_b[1])
+                extreme_burdens = eo.get_extreme_burdens(0, 0, db)
 
-            loss_mtxs_ab[ethical_a_b][ix, jx] = loss 
+                l_cb, l_ei, l_ev, l_1, l_2, l_3 = eo.normalisation(a, b, oc, ic_obj, unique_burden_param, extreme_burdens)
+
+                loss = em.global_loss(l_cb, l_ei, l_ev, a, b)
+                #loss = (1 - a - b) * l_cb + a * l_ei + b * l_ev 
+
+                loss_mtxs_ab[(a, b)][ix, jx] = loss 
+            else:
+                loss_mtxs_ab[(a, b)][ix, jx] = float("nan") 
+
 
 
 # TODO: matrices of global loss terms over (v1, v2) for each (a, b) combo. 
