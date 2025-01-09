@@ -212,6 +212,10 @@ solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param,
 # can see what the results look like.
 # ====================================================================
 
+print(70 * "=")
+print("plotting optimal trajectories for (a, b) examples")
+print(70 * "=")
+
 fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
 subplot_labels = ['(a)', '(b)', '(c)']
 
@@ -280,6 +284,11 @@ fig.savefig(f"{output_dir}/glamorous-trajectories.svg", bbox_inches='tight')
 # Plot the loss surfaces for each of the different components along
 # with their component specific optimal and the global optimal.
 # ====================================================================
+
+print(70 * "=")
+print("plotting loss surfaces for individual components")
+print(70 * "=")
+
 
 # We start by constructing a mapping from the initial conditions to
 # the outcomes given these initial conditions so that it is easy to
@@ -396,6 +405,11 @@ fig.savefig(f"{output_dir}/glamorous-loss_surfaces.svg", bbox_inches='tight')
 # with the (a,b) specific optimal (v1, v2) combination annotated
 # ====================================================================
 
+print(70 * "=")
+print("plotting global loss surfaces")
+print(70 * "=")
+
+
 # use the previously-constructed mapping from the initial conditions to
 # the outcomes given these initial conditions so that it is easy to
 # get the data into a plottable format.
@@ -408,6 +422,8 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
 
     loss_mtxs_ab[(a, b)] = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
 
+    extreme_burdens = eo.get_extreme_burdens(0, 0, db)
+
     for ix, g1_vac_num in enumerate(g1_vac_nums):
         for jx, g2_vac_num in enumerate(g2_vac_nums):
             ic_key = (g1_vac_num, g2_vac_num)
@@ -417,8 +433,6 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
                 ic_id = ics_ids[ic_key]
                 cf_id = cfs[ic_id]
                 oc = ocs[cf_id]
-
-                extreme_burdens = eo.get_extreme_burdens(0, 0, db)
 
                 l_cb, l_ei, l_ev, l_1, l_2, l_3 = eo.normalisation(a, b, oc, ic_obj, unique_burden_param, extreme_burdens)
 
