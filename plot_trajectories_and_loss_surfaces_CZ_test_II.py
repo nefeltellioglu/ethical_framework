@@ -456,7 +456,7 @@ y_ann_shift = 5
 
 
 def annotate_global_opt(my_ax, loss_mtx):
-    min_idx = np.argmin(loss_mtx)
+    min_idx = np.nanargmin(loss_mtx)
     min_idx_g1, min_idx_g2 = np.unravel_index(min_idx, loss_mtx.shape)
     print(f"Global optimal at ({g2_vac_nums[min_idx_g2]}, {g1_vac_nums[min_idx_g1]})")
     my_ax.scatter(min_idx_g2, min_idx_g1, color="blue", s=100, marker="o")
