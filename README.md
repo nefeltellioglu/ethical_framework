@@ -151,6 +151,12 @@ def optimal_initial_condition(model_param_id: int,
 
 ## FAQs
 
+#### How do I make things run quicker during development?
+
+The simplest solution is probably to reduce the `"grid_step"` value in
+the configuration file. But you could also reduce the population sizes
+as well if you want to to run much quicker.
+
 #### How do I change the resolution of levels of vaccination?
 
 In the `grid_search_step` section of the configuration file, the
