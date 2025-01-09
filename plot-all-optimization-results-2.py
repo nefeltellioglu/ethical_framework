@@ -15,10 +15,10 @@ import os
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    # config_file = "config/config-2024-10-14_manuscript.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
     config_file = "config/config-2024-10-28_limited_vaccine.json"
     #config_file = "config/config-2024-10-14_manuscript.json"
-    config_file = "config/config-2024-12-02_limited_low_R0.json"
+    #config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
@@ -258,8 +258,6 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         # this is where outcomes are logged
         vac_1 = count_vaccinations_group_1(oc_ab) / pop_1(ic_ab)
         vac_2 = count_vaccinations_group_2(oc_ab) / pop_2(ic_ab)
-        if vac_2 >= 1:
-            print("here")
         inf_1 = count_infections_group_1(oc_ab) / pop_1(ic_ab)
         inf_2 = count_infections_group_2(oc_ab) / pop_2(ic_ab)
         
@@ -268,7 +266,7 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         adverse_burden = total_burden_adverse(oc_ab, bp)
         
         total_vaccination = total_vaccinations(oc_ab)
-
+        total_vaccination_perc = 100 * total_vaccination / (pop_1(ic_ab) + pop_2(ic_ab))
         p_adverse_1 = adverse_per_capita_1(oc_ab, bp, ic_ab)
         p_adverse_2 = adverse_per_capita_2(oc_ab, bp, ic_ab)
 
@@ -291,6 +289,7 @@ for ethical_a in np.arange(grid_min, grid_max, step):
                 "inf_burden": infections_burden,
                 "adv_burden": adverse_burden,
                 "total_vacc": total_vaccination,
+                "total_vacc_perc": total_vaccination_perc,
                 "p_adverse_1": p_adverse_1,
                 "p_adverse_2": p_adverse_2,
                 "p_infburd_1": p_infection_burden_1,
@@ -357,12 +356,12 @@ figsize=(7,8)#no in x axis, no in yaxis
 labels = ('A', 'B', 'C', 'D', 'E', 'F')
 j = 0
 fig = plt.figure(figsize=figsize)
-variables = ["inf_1", "inf_2", "vac_1", "vac_2"]
-titles = ["Infections in group 1 (%)",
-          "Infections in group 2 (%)",
+variables = ["cli_burden", "total_vacc_perc", "vac_1", "vac_2"]
+titles = ["Total Clinical Burden",
+          "Total vaccination (%)",
           "Vaccinations in group 1 (%)",
           "Vaccinations in group 2 (%)"]
-colors = ["rocket_r", "rocket_r", "viridis_r", "viridis_r"]
+colors = ["rocket_r", "viridis_r", "viridis_r", "viridis_r"]
 #sns.set(font_scale = 0.9)
 for var, title, color in zip(variables, titles, colors):
     no = 221 + j
@@ -371,7 +370,8 @@ for var, title, color in zip(variables, titles, colors):
       fontsize=12, fontweight='bold', va='top', ha='right')
     j += 1
     
-    if var in ["cli_burden", "total_vacc", "inf_burden", "adv_burden"]:
+    if var in ["cli_burden", "total_vacc_perc", "total_vacc",
+               "inf_burden", "adv_burden"]:
         perc_var = var
     elif var in [ "inf_1", "inf_2","vac_1", "vac_2"]:
         perc_var = "%s_perc"%var
@@ -393,7 +393,7 @@ for var, title, color in zip(variables, titles, colors):
                                "pad":0.25},
                      cmap=color,annot=False, fmt='.0f')
     #plt.gca().collections[0].set_clim(min(plot_df[perc_var]),max(plot_df[perc_var]))
-    if var in [ "vac_1", "vac_2"]:
+    if var in [ "vac_1", "vac_2", "total_vacc_perc"]:
         plt.gca().collections[0].set_clim(0,100)
     #plt.setp(ax._legend.legendHandles, fontsize=16)
     cax = ax.figure.axes[-1]
@@ -422,7 +422,7 @@ labels = ["Infections in group 1 (%)",
           "Infections in group 2 (%)",
           "Vaccinations in group 1 (%)",
           "Vaccinations in group 2 (%)",
-          "Total Clinical Burden",
+          "Total Clinical Burden (days)",
           "Total Number of Vaccinated Individuals"]
 colors = ["rocket_r", "rocket_r", "viridis_r", "viridis_r", "rocket_r", "viridis_r"]
 for var, label, color in zip(variables, labels, colors):
