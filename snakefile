@@ -20,6 +20,9 @@ rule all:
         "out/2024-12-02_unlimited_high_R0/trajectories.png",
         "out/2024-12-02_unlimited_low_R0/trajectories.png",
 	
+        # New plots added by AEZ on 2025-01-08
+        "out/2024-10-14_manuscript/glamorous-trajectories.png",
+        "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
 
 rule make_grid_database_ode:
     input:
@@ -74,5 +77,20 @@ rule plot_selected_trajectories:
         """
         python {input.py} {input.config}
         """
-        
 
+rule plot_glamorous_trajectories_and_loss:
+    input:
+        "ethics/model.py",
+        "ethics/optimisation.py",
+        "out/grid_database-{config_date_name}.pkl",
+        py = "plot-glamorous-trajectories-and-loss-surfaces.py",
+        config = "config/config-{config_date_name}.json",
+    output:
+        "out/{config_date_name}/glamorous-trajectories.png",
+        "out/{config_date_name}/glamorous-loss_surfaces.png",
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript"
+    shell:
+        """
+        python {input.py} {input.config}
+        """

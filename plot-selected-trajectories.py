@@ -27,9 +27,9 @@ from ethics.optimisation import normalisation, get_extreme_burdens
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    #config_file = "config/config-2024-10-14_manuscript.json"
-    config_file = "config/config-2024-10-28_limited_vaccine.json"
-    config_file = "config/config-2024-12-02_limited_low_R0.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
+    #config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 # NOTE This assumes the configuration file is named with the format
 # `config-YYYY-MM-DD-<some_name>.json`. The `config_date_name` is used
@@ -223,7 +223,7 @@ def infection_burden_per_capita_2(sir: em.SIROutcome,
 #find best vacc parameters
 # ====================================================================
 
-ethical_a_b_list = [(0.05, 0.05), (0.85, 0.05), (0.05, 0.85)]
+ethical_a_b_list = [(0.0, 0.0), (0.99, 0.0), (0.0, 0.99)]
 
 times = 500
 if "low" in config_file: 
@@ -387,69 +387,6 @@ _num_solutions = len(solutions)
 assert _num_solutions == _num_configurations
 
 
-# ====================================================================
-#plot three trajectories
-# ====================================================================
-
-fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
-subplot_labels = ['A', 'B', 'C']
-
-# TODO These colour codes should not be hard-coded, but they are just
-# colorbrewer2 8-class Dark2 values so they shouldn't be too
-# mysterious for now.
-green_hex = "#1b9e77"
-orange_hex = "#d95f02"
-
-for ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
-    ax = axs[ix]
-    ax.text(-0.25, 1.15, subplot_labels[ix], transform=ax.transAxes,
-            fontsize=12, fontweight='bold', va='top', ha='right')
-
-    total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
-    total_s2 = 100 * (sol.s2 + sol.s2_vp + sol.s2_vu) / pop_size_2
-    total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
-    total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
-
-    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 Susceptibles")
-    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 Susceptibles")
-    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 Infecteds")
-    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 Infecteds")
-
-    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
-
-    ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
-                 )
-
-    textstr = '\n'.join((
-        'Optimal vaccination',
-    f'Group 1: {vacc[0]}%',
-    f'Group 2: {vacc[1]}%',
-    ))
-
-    props = {"facecolor":"white", "alpha":1.0}
-    if (total_s1[-1] > 60) or (total_s2[-1] > 60):
-        ax.text(0.315, 0.5, textstr, transform=ax.transAxes, #fontsize=14,
-            verticalalignment='top', horizontalalignment='left', bbox=props)
-    else:
-        # place a text box in upper left in axes coords
-        ax.text(0.315, 0.97, textstr, transform=ax.transAxes, #fontsize=14,
-            verticalalignment='top', horizontalalignment='left', bbox=props)
-
-    ax.set_xlabel('Day')
-    ax.set_ylabel('Group percentage (%)')
-    ax.legend().set_visible(False)
-
-ax.legend().set_visible(True)
-ax.legend(loc= "lower center", bbox_to_anchor=(-0.9,-0.55), ncol= 2)
-plt.subplots_adjust(left=0.1,
-            bottom=0.1,
-            right=0.9,
-            top=0.9,
-            wspace=0.4,
-            hspace=0.4)
-
-fig.savefig(f"{output_dir}/trajectories.png", bbox_inches='tight', dpi=300)
-fig.savefig(f"{output_dir}/trajectories.svg", bbox_inches='tight')
 
 
 # ====================================================================
@@ -566,7 +503,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
 # Put a single large red dot at the best outcome.
 
 
-plot_df = plot_df_list[0]
+"""plot_df = plot_df_list[0]
 myvars_list = [["cli_burden", "inf_burden", "adv_burden"],
           ["loss_tcb", "loss_eib", "loss_evb"],
           ["tcb", "teib", "tevb"]]
@@ -597,11 +534,11 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
                   pad = 0.23)
         
         #cbar = plt.colorbar(ax = ax)
-        """if mylabel in ["Loss in equity in\ninfection burden", 
-                       "Loss in equity in\nvaccination burden"]:
-            cbar.set_label(mylabel,rotation=270, labelpad = 20, )
-        else:
-            cbar.set_label(mylabel,rotation=270, labelpad = 10, )"""
+        #if mylabel in ["Loss in equity in\ninfection burden", 
+        #               "Loss in equity in\nvaccination burden"]:
+        #    cbar.set_label(mylabel,rotation=270, labelpad = 20, )
+        #else:
+        #    cbar.set_label(mylabel,rotation=270, labelpad = 10, )
         cbar.set_label(mylabel)
         ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
         ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
@@ -641,44 +578,101 @@ for myvars, mylabels, fname in zip(myvars_list, mylabels_list,fnames):
     #plt.savefig(f"{output_dir}/example-optimisation-results-perc.svg")
     #plt.show()
     #plt.clf()
+    """
     
+# ====================================================================
+#plot three trajectories
+# ====================================================================
+
+fig, axs = plt.subplots(2, 3, figsize=(10, 7))
+subplot_labels = ['A', 'B', 'C', 'D', 'E', 'F']
+
+# TODO These colour codes should not be hard-coded, but they are just
+# colorbrewer2 8-class Dark2 values so they shouldn't be too
+# mysterious for now.
+green_hex = "#1b9e77"
+orange_hex = "#d95f02"
+
+for ix, (c, sol, (a,b)) in enumerate(zip(configurations, solutions, ethical_a_b_list)):
+    ax = axs[0, ix]
+    ax.text(-0.3, 1.15, subplot_labels[ix], transform=ax.transAxes,
+            fontsize=12, fontweight='bold', va='top', ha='right')
+
+    total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
+    total_s2 = 100 * (sol.s2 + sol.s2_vp + sol.s2_vu) / pop_size_2
+    total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
+    total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
+
+    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 Susceptibles")
+    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 Susceptibles")
+    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 Infecteds")
+    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 Infecteds")
+
+    vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
+
+    ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
+                 )
+
+    textstr = '\n'.join((
+        'Optimal vaccination',
+    f'Group 1: {vacc[0]}%',
+    f'Group 2: {vacc[1]}%',
+    ))
+
+    props = {"facecolor":"white", "alpha":1.0}
+    if (total_s1[-1] > 60) or (total_s2[-1] > 60):
+        ax.text(0.315, 0.5, textstr, transform=ax.transAxes, #fontsize=14,
+            verticalalignment='top', horizontalalignment='left', bbox=props)
+    else:
+        # place a text box in upper left in axes coords
+        ax.text(0.315, 0.97, textstr, transform=ax.transAxes, #fontsize=14,
+            verticalalignment='top', horizontalalignment='left', bbox=props)
+
+    ax.set_xlabel('Day')
+    ax.set_ylabel('Group percentage (%)')
+    ax.legend().set_visible(False)
+
+ax.legend().set_visible(True)
+ax.legend(loc= "lower center", bbox_to_anchor=(-0.9,-0.46), ncol= 2)
+
 fname = "Aggregated_loss"
 myvar = "loss"
 mylabel = "$L$"
-fig, axs = plt.subplots(1, 3, figsize=(10, 4))
-subplot_labels = ['A', 'B', 'C']
 
-
-for ix, plot_df in enumerate(plot_df_list):
-    ax = axs[ix]
-    ax.text(-0.25, 1.05, subplot_labels[ix], transform=ax.transAxes,
+for ix, (plot_df, (a,b)) in enumerate(zip(plot_df_list, ethical_a_b_list)):
+    ax = axs[1,ix]
+    ax.text(-0.3, 1.25, subplot_labels[3 + ix], transform=ax.transAxes,
             fontsize=12, fontweight='bold', va='top', ha='right')
     cax1 = ax.scatter(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"],
                 100 * plot_df["vac_2"]/CONFIG["population_parameters"]["pop_size_2"],
-                c=plot_df[myvar], cmap = "viridis_r"#, norm=mpl.colors.LogNorm()
+                c=plot_df[myvar], cmap = "viridis_r", marker = "s",#, norm=mpl.colors.LogNorm()
                 )
     x_max = max(100 * plot_df["vac_1"]/CONFIG["population_parameters"]["pop_size_1"])
     cbar = fig.colorbar(cax1, ax=ax, location ='bottom',
-              pad = 0.23)
+              pad = 0.35)
     #cbar = plt.colorbar(ax = ax)
     cbar.set_label(mylabel)
     ax.set_xlabel("Total Vaccinations\nin Group 1 (%)")
     ax.set_ylabel("Total Vaccinations\nin Group 2 (%)")
-    
+    ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
+                 )
     vacc = [int(100 * x/y) for (x, y) in zip(selected_vaccinations[ix], (pop_size_1, pop_size_2))]
     
-    ax.text(vacc[0],vacc[1],subplot_labels[ix],bbox=props,c="black",weight="bold",#transform=ax.transAxes,
-                #100 * best_vac_2/CONFIG["population_parameters"]["pop_size_2"],
-                #s=500,  marker="o"
-                )
+    #ax.text(vacc[0],vacc[1],subplot_labels[ix],bbox=props,c="black",weight="bold",)
+    ax.scatter(vacc[0],vacc[1],c="red", s= 25,)
+
+
+
+
 
 plt.subplots_adjust(left=0.1,
-            bottom=0.1, 
-            right=0.9, 
-            top=0.9, 
-            wspace=0.4, 
+            bottom=0.1,
+            right=0.9,
+            top=0.9,
+            wspace=0.4,
             hspace=0.6)
-plt.savefig(f"{output_dir}/example-optimisation-%s.png"%fname, 
-            bbox_inches='tight', dpi=300)
-#plt.savefig(f"{output_dir}/example-optimisation-results-perc.svg")
-#plt.show()
+
+fig.savefig(f"{output_dir}/trajectories.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/trajectories.svg", bbox_inches='tight')    
+    
+    
