@@ -15,8 +15,8 @@ import seaborn as sns
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-10-14_manuscript.json"
-     #config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+     config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -457,13 +457,8 @@ y_ann_shift = 5
 
 def annotate_global_opt(my_ax, loss_mtx):
     min_idx = np.argmin(loss_mtx)
-    min_idx_g1, min_idx_g2 = np.unravel_index(min_idx, loss_mtx_cb.shape)
+    min_idx_g1, min_idx_g2 = np.unravel_index(min_idx, loss_mtx.shape)
     print(f"Global optimal at ({g2_vac_nums[min_idx_g2]}, {g1_vac_nums[min_idx_g1]})")
-    tmp = min_idx_g1 - 2 * y_ann_shift
-    y_ann_ix = tmp if tmp > 0 else min_idx_g1 + 2 * y_ann_shift
-    tmp = min_idx_g2 - x_ann_shift
-    x_ann_ix = tmp if tmp > 0 else min_idx_g2
-    #my_ax.annotate("Global optimal", (x_ann_ix, y_ann_ix), color="blue")
     my_ax.scatter(min_idx_g2, min_idx_g1, color="blue", s=100, marker="o")
 
 
