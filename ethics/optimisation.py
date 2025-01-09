@@ -177,7 +177,10 @@ def extreme_initial_condition(
         tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = transform(
             em.loss_terms(oc["outcome"], tmp_ic, bp)
         )
-        tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
+
+        #tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
+        tmp_loss = em.global_loss(tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb, a, b)
+
         if (minimise and (tmp_loss < best_loss)) or (
             (not minimise) and (tmp_loss > best_loss)
         ):

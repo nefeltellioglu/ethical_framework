@@ -756,3 +756,15 @@ def loss_terms(
         loss_equity_of_infection_burden,
         loss_equity_of_vaccination_burden,
     )
+
+def global_loss(
+    loss_total_clinical_burden: float,
+    loss_equity_of_infection_burden: float,
+    loss_equity_of_vaccination_burden: float,
+    weight_EI:float,
+    weight_EV:float
+) -> (float):
+    loss = (1 - weight_EI - weight_EV) * loss_total_clinical_burden + \
+           weight_EI * loss_equity_of_infection_burden + \
+           weight_EV * loss_equity_of_vaccination_burden
+    return loss
