@@ -35,11 +35,6 @@ with open(config_file, "r") as f:
 
 output_dir = f"out/{config_date_name}"
 os.makedirs(output_dir, exist_ok=True)
-
-with open(CONFIG["database_file"], "rb") as f:
-    db = pickle.load(f)
-    assert len(db["model_parameters"]) == 1
-
 plot_df = pd.read_csv(f"{output_dir}/ab-heatmap-data.csv")
 
 # ====================================================================
@@ -103,4 +98,4 @@ ax[2].set_yticks([])
 ax[2].set_xticks([])
 
 fig.savefig(f"{output_dir}/ab-heatmap-group-vaccination.png", bbox_inches='tight', dpi=300)
-fig.savefig(f"{output_dir}/ab-heatmap-group-vaccination.svg", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/ab-heatmap-group-vaccination.svg", bbox_inches='tight')
