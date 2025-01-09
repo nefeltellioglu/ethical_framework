@@ -288,6 +288,7 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         infections_burden = total_burden_infections(oc_ab, bp)
         adverse_burden = total_burden_adverse(oc_ab, bp)
         total_vaccination = total_vaccinations(oc_ab)
+        total_vaccination_perc = 100 * total_vaccination / (pop_1(ic_ab) + pop_2(ic_ab))
 
 
         plot_df.append(
@@ -301,6 +302,7 @@ for ethical_a in np.arange(grid_min, grid_max, step):
                 "inf_burden": infections_burden,
                 "adv_burden": adverse_burden,
                 "total_vacc": total_vaccination,
+                "total_vacc_perc": total_vaccination_perc,
             }
         )
 plot_df = pd.DataFrame(plot_df)
