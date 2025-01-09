@@ -137,13 +137,6 @@ def burden_adverse_group_2(
             * sir.total_vac_2
             * dbp.prop_hosp_vacc_2)
 
-# count of infections
-def count_infections_group_1(sir: em.SIROutcome) -> float:
-    return(sir.inf_1_no_vac + sir.inf_1_vu)
-
-def count_infections_group_2(sir: em.SIROutcome) -> float:
-    return(sir.inf_2_no_vac + sir.inf_2_vu)
-
 #burden from infections in unvaccinated people (group 1)
 def burden_infections_group_1_noVacc(
     sir: em.SIROutcome, dbp: em.BurdenParams
@@ -296,8 +289,8 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         # this is where outcomes are logged
         vac_1 = oc_ab.total_vac_1 / ic_ab.pop_size(1)
         vac_2 = oc_ab.total_vac_2 / ic_ab.pop_size(2)
-        inf_1 = count_infections_group_1(oc_ab) / ic_ab.pop_size(1)
-        inf_2 = count_infections_group_2(oc_ab) / ic_ab.pop_size(2)
+        inf_1 = (oc_ab.inf_1_no_vac + oc_ab.inf_1_vu) / ic_ab.pop_size(1)
+        inf_2 = (oc_ab.inf_2_no_vac + oc_ab.inf_2_vu) / ic_ab.pop_size(2)
 
         clinical_burden = total_clinical_burden(oc_ab, bp)
         infections_burden = total_burden_infections(oc_ab, bp)
