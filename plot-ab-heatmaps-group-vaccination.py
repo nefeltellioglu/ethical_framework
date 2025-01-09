@@ -54,7 +54,6 @@ You will need to post-process this in a vector graphics
 editor to remove the dummy plot.
 =======================================================
 """)
-fig.clf()
 colourbar_title = 'Vaccination (%)'
 colour_scheme = "viridis_r"
 fig, ax = plt.subplots(1, 3, figsize=(15, 4), gridspec_kw={'wspace': 0.2})
