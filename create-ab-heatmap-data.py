@@ -144,12 +144,6 @@ def count_infections_group_1(sir: em.SIROutcome) -> float:
 def count_infections_group_2(sir: em.SIROutcome) -> float:
     return(sir.inf_2_no_vac + sir.inf_2_vu)
 
-def count_vaccinations_group_1(sir: em.SIROutcome) -> float:
-    return sir.total_vac_1
-
-def count_vaccinations_group_2(sir: em.SIROutcome) -> float:
-    return sir.total_vac_2
-
 #burden from infections in unvaccinated people (group 1)
 def burden_infections_group_1_noVacc(
     sir: em.SIROutcome, dbp: em.BurdenParams
@@ -217,36 +211,6 @@ def total_clinical_burden(sir:em.SIROutcome, dbp: em.BurdenParams) -> float:
     return (total_burden_infections(sir, dbp) +
             total_burden_adverse(sir, dbp))
 
-
-# per-capita burdens:
-def pop_1(ic: em.SIRInitialCondition) -> int:
-    return ic.pop_size(1)
-
-def pop_2(ic: em.SIRInitialCondition) -> int:
-    return ic.pop_size(2)
-
-def total_pop(ic: em.SIRInitialCondition) -> int:
-    return (pop_1(ic) + pop_2(ic))
-
-def adverse_per_capita_1(sir: em.SIROutcome,
-                         dbp: em.BurdenParams,
-                         ic: em.SIRInitialCondition) -> float:
-    return(burden_adverse_group_1(sir, dbp) / pop_1(ic))
-
-def adverse_per_capita_2(sir: em.SIROutcome,
-                         dbp: em.BurdenParams,
-                         ic: em.SIRInitialCondition) -> float:
-    return(burden_adverse_group_2(sir, dbp) / pop_2(ic))
-
-def infection_burden_per_capita_1(sir: em.SIROutcome,
-                                  dbp: em.BurdenParams,
-                                  ic: em.SIRInitialCondition) -> float:
-    return(total_burden_infections_group_1(sir, dbp) / pop_1(ic))
-
-def infection_burden_per_capita_2(sir: em.SIROutcome,
-                                  dbp: em.BurdenParams,
-                                  ic: em.SIRInitialCondition) -> float:
-    return(total_burden_infections_group_2(sir, dbp) / pop_2(ic))
 
 
 
@@ -330,16 +294,16 @@ for ethical_a in np.arange(grid_min, grid_max, step):
         oc_ab = _optimal_outcome[0]["outcome"]
 
         # this is where outcomes are logged
-        vac_1 = count_vaccinations_group_1(oc_ab) / pop_1(ic_ab)
-        vac_2 = count_vaccinations_group_2(oc_ab) / pop_2(ic_ab)
-        inf_1 = count_infections_group_1(oc_ab) / pop_1(ic_ab)
-        inf_2 = count_infections_group_2(oc_ab) / pop_2(ic_ab)
+        vac_1 = oc_ab.total_vac_1 / ic_ab.pop_size(1)
+        vac_2 = oc_ab.total_vac_2 / ic_ab.pop_size(2)
+        inf_1 = count_infections_group_1(oc_ab) / ic_ab.pop_size(1)
+        inf_2 = count_infections_group_2(oc_ab) / ic_ab.pop_size(2)
 
         clinical_burden = total_clinical_burden(oc_ab, bp)
         infections_burden = total_burden_infections(oc_ab, bp)
         adverse_burden = total_burden_adverse(oc_ab, bp)
         total_vaccination = total_vaccinations(oc_ab)
-        total_vaccination_perc = 100 * total_vaccination / (pop_1(ic_ab) + pop_2(ic_ab))
+        total_vaccination_perc = 100 * total_vaccination / (ic_ab.pop_size(1) + ic_ab.pop_size(2))
 
 
         plot_df.append(
