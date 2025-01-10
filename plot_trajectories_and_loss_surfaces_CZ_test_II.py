@@ -331,13 +331,18 @@ loss_ei = np.zeros((num_rows))
 loss_ev = np.zeros((num_rows))
 # TODO: these need to be taken from the valid configurations. 
 iter = -1
+
+# populations are constant: 
+pop_1 = em.pop_1(ics_objs[(0, 0)])
+pop_2 = em.pop_2(ics_objs[(0, 0)])
+
 for ix, g1_vac_num in enumerate(g1_vac_nums):
     for jx, g2_vac_num in enumerate(g2_vac_nums):
 
         iter += 1
 
-        v1[iter] = g1_vac_num
-        v2[iter] = g2_vac_num
+        v1[iter] = g1_vac_num / pop_1
+        v2[iter] = g2_vac_num / pop_2
 
         ic_key = (g1_vac_num, g2_vac_num)
 
@@ -348,18 +353,16 @@ for ix, g1_vac_num in enumerate(g1_vac_nums):
             cf_id = cfs[ic_id]
             oc = ocs[cf_id]
 
+
+
             l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
 
-            # loss_mtx_cb[ix, jx] = l_cb
-            # loss_mtx_ei[ix, jx] = l_ei
-            # loss_mtx_ev[ix, jx] = l_ev
+
             loss_cb[iter] = l_cb
             loss_ei[iter] = l_ei
             loss_ev[iter] = l_ev
         else: 
-            # loss_mtx_cb[ix, jx] = float("nan")
-            # loss_mtx_ei[ix, jx] = float("nan")
-            # loss_mtx_ev[ix, jx] = float("nan")
+
             loss_cb[iter] = float("nan")
             loss_ei[iter] = float("nan")
             loss_ev[iter] = float("nan")
@@ -384,14 +387,21 @@ x_ann_shift = 5
 y_ann_shift = 5
 
 def setup_axes(my_ax, g2_vac_nums, g1_vac_nums):
-    my_ax.set_xticks(range(len(g2_vac_nums)), labels=g2_vac_nums, rotation=45)
-    my_ax.set_xlabel("Group 2 vaccinations")
+
+    x_ticks_thinned = range(0, len(g2_vac_nums), 2)
+    x_labels_thinned = [round(g2_vac_nums[i]/pop_2, 2) for i in x_ticks_thinned]
+    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45)
+    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)")
+
     y_ticks_thinned = range(0, len(g1_vac_nums), 7)
-    y_labels_thinned = [g1_vac_nums[i] for i in y_ticks_thinned]
+    y_labels_thinned = [round(g1_vac_nums[i]/pop_1,2) for i in y_ticks_thinned]
     my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned)
-    my_ax.set_ylabel("Group 1 vaccinations")
+    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)")
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
+    #colorbar font size: 
+    my_ax.figure.axes[-1].xaxis.label.set_size(14)
+    my_ax.figure.axes[-1].xaxis.set_label_coords(0.5, 3.0)
 
 def annotate_vacc_opt_choice(my_ax, opt_vacc_strat):
     for (name, (g1_v, g2_v)) in zip(["A", "B", "C"], opt_vacc_strat.values()):
@@ -468,8 +478,9 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
         for jx, g2_vac_num in enumerate(g2_vac_nums):
 
             iter += 1
-            v1[iter] = g1_vac_num
-            v2[iter] = g2_vac_num
+
+            v1[iter] = g1_vac_num / pop_1
+            v2[iter] = g2_vac_num / pop_2
 
             ic_key = (g1_vac_num, g2_vac_num)
 
@@ -521,36 +532,54 @@ fig, ax = plt.subplots(1, 3, figsize=(15, 9))
 ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
+
+
 # ....................................................................
 #im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
+cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+             str(ethical_a_b_list[0][0]) + \
+             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm(vmin = vmin_ab, clip=True))
+                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+                 norm=LogNorm(vmin = vmin_ab, clip=True))
 im.invert_yaxis()
-ax_cb.set_title("L", fontweight="bold")
 setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_cb, loss_mtx)
+
+
 # ....................................................................
 #im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[1]]
+cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+             str(ethical_a_b_list[1][0]) + \
+             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+
 vmin_ab = find_vmin(loss_mtx)
+
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm(vmin = vmin_ab, clip=True))
+                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+                 norm=LogNorm(vmin = vmin_ab, clip=True))
 im.invert_yaxis()
-ax_ei.set_title("L", fontweight="bold")
 setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ei, loss_mtx)
+
+
 # ....................................................................
 #im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[2]]
+cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+             str(ethical_a_b_list[2][0]) + \
+             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
-                 cbar_kws=dict(location='bottom'),norm=LogNorm(vmin = vmin_ab, clip=True))
+                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+                 norm=LogNorm(vmin = vmin_ab, clip=True))
 im.invert_yaxis()
-ax_ev.set_title("L", fontweight="bold")
 setup_axes(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ev, loss_mtx)
 # ....................................................................
