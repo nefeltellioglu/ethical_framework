@@ -11,6 +11,8 @@ import ethics.model as em
 import ethics.optimisation as eo
 import numpy as np
 
+from matplotlib.colors import LogNorm
+
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
@@ -47,14 +49,22 @@ colour_scheme = "viridis_r"
 cb_df = plot_df.pivot(index="b", columns="a", values="cli_burden")
 
 fig = plt.figure(figsize=(7, 8))
+d_cb = max(cb_df.max()) - min(cb_df)
+
 cb_heatmap = sns.heatmap(cb_df, cmap=colour_scheme,
                          cbar_kws={'label': colourbar_title,
                                    'location': 'bottom',
-                                   'shrink': 0.5,},
+                                   'shrink': 0.5},
                          linewidths=0.5,
                          square=True,
                          yticklabels=cb_df.index.values.round(2),
-                         xticklabels=cb_df.columns.values.round(2))
+                         xticklabels=cb_df.columns.values.round(2))#,
+                         #norm = LogNorm())
+
+cb_heatmap.figure.axes[1].ticklabel_format(scilimits=(0,2))
+
+for label in cb_heatmap.figure.axes[1].get_xticklabels():
+     label.set_rotation(0)
 
 for label in cb_heatmap.get_yticklabels():
     label.set_rotation(0)

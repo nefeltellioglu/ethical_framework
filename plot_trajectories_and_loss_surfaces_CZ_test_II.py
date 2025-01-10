@@ -11,7 +11,7 @@ import ethics.optimisation as eo
 import numpy as np
 import seaborn as sns
 
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm
 
 
 if len(sys.argv) > 1:
@@ -35,7 +35,7 @@ print(70 * "=")
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-output_dir = f"out/CZ_test_II/glam/{config_date_name}"
+output_dir = f"out/CZ_test_II/{config_date_name}"
 os.makedirs(output_dir, exist_ok=True)
 
 with open(CONFIG["database_file"], "rb") as f:
@@ -247,7 +247,13 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 
     vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
-    ax.set_title(f'a = {a}, b = {b}', fontweight="bold"#, size = 8
+# r'$\mathcal{L}(w_{EI} = $' + \
+#              str(ethical_a_b_list[0][0]) + \
+#              r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+
+    title_text = r'$w_{EI} =$' +  str(a) + r', $w_{EV} = $' + str(b)
+
+    ax.set_title(title_text,#, size = 8
                  )
 
     textstr = '\n'.join((
@@ -391,12 +397,12 @@ def setup_axes(my_ax, g2_vac_nums, g1_vac_nums):
     x_ticks_thinned = range(0, len(g2_vac_nums), 2)
     x_labels_thinned = [round(g2_vac_nums[i]/pop_2, 2) for i in x_ticks_thinned]
     my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45)
-    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)")
+    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)",size=14)
 
     y_ticks_thinned = range(0, len(g1_vac_nums), 7)
     y_labels_thinned = [round(g1_vac_nums[i]/pop_1,2) for i in y_ticks_thinned]
     my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned)
-    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)")
+    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)", size=14)
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
     #colorbar font size: 
