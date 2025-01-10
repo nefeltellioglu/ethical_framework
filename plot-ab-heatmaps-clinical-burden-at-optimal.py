@@ -17,8 +17,8 @@ from matplotlib.colors import LogNorm
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-10-14_manuscript.json"
-    # config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+     config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
