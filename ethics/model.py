@@ -779,6 +779,22 @@ def global_loss(
 #### ====================================================================
 #define function to calculate total burden from SIROutcome object
 # burden from adverse vaccination reactions (group 1)
+
+# count of infections
+def count_infections_group_1(sir: SIROutcome) -> float:
+    return(sir.inf_1_no_vac + sir.inf_1_vu)
+
+def count_infections_group_2(sir: SIROutcome) -> float:
+    return(sir.inf_2_no_vac + sir.inf_2_vu)
+
+def count_vaccinations_group_1(sir: SIROutcome) -> float:
+    return sir.total_vac_1
+
+def count_vaccinations_group_2(sir: SIROutcome) -> float:
+    return sir.total_vac_2
+
+
+
 def burden_adverse_group_1(
     sir: SIROutcome, dbp: BurdenParams
     ) -> float:
@@ -842,7 +858,7 @@ def total_burden_infections_group_2(
     return (tot)
 
 
-def total_vaccinations(sir: em.SIROutcome) -> float:
+def total_vaccinations(sir: SIROutcome) -> float:
     return (sir.total_vac_1 + sir.total_vac_2)
 
 # aggregate burden components
@@ -861,3 +877,32 @@ def total_clinical_burden(sir:SIROutcome, dbp: BurdenParams) -> float:
     return (total_burden_infections(sir, dbp) +
             total_burden_adverse(sir, dbp))
 
+# per-capita burdens: 
+def pop_1(ic: SIRInitialCondition) -> int:
+    return ic.pop_size(1)
+
+def pop_2(ic: SIRInitialCondition) -> int:
+    return ic.pop_size(2)
+
+def total_pop(ic: SIRInitialCondition) -> int:
+    return (pop_1(ic) + pop_2(ic))
+
+def adverse_per_capita_1(sir: SIROutcome, 
+                         dbp: BurdenParams, 
+                         ic: SIRInitialCondition) -> float:
+    return(burden_adverse_group_1(sir, dbp) / pop_1(ic))
+
+def adverse_per_capita_2(sir: SIROutcome, 
+                         dbp: BurdenParams, 
+                         ic: SIRInitialCondition) -> float:
+    return(burden_adverse_group_2(sir, dbp) / pop_2(ic)) 
+
+def infection_burden_per_capita_1(sir: SIROutcome, 
+                                  dbp: BurdenParams, 
+                                  ic: SIRInitialCondition) -> float:
+    return(total_burden_infections_group_1(sir, dbp) / pop_1(ic))
+
+def infection_burden_per_capita_2(sir: SIROutcome, 
+                                  dbp: BurdenParams, 
+                                  ic: SIRInitialCondition) -> float:
+    return(total_burden_infections_group_2(sir, dbp) / pop_2(ic)) 
