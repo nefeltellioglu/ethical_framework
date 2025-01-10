@@ -42,7 +42,9 @@ print(70 * "=")
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-output_dir = f"out/{config_date_name}"
+# specify output dir
+output_dir = f"out/CZ_test_II/{config_date_name}"
+
 os.makedirs(output_dir, exist_ok=True)
 
 with open(CONFIG["database_file"], "rb") as f:
@@ -82,175 +84,6 @@ db = {
     "burden_parameters": db["burden_parameters"]
 }
 # ====================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### ====================================================================
-#define function to calculate total burden from SIROutcome object
-# burden from adverse vaccination reactions (group 1)
-def burden_adverse_group_1(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.days_hosp_vacc_1
-            * sir.total_vac_1
-            * dbp.prop_hosp_vacc_1)
-
-# burden from adverse vaccination reactions (group 2)
-def burden_adverse_group_2(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.days_hosp_vacc_2
-            * sir.total_vac_2
-            * dbp.prop_hosp_vacc_2)
-
-#burden from infections in unvaccinated people (group 1)
-def burden_infections_group_1_noVacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.prop_hosp_inf_1 *
-            dbp.days_hosp_inf_1 * sir.inf_1_no_vac)
-
-# burden from infections in unvaccinated people (group 2)
-def burden_infections_group_2_noVacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.prop_hosp_inf_2 *
-            dbp.days_hosp_inf_2 * sir.inf_2_no_vac)
-
-#burden from infections in vaccinated people (group 1)
-def burden_infections_group_1_Vacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.prop_hosp_inf_1 *
-            (1 - dbp.vacc_protection_from_disease_1) *
-            dbp.days_hosp_inf_1 *
-            sir.inf_1_vu )
-
-#burden from infections in vaccinated people (group 2)
-def burden_infections_group_2_Vacc(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    return (dbp.prop_hosp_inf_2 *
-            (1 - dbp.vacc_protection_from_disease_2) *
-            dbp.days_hosp_inf_2 *
-            sir.inf_2_vu )
-
-# total infection burden group 1
-def total_burden_infections_group_1(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    tot= (burden_infections_group_1_noVacc(sir, dbp) +
-            burden_infections_group_1_Vacc(sir, dbp))
-    return (tot)
-
-def total_burden_infections_group_2(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    tot= (burden_infections_group_2_noVacc(sir, dbp) +
-            burden_infections_group_2_Vacc(sir, dbp))
-    return (tot)
-
-
-def total_vaccinations(sir: em.SIROutcome) -> float:
-    return (sir.total_vac_1 + sir.total_vac_2)
-
-# aggregate burden components
-def total_burden_infections(
-    sir: em.SIROutcome, dbp: em.BurdenParams
-    ) -> float:
-    tot_1 = total_burden_infections_group_1(sir, dbp)
-    tot_2 = total_burden_infections_group_2(sir, dbp)
-    return (tot_1 + tot_2)
-
-def total_burden_adverse(sir: em.SIROutcome, dbp: em.BurdenParams) -> float:
-    return(burden_adverse_group_1(sir, dbp) +
-           burden_adverse_group_2(sir, dbp))
-
-def total_clinical_burden(sir:em.SIROutcome, dbp: em.BurdenParams) -> float:
-    return (total_burden_infections(sir, dbp) +
-            total_burden_adverse(sir, dbp))
-
-
-
-
-
-#### ====================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #### ====================================================================
 
@@ -296,10 +129,10 @@ for eth_a, eth_b in itertools.product(eth_a_vals, eth_b_vals):
     vac_2 = oc_ab.total_vac_2 / ic_ab.pop_size(2)
     inf_1 = (oc_ab.inf_1_no_vac + oc_ab.inf_1_vu) / ic_ab.pop_size(1)
     inf_2 = (oc_ab.inf_2_no_vac + oc_ab.inf_2_vu) / ic_ab.pop_size(2)
-    clinical_burden = total_clinical_burden(oc_ab, bp)
-    infections_burden = total_burden_infections(oc_ab, bp)
-    adverse_burden = total_burden_adverse(oc_ab, bp)
-    total_vaccination = total_vaccinations(oc_ab)
+    clinical_burden = em.total_clinical_burden(oc_ab, bp)
+    infections_burden = em.total_burden_infections(oc_ab, bp)
+    adverse_burden = em.total_burden_adverse(oc_ab, bp)
+    total_vaccination = em.total_vaccinations(oc_ab)
     total_vaccination_perc = 100 * total_vaccination / (ic_ab.pop_size(1) + ic_ab.pop_size(2))
     plot_df.append(
         {   "a": eth_a,

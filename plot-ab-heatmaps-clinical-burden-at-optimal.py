@@ -33,7 +33,8 @@ print(70 * "=")
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-output_dir = f"out/{config_date_name}"
+output_dir = f"out/CZ_test_II/{config_date_name}"
+
 os.makedirs(output_dir, exist_ok=True)
 plot_df = pd.read_csv(f"{output_dir}/ab-heatmap-data.csv")
 
@@ -53,9 +54,11 @@ cb_heatmap = sns.heatmap(cb_df, cmap=colour_scheme,
                          linewidths=0.5,
                          square=True,
                          yticklabels=cb_df.index.values.round(2),
-                                xticklabels=cb_df.columns.values.round(2))
+                         xticklabels=cb_df.columns.values.round(2))
+
 for label in cb_heatmap.get_yticklabels():
     label.set_rotation(0)
+
 cb_heatmap.set_xlabel("Equity in Infection Burden Multiplier (a)")
 cb_heatmap.set_ylabel("Equity in Vaccination Burden Multiplier (b)")
 # invert the y-axis so that the origin is in the bottom left

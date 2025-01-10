@@ -11,12 +11,14 @@ import ethics.optimisation as eo
 import numpy as np
 import seaborn as sns
 
+from matplotlib.colors import LogNorm, Normalize
+
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    #config_file = "config/config-2024-10-14_manuscript.json"
-     config_file = "config/config-2024-10-28_limited_vaccine.json"
+    config_file = "config/config-2024-10-14_manuscript.json"
+     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -316,14 +318,27 @@ uniq_sorted = lambda x: sorted(list(set(x)))
 g1_vac_nums = uniq_sorted(g1_vac_nums)
 g2_vac_nums = uniq_sorted(g2_vac_nums)
 
-# for seaborne heatmap, use a matrix. 
+# for seaborne heatmap, dataframe
 
-loss_mtx_cb = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
-loss_mtx_ei = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
-loss_mtx_ev = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+
+
+
+num_rows = len(g1_vac_nums) * len(g2_vac_nums)
+v1 = np.zeros((num_rows))
+v2 = np.zeros((num_rows))
+loss_cb = np.zeros((num_rows))
+loss_ei = np.zeros((num_rows))
+loss_ev = np.zeros((num_rows))
 # TODO: these need to be taken from the valid configurations. 
+iter = -1
 for ix, g1_vac_num in enumerate(g1_vac_nums):
     for jx, g2_vac_num in enumerate(g2_vac_nums):
+
+        iter += 1
+
+        v1[iter] = g1_vac_num
+        v2[iter] = g2_vac_num
+
         ic_key = (g1_vac_num, g2_vac_num)
 
         if ic_key in ics_objs:
@@ -335,13 +350,31 @@ for ix, g1_vac_num in enumerate(g1_vac_nums):
 
             l_cb, l_ei, l_ev = em.loss_terms(oc, ic_obj, unique_burden_param)
 
-            loss_mtx_cb[ix, jx] = l_cb
-            loss_mtx_ei[ix, jx] = l_ei
-            loss_mtx_ev[ix, jx] = l_ev
+            # loss_mtx_cb[ix, jx] = l_cb
+            # loss_mtx_ei[ix, jx] = l_ei
+            # loss_mtx_ev[ix, jx] = l_ev
+            loss_cb[iter] = l_cb
+            loss_ei[iter] = l_ei
+            loss_ev[iter] = l_ev
         else: 
-            loss_mtx_cb[ix, jx] = float("nan")
-            loss_mtx_ei[ix, jx] = float("nan")
-            loss_mtx_ev[ix, jx] = float("nan")
+            # loss_mtx_cb[ix, jx] = float("nan")
+            # loss_mtx_ei[ix, jx] = float("nan")
+            # loss_mtx_ev[ix, jx] = float("nan")
+            loss_cb[iter] = float("nan")
+            loss_ei[iter] = float("nan")
+            loss_ev[iter] = float("nan")
+
+loss_components = {'v1':v1, 
+                   'v2':v2, 
+                   'loss_cb':loss_cb, 
+                   'loss_ei':loss_ei,
+                   'loss_ev':loss_ev}
+
+loss_components_df = pd.DataFrame(loss_components)
+
+loss_mtx_cb = loss_components_df.pivot(index="v1", columns="v2", values = "loss_cb")
+loss_mtx_ei = loss_components_df.pivot(index="v1", columns="v2", values = "loss_ei")
+loss_mtx_ev = loss_components_df.pivot(index="v1", columns="v2", values = "loss_ev")
 
 
 # --------------------------------------------------------------------
@@ -373,22 +406,25 @@ ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
 # ....................................................................
-#im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
-im = sns.heatmap(loss_mtx_cb, cmap = "viridis_r",  ax=ax_cb, cbar_kws=dict(location='bottom'))
+im = sns.heatmap(loss_mtx_cb, cmap = "viridis_r",  ax=ax_cb, 
+                 cbar_kws=dict(location='bottom'), norm=LogNorm())
+im.invert_yaxis()
 ax_cb.set_title("Total clinical burden", fontweight="bold")
 setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_cb, opt_vacc_strat)
 #annotate_global_opt(ax_cb, loss_mtx_cb)
 # ....................................................................
-#im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
-im = sns.heatmap(loss_mtx_ei, cmap = "viridis_r",  ax=ax_ei, cbar_kws=dict(location='bottom'))
+im = sns.heatmap(loss_mtx_ei, cmap = "viridis_r",  ax=ax_ei, 
+                 cbar_kws=dict(location='bottom'), norm=LogNorm())
+im.invert_yaxis()
 ax_ei.set_title("Inequity of infection burden", fontweight="bold")
 setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_ei, opt_vacc_strat)
 #annotate_global_opt(ax_ei, loss_mtx_ei)
 # ....................................................................
-#im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
-im = sns.heatmap(loss_mtx_ev, cmap = "viridis_r",  ax=ax_ev, cbar_kws=dict(location='bottom'))
+im = sns.heatmap(loss_mtx_ev, cmap = "viridis_r",  ax=ax_ev, 
+                 cbar_kws=dict(location='bottom'), norm=LogNorm())
+im.invert_yaxis()
 ax_ev.set_title("Inequity of vaccination burden", fontweight="bold")
 setup_axes(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_ev, opt_vacc_strat)
@@ -420,12 +456,21 @@ loss_mtxs_ab = {}
 
 for i_ab, (a, b) in enumerate(ethical_a_b_list):
 
-    loss_mtxs_ab[(a, b)] = np.zeros((len(g1_vac_nums), len(g2_vac_nums)))
+    loss_ab = np.zeros(num_rows)
+    v1 = np.zeros(num_rows)
+    v2 = np.zeros(num_rows)
 
     extreme_burdens = eo.get_extreme_burdens(0, 0, db)
 
+    iter = -1
+
     for ix, g1_vac_num in enumerate(g1_vac_nums):
         for jx, g2_vac_num in enumerate(g2_vac_nums):
+
+            iter += 1
+            v1[iter] = g1_vac_num
+            v2[iter] = g2_vac_num
+
             ic_key = (g1_vac_num, g2_vac_num)
 
             if ic_key in ics_objs:
@@ -436,12 +481,12 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
 
                 l_cb, l_ei, l_ev, l_1, l_2, l_3 = eo.normalisation(a, b, oc, ic_obj, unique_burden_param, extreme_burdens)
 
-                loss = em.global_loss(l_cb, l_ei, l_ev, a, b)
-                #loss = (1 - a - b) * l_cb + a * l_ei + b * l_ev 
-
-                loss_mtxs_ab[(a, b)][ix, jx] = loss 
+                loss_ab[iter] = em.global_loss(l_cb, l_ei, l_ev, a, b)
             else:
-                loss_mtxs_ab[(a, b)][ix, jx] = float("nan") 
+                loss_ab[iter] = float("nan") 
+
+    loss_ab_df = pd.DataFrame({'loss':loss_ab, 'v1':v1, 'v2':v2})
+    loss_mtxs_ab[(a, b)] = loss_ab_df.pivot(index='v1', columns='v2',values='loss')
 
 
 
@@ -461,7 +506,15 @@ def annotate_global_opt(my_ax, loss_mtx):
     print(f"Global optimal at ({g2_vac_nums[min_idx_g2]}, {g1_vac_nums[min_idx_g1]})")
     my_ax.scatter(min_idx_g2, min_idx_g1, color="blue", s=100, marker="o")
 
+def smallest_gtz(loss_mtx)->float:
+    return np.nanmin(loss_mtx[loss_mtx > 0])
 
+def find_vmin(loss_mtx)->float:
+    if np.nanmin(loss_mtx) <= 0:
+        vmin = smallest_gtz(loss_mtx)
+    else:
+        vmin = np.nanmin(loss_mtx)
+    return vmin
 
 # ....................................................................
 fig, ax = plt.subplots(1, 3, figsize=(15, 9))
@@ -471,21 +524,32 @@ ax_ev = ax[2]
 # ....................................................................
 #im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb, cbar_kws=dict(location='bottom'))
+
+vmin_ab = find_vmin(loss_mtx)
+
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb, 
+                 cbar_kws=dict(location='bottom'), norm=LogNorm(vmin = vmin_ab, clip=True))
+im.invert_yaxis()
 ax_cb.set_title("L", fontweight="bold")
 setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_cb, loss_mtx)
 # ....................................................................
 #im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[1]]
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei, cbar_kws=dict(location='bottom'))
+vmin_ab = find_vmin(loss_mtx)
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei, 
+                 cbar_kws=dict(location='bottom'), norm=LogNorm(vmin = vmin_ab, clip=True))
+im.invert_yaxis()
 ax_ei.set_title("L", fontweight="bold")
 setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ei, loss_mtx)
 # ....................................................................
 #im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[2]]
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, cbar_kws=dict(location='bottom'))
+vmin_ab = find_vmin(loss_mtx)
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
+                 cbar_kws=dict(location='bottom'),norm=LogNorm(vmin = vmin_ab, clip=True))
+im.invert_yaxis()
 ax_ev.set_title("L", fontweight="bold")
 setup_axes(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ev, loss_mtx)
