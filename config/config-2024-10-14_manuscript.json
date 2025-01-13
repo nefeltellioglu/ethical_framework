@@ -15,8 +15,8 @@
     },
     "grid_search_step":
     {
-	"grid_step": 50000,
-	"a_b_grid_num_points": 11,
+	"grid_step": 0.02,
+	"a_b_grid_num_points": 21,
 	"a_b_grid_max": 1,
 	"a_b_grid_min": 0
     },

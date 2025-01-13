@@ -17,8 +17,9 @@ from matplotlib.colors import LogNorm
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
-     #config_file = "config/config-2024-10-28_limited_vaccine.json"
+    #config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
+    #config_file = "config/config-2024-10-14_manuscript.json"
+     config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -397,16 +398,19 @@ def setup_axes(my_ax, g2_vac_nums, g1_vac_nums):
     n_ticks = 5
     x_tick_space = int(round(len(g2_vac_nums)/n_ticks))
     x_ticks_thinned = range(0, len(g2_vac_nums), x_tick_space)
-    x_labels_thinned = [round(g2_vac_nums[i]/pop_2, 2) for i in x_ticks_thinned]
+
+    x_labels_thinned = [round(g2_vac_nums[i]/pop_2 * 100) for i in x_ticks_thinned]
+
     my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45, size = 16)
-    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)",size=20)
+    my_ax.set_xlabel("% vaccinated (group 2, 70+)",size=20)
 
     y_tick_space = int(round(len(g1_vac_nums)/n_ticks))
     y_ticks_thinned = range(0, len(g1_vac_nums), y_tick_space)
-    y_labels_thinned = [round(g1_vac_nums[i]/pop_1,2) for i in y_ticks_thinned]
+
+    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned] 
 
     my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = 16)
-    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)", size=20)
+    my_ax.set_ylabel("% vaccinated (group 1, 0-69)", size=20)
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
     #colorbar font size: 
@@ -521,6 +525,29 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
 x_ann_shift = 5
 y_ann_shift = 5
 
+def setup_axes_g(my_ax, g2_vac_nums, g1_vac_nums):
+    n_ticks = 5
+    x_tick_space = int(round(len(g2_vac_nums)/n_ticks))
+    x_ticks_thinned = range(0, len(g2_vac_nums), x_tick_space)
+
+    x_labels_thinned = [round(g2_vac_nums[i]/pop_2 * 100) for i in x_ticks_thinned]
+    
+    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45, size = 16)
+    my_ax.set_xlabel("% vaccinated (group 2, 70+)",size=20)
+
+    y_tick_space = int(round(len(g1_vac_nums)/n_ticks))
+    y_ticks_thinned = range(0, len(g1_vac_nums), y_tick_space)
+
+    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned] 
+
+    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = 16)
+    my_ax.set_ylabel("% vaccinated (group 1, 0-69)", size=20)
+    my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
+    #my_ax.figure.colorbar(im, ax=my_ax)
+    #colorbar font size: 
+    my_ax.figure.axes[-1].xaxis.label.set_size(25)
+    my_ax.figure.axes[-1].tick_params(labelsize = 16)
+    my_ax.figure.axes[-1].xaxis.set_label_coords(0.5, 3.0)
 
 
 def annotate_global_opt(my_ax, loss_mtx):
@@ -562,7 +589,7 @@ im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb,
 #im.figure.axes[-1].set_xlabel(cbar_label, fontsize=30)
 
 im.invert_yaxis()
-setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
+setup_axes_g(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_cb, loss_mtx)
 
 
@@ -579,7 +606,7 @@ im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei,
                  cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
                  norm=LogNorm(vmin = vmin_ab, vmax=1, clip=True ))
 im.invert_yaxis()
-setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
+setup_axes_g(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ei, loss_mtx)
 
 
@@ -595,7 +622,7 @@ im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev,
                  cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
                  norm=LogNorm(vmin = vmin_ab, vmax = 1, clip=True))
 im.invert_yaxis()
-setup_axes(ax_ev, g2_vac_nums, g1_vac_nums)
+setup_axes_g(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ev, loss_mtx)
 # ....................................................................
 fig.tight_layout()

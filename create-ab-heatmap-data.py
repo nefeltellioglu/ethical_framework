@@ -24,9 +24,10 @@ import numpy as np
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
+    #config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
     #config_file = "config/config-2024-10-14_manuscript.json"
      config_file = "config/config-2024-10-28_limited_vaccine.json"
-    # config_file = "config/config-2024-12-02_limited_low_R0.json"
+    #config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -115,6 +116,9 @@ eth_b_vals = np.linspace(grid_min, grid_max, num_points)
 for eth_a, eth_b in itertools.product(eth_a_vals, eth_b_vals):
     if eth_a + eth_b > 1:
         continue
+
+    print('optimising vaccination for w_EI = ' + str(eth_a) + ' w_EV = ' + str(eth_b))
+
     opt_ix, _ = eo.optimal_initial_condition(
         eth_a, eth_b, model_param_id, burden_param_id, db, normalise=True
     )
