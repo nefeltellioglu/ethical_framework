@@ -17,8 +17,8 @@ from matplotlib.colors import LogNorm
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    #config_file = "config/config-2024-10-14_manuscript.json"
-     config_file = "config/config-2024-10-28_limited_vaccine.json"
+    config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
+     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -219,7 +219,8 @@ print("plotting optimal trajectories for (a, b) examples")
 print(70 * "=")
 
 fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
-subplot_labels = ['(a)', '(b)', '(c)']
+#subplot_labels = ['(a)', '(b)', '(c)']
+subplot_labels = ['', '', '']
 
 # TODO These colour codes should not be hard-coded, but they are just
 # colorbrewer2 8-class Dark2 values so they shouldn't be too
@@ -240,10 +241,10 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
     total_i1 = 100 * (sol.i1 + sol.i1_vu) / pop_size_1
     total_i2 = 100 * (sol.i2 + sol.i2_vu) / pop_size_2
 
-    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Group 1 susceptible")
-    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Group 2 susceptible")
-    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Group 1 infectious")
-    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Group 2 infectious")
+    ax.plot(sol.times, total_s1, color = green_hex, linestyle="solid", label = "Susceptible (Group 1)")
+    ax.plot(sol.times, total_s2, color = green_hex, linestyle="dashed", label = "Susceptible (Group 2)")
+    ax.plot(sol.times, total_i1, color = orange_hex, linestyle="solid", label = "Infectious (Group 1)")
+    ax.plot(sol.times, total_i2, color = orange_hex, linestyle="dashed", label = "Infectious (Group 2)")
 
     vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
@@ -253,7 +254,7 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 
     title_text = r'$w_{EI} =$' +  str(a) + r', $w_{EV} = $' + str(b)
 
-    ax.set_title(title_text,#, size = 8
+    ax.set_title(title_text, size = 12
                  )
 
     textstr = '\n'.join((
@@ -393,20 +394,24 @@ x_ann_shift = 5
 y_ann_shift = 5
 
 def setup_axes(my_ax, g2_vac_nums, g1_vac_nums):
-
-    x_ticks_thinned = range(0, len(g2_vac_nums), 2)
+    n_ticks = 5
+    x_tick_space = int(round(len(g2_vac_nums)/n_ticks))
+    x_ticks_thinned = range(0, len(g2_vac_nums), x_tick_space)
     x_labels_thinned = [round(g2_vac_nums[i]/pop_2, 2) for i in x_ticks_thinned]
-    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45)
-    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)",size=14)
+    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45, size = 16)
+    my_ax.set_xlabel("Prop. vaccinated (group 2, 70+)",size=20)
 
-    y_ticks_thinned = range(0, len(g1_vac_nums), 7)
+    y_tick_space = int(round(len(g1_vac_nums)/n_ticks))
+    y_ticks_thinned = range(0, len(g1_vac_nums), y_tick_space)
     y_labels_thinned = [round(g1_vac_nums[i]/pop_1,2) for i in y_ticks_thinned]
-    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned)
-    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)", size=14)
+
+    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = 16)
+    my_ax.set_ylabel("Prop. vaccinated (group 1, 0-69)", size=20)
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
     #colorbar font size: 
-    my_ax.figure.axes[-1].xaxis.label.set_size(14)
+    my_ax.figure.axes[-1].xaxis.label.set_size(25)
+    my_ax.figure.axes[-1].tick_params(labelsize = 16)
     my_ax.figure.axes[-1].xaxis.set_label_coords(0.5, 3.0)
 
 def annotate_vacc_opt_choice(my_ax, opt_vacc_strat):
@@ -418,6 +423,7 @@ def annotate_vacc_opt_choice(my_ax, opt_vacc_strat):
 
 # ....................................................................
 fig, ax = plt.subplots(1, 3, figsize=(15, 9))
+
 ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
@@ -534,7 +540,7 @@ def find_vmin(loss_mtx)->float:
     return vmin
 
 # ....................................................................
-fig, ax = plt.subplots(1, 3, figsize=(15, 9))
+fig, ax = plt.subplots(1, 3, figsize=(16, 9))
 ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
@@ -551,7 +557,10 @@ vmin_ab = find_vmin(loss_mtx)
 
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb, 
                  cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
-                 norm=LogNorm(vmin = vmin_ab, clip=True))
+                 norm=LogNorm(vmin = vmin_ab, vmax=1, clip=True))
+#im.figure.axes[-1].tick_params(labelsize = 14)
+#im.figure.axes[-1].set_xlabel(cbar_label, fontsize=30)
+
 im.invert_yaxis()
 setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_cb, loss_mtx)
@@ -568,7 +577,7 @@ vmin_ab = find_vmin(loss_mtx)
 
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei, 
                  cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
-                 norm=LogNorm(vmin = vmin_ab, clip=True))
+                 norm=LogNorm(vmin = vmin_ab, vmax=1, clip=True ))
 im.invert_yaxis()
 setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ei, loss_mtx)
@@ -584,7 +593,7 @@ cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
                  cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
-                 norm=LogNorm(vmin = vmin_ab, clip=True))
+                 norm=LogNorm(vmin = vmin_ab, vmax = 1, clip=True))
 im.invert_yaxis()
 setup_axes(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ev, loss_mtx)

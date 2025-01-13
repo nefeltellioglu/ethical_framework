@@ -23,8 +23,8 @@ import ethics.model as em
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
 else:
-    #config_file = "config/config-2024-10-14_manuscript.json"
-     config_file = "config/config-2024-10-28_limited_vaccine.json"
+    config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
+     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
 assert os.path.exists(config_file)
 
@@ -87,15 +87,15 @@ pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
 # database covers a good range of possible options.
 pop_grid_step_size = CONFIG["grid_search_step"]["grid_step"]
 
-_vac_vals_pop_1 = list(round(range(0, pop_size_1, pop_grid_step_size * pop_size_1)))
-
+v1_step = int(np.ceil(pop_grid_step_size * pop_size_1))
+_vac_vals_pop_1 = list(range(0, pop_size_1, v1_step))
 if _vac_vals_pop_1[0] != 0 :
     _vac_vals_pop_1[0] = 0
 if _vac_vals_pop_1[-1] != pop_size_1:
     _vac_vals_pop_1[-1] = pop_size_1
 
-_vac_vals_pop_2 = list(round(range(0, pop_size_2, pop_grid_step_size * pop_size_2)))
-
+v2_step = int(np.ceil(pop_grid_step_size * pop_size_2))
+_vac_vals_pop_2 = list(range(0, pop_size_2, v2_step))
 if _vac_vals_pop_2[0] != 0 :
     _vac_vals_pop_2[0] = 0
 if _vac_vals_pop_2[-1] != pop_size_2:
