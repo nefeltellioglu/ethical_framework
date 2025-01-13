@@ -86,16 +86,21 @@ pop_size_2 = CONFIG["population_parameters"]["pop_size_2"]
 # options are included. This is because we want to make sure out
 # database covers a good range of possible options.
 pop_grid_step_size = CONFIG["grid_search_step"]["grid_step"]
-_vac_vals_pop_1 = list(range(0, pop_size_1, pop_grid_step_size))
-if 0 not in _vac_vals_pop_1:
-    _vac_vals_pop_1.append(0)
-if pop_size_1 not in _vac_vals_pop_1:
-    _vac_vals_pop_1.append(pop_size_1)
-_vac_vals_pop_2 = list(range(0, pop_size_2, pop_grid_step_size))
-if 0 not in _vac_vals_pop_2:
-    _vac_vals_pop_2.append(0)
-if pop_size_2 not in _vac_vals_pop_2:
-    _vac_vals_pop_2.append(pop_size_2)
+
+_vac_vals_pop_1 = list(round(range(0, pop_size_1, pop_grid_step_size * pop_size_1)))
+
+if _vac_vals_pop_1[0] != 0 :
+    _vac_vals_pop_1[0] = 0
+if _vac_vals_pop_1[-1] != pop_size_1:
+    _vac_vals_pop_1[-1] = pop_size_1
+
+_vac_vals_pop_2 = list(round(range(0, pop_size_2, pop_grid_step_size * pop_size_2)))
+
+if _vac_vals_pop_2[0] != 0 :
+    _vac_vals_pop_2[0] = 0
+if _vac_vals_pop_2[-1] != pop_size_2:
+    _vac_vals_pop_2[-1] = pop_size_2
+
 assert 0 in _vac_vals_pop_1, "Must have 0 vaccinated in population 1 as an option."
 assert pop_size_1 in _vac_vals_pop_1, "Must have all vaccinated in population 1 as an option."
 assert 0 in _vac_vals_pop_2, "Must have 0 vaccinated in population 2 as an option."
