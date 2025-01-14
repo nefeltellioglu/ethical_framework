@@ -56,8 +56,8 @@ titles = ["Tot. Burden (hosp. days)",
           "Tot. vaccination (%)",
           "Vaccinations, group 1 (%)",
           "Vaccinations, group 2 (%)"]
-#colors = ["rocket_r", "viridis_r", "viridis_r", "viridis_r"]
 colors = ["rocket_r", "viridis_r", "viridis_r", "viridis_r"]
+#colors = ["rocket_r", "brg", "brg", "brg"]
 
 
 for var, title, color in zip(variables, titles, colors):
@@ -80,7 +80,14 @@ for var, title, color in zip(variables, titles, colors):
         plot_df[perc_var] = 100 * plot_df[var]/CONFIG["population_parameters"]["pop_size_%s"%(var.split("_")[1])]
     plot_df["a"] = [round(i,2) for i in plot_df["a"]]
     plot_df["b"] = [round(i,2) for i in plot_df["b"]]
+
+    #hack: setting all outputs from w_EI = 1  to NaN
+    plot_df.loc[plot_df.b == 1.0, perc_var] = float("nan")
+
+
     data = plot_df.pivot(index="b", columns="a", values = perc_var)
+
+
 
     # set up tick positions and labels: 
     n_ticks = 5
@@ -101,8 +108,8 @@ for var, title, color in zip(variables, titles, colors):
     cax.ticklabel_format(scilimits=(0, 3))
     #cax.xticks(rotation = 45)
     ax.invert_yaxis()
-    ax.set_xlabel("$w_{EI}$")
-    ax.set_ylabel("$w_{EV}$")
+    ax.set_xlabel("$w_{\\text{EI}}$")
+    ax.set_ylabel("$w_{\\text{EV}}$")
 
     
 

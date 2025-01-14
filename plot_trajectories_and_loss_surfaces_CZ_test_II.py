@@ -253,7 +253,7 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 #              str(ethical_a_b_list[0][0]) + \
 #              r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
 
-    title_text = r'$w_{EI} =$' +  str(a) + r', $w_{EV} = $' + str(b)
+    title_text = r'$w_{\text{EI}} =$' +  str(a) + r', $w_{\text{EV}} = $' + str(b)
 
     ax.set_title(title_text, size = 12
                  )
@@ -554,7 +554,7 @@ def annotate_global_opt(my_ax, loss_mtx):
     min_idx = np.nanargmin(loss_mtx)
     min_idx_g1, min_idx_g2 = np.unravel_index(min_idx, loss_mtx.shape)
     print(f"Global optimal at ({g2_vac_nums[min_idx_g2]}, {g1_vac_nums[min_idx_g1]})")
-    my_ax.scatter(min_idx_g2, min_idx_g1, color="blue", s=100, marker="o")
+    my_ax.scatter(min_idx_g2, min_idx_g1, color="red", s=100, marker="o")
 
 def smallest_gtz(loss_mtx)->float:
     return np.nanmin(loss_mtx[loss_mtx > 0])
@@ -576,9 +576,9 @@ ax_ev = ax[2]
 # ....................................................................
 #im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
-cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
              str(ethical_a_b_list[0][0]) + \
-             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[0][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 
@@ -596,9 +596,9 @@ annotate_global_opt(ax_cb, loss_mtx)
 # ....................................................................
 #im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[1]]
-cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
              str(ethical_a_b_list[1][0]) + \
-             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[1][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 
@@ -613,9 +613,9 @@ annotate_global_opt(ax_ei, loss_mtx)
 # ....................................................................
 #im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[2]]
-cbar_label = r'$\mathcal{L}(w_{EI} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
              str(ethical_a_b_list[2][0]) + \
-             r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
