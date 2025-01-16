@@ -32,26 +32,21 @@ To lint the code and keep documentation up to date:
 $ bash housekeeping.sh
 ```
 
-## Gallery
+## Gallery of results figures
 
-[Foobar plot](./plot-glamorous-trajectories-and-loss-surfaces.py)
+Here are some figures for one particular configuration file. This
+[script](./plot_trajectories_and_loss_surfaces.py) generates the
+following two example plots.
 
 ![plot (demo I)](./out/2024-10-14_manuscript/glamorous-trajectories.png)
 ![plot (demo II)](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
 
-[Clinical burden heatmap](./plot-ab-heatmaps-clinical-burden-at-optimal.py)
+This [script](./plot-ab-heatmaps-vaccination-and-clinical-burden.py)
+generates heatmaps of the clinical burden when using the optimal
+vaccination strategy for a range of different ethical framework
+configurations. The plot the script produces is below.
 
-Plots the clinical burden when using the optimal vaccination strategy
-while at various values of a/b.
-
-![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png)
-
-[Group vaccination heatmap](./plot-ab-heatmaps-group-vaccination.py)
-
-Plots the vaccination level in each group when using the optimal
-vaccination strategy while at various values of a/b.
-
-![plot (demo IV)](./out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png)
+![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png)
 
 ## Configuration
 
