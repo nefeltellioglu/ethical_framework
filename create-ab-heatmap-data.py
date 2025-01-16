@@ -44,7 +44,7 @@ with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
 # specify output dir
-output_dir = f"out/CZ_test_II/{config_date_name}"
+output_dir = f"out/{config_date_name}"
 
 os.makedirs(output_dir, exist_ok=True)
 

@@ -35,7 +35,7 @@ print(70 * "=")
 with open(config_file, "r") as f:
     CONFIG = json.load(f)
 
-output_dir = f"out/CZ_test_II/{config_date_name}"
+output_dir = f"out/{config_date_name}"
 
 os.makedirs(output_dir, exist_ok=True)
 plot_df = pd.read_csv(f"{output_dir}/ab-heatmap-data.csv")
