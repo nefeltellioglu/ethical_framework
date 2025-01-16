@@ -1,34 +1,20 @@
 
 rule all:
     input:
+        # Unlimited vaccination scenario
         "out/grid_database-2024-10-14_manuscript.pkl",
-        "out/grid_database-2024-10-28_limited_vaccine.pkl",
         "out/2024-10-14_manuscript/hm_inf_vacc.png",
-        "out/2024-10-28_limited_vaccine/hm_inf_vacc.png",
-        "out/grid_database-2024-12-02_limited_low_R0.pkl",
-        "out/grid_database-2024-12-02_limited_high_R0.pkl",
-        "out/grid_database-2024-12-02_unlimited_low_R0.pkl",
-        "out/grid_database-2024-12-02_unlimited_high_R0.pkl",
-        "out/2024-12-02_limited_low_R0/hm_inf_vacc.png",
-        "out/2024-12-02_limited_high_R0/hm_inf_vacc.png",
-        "out/2024-12-02_unlimited_high_R0/hm_inf_vacc.png",
-        "out/2024-12-02_unlimited_low_R0/hm_inf_vacc.png",
         "out/2024-10-14_manuscript/trajectories.png",
-        "out/2024-10-28_limited_vaccine/trajectories.png",
-        "out/2024-12-02_limited_low_R0/trajectories.png",
-        "out/2024-12-02_limited_high_R0/trajectories.png",
-        "out/2024-12-02_unlimited_high_R0/trajectories.png",
-        "out/2024-12-02_unlimited_low_R0/trajectories.png",
-	
-        # New plots added by AEZ on 2025-01-08
         "out/2024-10-14_manuscript/glamorous-trajectories.png",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
-
-        # New plots added by AEZ on 2025-01-09
         "out/2024-10-14_manuscript/ab-heatmap-data.csv",
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png",
         "out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png"
+        # Limited vaccination scenario
+        "out/grid_database-2024-10-28_limited_vaccine.pkl",
+        "out/2024-10-28_limited_vaccine/hm_inf_vacc.png",
+        "out/2024-10-28_limited_vaccine/trajectories.png",
 
 rule make_grid_database_ode:
     input:
@@ -38,7 +24,7 @@ rule make_grid_database_ode:
     output:
         "out/grid_database-{config_date_name}.pkl"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -57,7 +43,7 @@ rule plot_all_optimization_results_2:
 	"out/{config_date_name}/hm_total_vacc_across_all.png"
 
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -78,7 +64,7 @@ rule plot_selected_trajectories:
 	"out/{config_date_name}/example-optimisation-Normalized_individual_loss.png",
 	"out/{config_date_name}/example-optimisation-Aggregated_loss.png"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -95,7 +81,7 @@ rule plot_glamorous_trajectories_and_loss:
         "out/{config_date_name}/glamorous-trajectories.png",
         "out/{config_date_name}/glamorous-loss_surfaces.png",
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -112,7 +98,7 @@ rule make_ab_heatmap_data:
     output:
         "out/{config_date_name}/ab-heatmap-data.csv"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -129,7 +115,7 @@ rule plot_ab_heatmaps_vaccination_and_clinical_burden:
     output:
         "out/{config_date_name}/ab-heatmap-vaccination-and-clinical-burden.png"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -146,7 +132,7 @@ rule plot_ab_heatmaps_group_vaccination:
     output:
         "out/{config_date_name}/ab-heatmap-group-vaccination.png"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
@@ -163,7 +149,7 @@ rule plot_ab_heatmaps_clinical_burden:
     output:
         "out/{config_date_name}/ab-heatmap-clinical-burden.png"
     wildcard_constraints:
-        config_date_name = "2024-10-14_manuscript"
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine"
     shell:
         """
         python {input.py} {input.config}
