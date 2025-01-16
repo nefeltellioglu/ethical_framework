@@ -11,6 +11,9 @@ import ethics.model as em
 import ethics.optimisation as eo
 import numpy as np
 
+# We need to tell matplotlib to use LaTeX for the text rendering
+# otherwise it has issues parsing the text strings.
+plt.rcParams["text.usetex"] = True
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
@@ -108,10 +111,10 @@ for var, title, color in zip(variables, titles, colors):
     cax.ticklabel_format(scilimits=(0, 3))
     #cax.xticks(rotation = 45)
     ax.invert_yaxis()
-    ax.set_xlabel("$w_{\\text{EI}}$")
-    ax.set_ylabel("$w_{\\text{EV}}$")
+    ax.set_xlabel(r'$w_{\mathrm{EI}}$')
+    ax.set_ylabel(r'$w_{\mathrm{EV}}$')
 
-    
+
 
     x_lims = ax.get_xlim()
     y_lims = ax.get_ylim()
