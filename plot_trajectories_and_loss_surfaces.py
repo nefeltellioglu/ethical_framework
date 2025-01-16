@@ -13,6 +13,9 @@ import seaborn as sns
 
 from matplotlib.colors import LogNorm
 
+# We need to tell matplotlib to use LaTeX for the text rendering
+# otherwise it has issues parsing the text strings.
+plt.rcParams["text.usetex"] = True
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
@@ -249,11 +252,13 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 
     vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
-# r'$\mathcal{L}(w_{EI} = $' + \
-#              str(ethical_a_b_list[0][0]) + \
-#              r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
-
-    title_text = r'$w_{\text{EI}} =$' +  str(a) + r', $w_{\text{EV}} = $' + str(b)
+    # Using \text in the subscripts seems to rely on some LaTeX
+    # packages that are not loaded by default. The use of \mathrm
+    # appears to be more robust. The ideal solution would be to try
+    # with \text and then catch the exception and use \mathrm if it
+    # fails. But this is simpler and works on my machine... famous
+    # last words.
+    title_text = r'$w_{\mathrm{EI}} =$' +  str(a) + r', $w_{\mathrm{EV}} = $' + str(b)
 
     ax.set_title(title_text, size = 12
                  )
@@ -576,9 +581,9 @@ ax_ev = ax[2]
 # ....................................................................
 #im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\mathrm{EI}} = $' + \
              str(ethical_a_b_list[0][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[0][1]) + r'$)$'
+             r', $w_{\mathrm{EV}} = $' + str(ethical_a_b_list[0][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 
@@ -596,9 +601,9 @@ annotate_global_opt(ax_cb, loss_mtx)
 # ....................................................................
 #im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[1]]
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\mathrm{EI}} = $' + \
              str(ethical_a_b_list[1][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[1][1]) + r'$)$'
+             r', $w_{\mathrm{EV}} = $' + str(ethical_a_b_list[1][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 
@@ -613,9 +618,9 @@ annotate_global_opt(ax_ei, loss_mtx)
 # ....................................................................
 #im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[2]]
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
+cbar_label = r'$\mathcal{L}(w_{\mathrm{EI}} = $' + \
              str(ethical_a_b_list[2][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+             r', $w_{\mathrm{EV}} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
