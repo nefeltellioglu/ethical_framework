@@ -5,6 +5,9 @@ import typing as tp
 LossTermTransformer = tp.Callable[
     tp.Tuple[float, float, float], tp.Tuple[float, float, float]
 ]
+
+
+
 def get_extreme_burdens(model_param_id: int,
             burden_param_id: int,
             db: dict,):
@@ -29,7 +32,11 @@ def get_extreme_burdens(model_param_id: int,
     )
     
     return (min_tcb, max_tcb, min_eib, max_eib, min_evb, max_evb)
-    
+
+
+
+
+
 def normalisation(
         a: float,
         b: float,
@@ -55,6 +62,10 @@ def normalisation(
     )
     return tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb,\
             tmp_loss_tcb_nonnorm, tmp_loss_eib_nonnorm, tmp_loss_evb_nonnorm
+
+
+
+
 
 def optimal_initial_condition(
     a: float,
@@ -121,6 +132,8 @@ def optimal_initial_condition(
         return best_ic_id, best_loss
 
 
+
+
 def extreme_initial_condition(
     a: float,
     b: float,
@@ -177,7 +190,10 @@ def extreme_initial_condition(
         tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb = transform(
             em.loss_terms(oc["outcome"], tmp_ic, bp)
         )
-        tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
+
+        #tmp_loss = (1 - a - b) * tmp_loss_tcb + a * tmp_loss_ecb + b * tmp_loss_evb
+        tmp_loss = em.global_loss(tmp_loss_tcb, tmp_loss_ecb, tmp_loss_evb, a, b)
+
         if (minimise and (tmp_loss < best_loss)) or (
             (not minimise) and (tmp_loss > best_loss)
         ):

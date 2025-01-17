@@ -39,6 +39,20 @@ $ bash housekeeping.sh
 ![plot (demo I)](./out/2024-10-14_manuscript/glamorous-trajectories.png)
 ![plot (demo II)](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
 
+[Clinical burden heatmap](./plot-ab-heatmaps-clinical-burden-at-optimal.py)
+
+Plots the clinical burden when using the optimal vaccination strategy
+while at various values of a/b.
+
+![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png)
+
+[Group vaccination heatmap](./plot-ab-heatmaps-group-vaccination.py)
+
+Plots the vaccination level in each group when using the optimal
+vaccination strategy while at various values of a/b.
+
+![plot (demo IV)](./out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png)
+
 ## Configuration
 
 To avoid magic numbers appearing thoughout the code, there is a single
@@ -150,6 +164,12 @@ def optimal_initial_condition(model_param_id: int,
 ```
 
 ## FAQs
+
+#### How do I make things run quicker during development?
+
+The simplest solution is probably to reduce the `"grid_step"` value in
+the configuration file. But you could also reduce the population sizes
+as well if you want to to run much quicker.
 
 #### How do I change the resolution of levels of vaccination?
 
