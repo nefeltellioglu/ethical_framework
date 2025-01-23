@@ -32,26 +32,21 @@ To lint the code and keep documentation up to date:
 $ bash housekeeping.sh
 ```
 
-## Gallery
+## Gallery of results figures
 
-[Foobar plot](./plot-glamorous-trajectories-and-loss-surfaces.py)
+Here are some figures for one particular configuration file. This
+[script](./plot_trajectories_and_loss_surfaces.py) generates the
+following two example plots.
 
 ![plot (demo I)](./out/2024-10-14_manuscript/glamorous-trajectories.png)
 ![plot (demo II)](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
 
-[Clinical burden heatmap](./plot-ab-heatmaps-clinical-burden-at-optimal.py)
+This [script](./plot-ab-heatmaps-vaccination-and-clinical-burden.py)
+generates heatmaps of the clinical burden when using the optimal
+vaccination strategy for a range of different ethical framework
+configurations. The plot the script produces is below.
 
-Plots the clinical burden when using the optimal vaccination strategy
-while at various values of a/b.
-
-![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png)
-
-[Group vaccination heatmap](./plot-ab-heatmaps-group-vaccination.py)
-
-Plots the vaccination level in each group when using the optimal
-vaccination strategy while at various values of a/b.
-
-![plot (demo IV)](./out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png)
+![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png)
 
 ## Configuration
 
@@ -64,49 +59,13 @@ file.
 Consult the [FAQs](#faqs) if you want to modify this configuration.
 There might be helpful information in there.
 
-## `grid-search-opt` branch goals
+## Database
 
-- TODO Double check that the percentages in the `BurdenParams` class
-  can safely be renamed to proportions as this is what they appear to
-  be.
-- TODO Use grid search as the optimisation strategy
-  + DONE Create a database of the model solutions to store the heavy
-    compute so various optimisation question can be answered quickly
-    be querying the database. See SQL example below.
-  + DONE Rename `ethical_sir_fancy.py` to `ethics/model.py` or
-    whatever allows us to import just the modelling code as
-    `ethics.model`. Then there can be a `ethics.optimisation` for the
-    optimisation.
-  + DONE Configure the database construction with a file. This will
-    provide a nicer alternative to having hard-coded parameters in the
-    code. This should live in `config/`.
-  + DONE Write an optimisation method that searches the database for
-    the best initial condition.
-  + DONE Generate plots to check that the optimal vaccination strategy
-    (i.e. the initial condition) is (practically) identifiable.
-  + DONE Implement a normalisation strategy so that all of the
-    objectives are on a comparable scale. We could do this by looking
-    at the vertices of the a/b simplex and then scaling each loss term
-    to take values form 0 to 1.
-  + TODO Get the database construction working with the stochastic
-    simulator.
-  + TODO Get the optimisation process working with the stochastic
-    model.
-  + TODO Generate plots to check that we are using a suitable number
-    of replicates to get the average value.
-
-The `create-grid-database.py` script iterates over a large combination
-of parameters and initial conditions and computes multiple simulations
-per pair. This information can be queried to work out what is the
-optimal initial condition (i.e. vaccination scheme) to minimise the
-loss with an arbitrary loss function. To create the database needed to
-do this run the `create-grid-database.py` script.
-
-### Database creation example
-
-This script would create a database containing the model simulation
-results. We aren't using a database, but it might be helpful to have
-this here as a model for how the data is stored.
+We use a database of simulations to avoid needing to recompute them
+for subsequent analysis. This script would create a database
+containing the model simulation results. We aren't using a database,
+but it might be helpful to have this here as a model for how the data
+is stored.
 
 ```sql
 CREATE TABLE model_parameters (
@@ -164,6 +123,15 @@ def optimal_initial_condition(model_param_id: int,
 ```
 
 ## FAQs
+
+#### How do I run the code in this repo?
+
+1. Make sure you a bunch of standard scientific python packages
+   installed.
+2. (Optionally) remove any lingering output with `rm -r out`.
+3. Run `snakemake -c1 -p` (or `-c[n]` if you want to run across `n`
+   processes).
+4. If this doesn't work, lodge an issue on GitHub.
 
 #### How do I make things run quicker during development?
 
