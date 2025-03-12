@@ -47,8 +47,8 @@
     },
     "time_parameters": {
     "start_time": 0.0,
-    "finish_time": 20000.0,
-    "num_points": 5000
+    "finish_time": 2000.0,
+    "num_points": 10000
     },
     "database_file": "out/grid_database-2025-03-12_unlimited_low_R0.pkl"
 }
