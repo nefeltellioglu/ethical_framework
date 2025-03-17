@@ -231,7 +231,7 @@ if final_no_infections:
     WARNING: Among {len(solutions)} runs with different initial points, 
     {len(final_no_infections)} runs needed a longer final time. The no infections
     ranged between {min(final_no_infections), max(final_no_infections)} with mean
-    {sum(min(final_no_infections))/len(final_no_infections)}
+    {sum(final_no_infections)/len(final_no_infections)}
     """)
 # --------------------------------------------------------------------
 
