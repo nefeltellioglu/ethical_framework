@@ -6,7 +6,7 @@
             "contact_per_capita_21": 0.14,
             "contact_per_capita_22": 0.34,
             "gamma": 0.096,
-            "R0": 9.5
+            "R0": 9
 
     },
     "population_parameters":
@@ -18,13 +18,13 @@
     {
 	"maximum_vacc_rollout": 1000000
     },
-    "grid_search_step":
-    {
-	"grid_step": 50000,
-	"a_b_grid_step": 0.05,
-	"a_b_grid_max": 1,
-	"a_b_grid_min": 0
-    },
+     "grid_search_step":
+     {
+     	"grid_step": 0.01,
+     	"a_b_grid_num_points": 21,
+     	"a_b_grid_max": 1,
+     	"a_b_grid_min": 0
+     },
     "burden_parameters":
     {
             "prop_hosp_inf_1": 0.00088,
@@ -49,6 +49,11 @@
         "i0_2_vu" : 0,
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
+    },
+    "time_parameters": {
+	"start_time": 0.0,
+	"finish_time": 1000.0,
+	"num_points": 5000
     },
     "database_file": "out/grid_database-2024-12-02_limited_high_R0.pkl"
 }
