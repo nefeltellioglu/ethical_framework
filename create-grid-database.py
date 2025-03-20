@@ -60,7 +60,7 @@ beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
                          (contact_per_capita_11**2
                           - 2 * contact_per_capita_22 * contact_per_capita_11
                           + contact_per_capita_22 ** 2
-                          + 4 * contact_per_capita_12 * contact_per_capita_22
+                          + 4 * contact_per_capita_12 * contact_per_capita_21
                           )**(0.5))
 
 model_parameters = [
