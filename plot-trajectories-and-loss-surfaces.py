@@ -198,11 +198,11 @@ for ethical_a_b in ethical_a_b_list:
 
 
 # TODO We should really remove this hard-coded value.
-times = 500
-if "low" in config_file:
-   times = int(times * 20)
-elif "high" in config_file:
-   times = int(times * 0.5)
+times = 1000
+# if "low" in config_file:
+#    times = int(times * 20)
+# elif "high" in config_file:
+#    times = int(times * 0.5)
 
 # for plotting trajectories 
 solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, 

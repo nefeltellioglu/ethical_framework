@@ -20,8 +20,9 @@ else:
     #config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
     #config_file = "config/config-2024-10-14_manuscript.json"
      #config_file = "config/config-2024-10-28_limited_vaccine.json"
-    #config_file = "config/config-2025-03-12_unlimited_low_R0.json"
-    config_file = "config/config-2024-12-02_unlimited_low_R0.json"
+    # config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    #config_file = "config/config-2024-12-02_unlimited_low_R0.json"
+    config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -372,19 +373,28 @@ def annotate_vacc_opt_choice(my_ax, opt_vacc_strat):
         my_ax.scatter(x_index, y_index, color="red", s=100, marker="o")
 
 # ....................................................................
-fig, ax = plt.subplots(3, 3, figsize=(15, 20))
+# fig, ax = plt.subplots(3, 3, figsize=(15, 20))
 
-ax_inf_tot = ax[0][0]
-ax_cb_inf_tot = ax[0][1]
-ax_cb_vac_tot = ax[0][2]
+# ax_inf_tot = ax[0][0]
+# ax_cb_inf_tot = ax[0][1]
+# ax_cb_vac_tot = ax[0][2]
 
-ax_inf_g1 = ax[1][0]
-ax_cb_inf_g1 = ax[1][1]
-ax_cb_vac_g1 = ax[1][2]
+# ax_inf_g1 = ax[1][0]
+# ax_cb_inf_g1 = ax[1][1]
+# ax_cb_vac_g1 = ax[1][2]
 
-ax_inf_g2 = ax[2][0]
-ax_cb_inf_g2 = ax[2][1]
-ax_cb_vac_g2 = ax[2][2]
+# ax_inf_g2 = ax[2][0]
+# ax_cb_inf_g2 = ax[2][1]
+# ax_cb_vac_g2 = ax[2][2]
+
+#-------------------
+fig, ax = plt.subplots(1, 3, figsize=(20, 10))
+
+ax_inf_tot = ax[0]
+ax_inf_g1 = ax[1]
+ax_inf_g2 = ax[2]
+
+
 # ....................................................................
 im = sns.heatmap(mtx_infections_tot, cmap = "viridis_r",  ax=ax_inf_tot, 
                  cbar_kws=dict(location='bottom'), norm=LogNorm())
@@ -397,19 +407,19 @@ ax_inf_tot.set_title("Total infections", fontweight="bold")
 setup_axes(ax_inf_tot, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_inf_tot, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_infections_tot, cmap = "viridis_r",  ax=ax_cb_inf_tot, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_inf_tot.set_title("Tot. inf. burden", fontweight="bold")
-setup_axes(ax_cb_inf_tot, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_inf_tot, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_infections_tot, cmap = "viridis_r",  ax=ax_cb_inf_tot, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_inf_tot.set_title("Tot. inf. burden", fontweight="bold")
+# setup_axes(ax_cb_inf_tot, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_inf_tot, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_vaccinations_tot, cmap = "viridis_r",  ax=ax_cb_vac_tot, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_vac_tot.set_title("Tot. vacc. burden", fontweight="bold")
-setup_axes(ax_cb_vac_tot, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_vac_tot, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_vaccinations_tot, cmap = "viridis_r",  ax=ax_cb_vac_tot, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_vac_tot.set_title("Tot. vacc. burden", fontweight="bold")
+# setup_axes(ax_cb_vac_tot, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_vac_tot, opt_vacc_strat)
 
 
 # ....................................................................
@@ -420,19 +430,19 @@ ax_inf_g1.set_title("Grp 1 infections", fontweight="bold")
 setup_axes(ax_inf_g1, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_inf_g1, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_infections_g1, cmap = "viridis_r",  ax=ax_cb_inf_g1, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_inf_g1.set_title("Grp 1 inf. burden", fontweight="bold")
-setup_axes(ax_cb_inf_g1, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_inf_g1, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_infections_g1, cmap = "viridis_r",  ax=ax_cb_inf_g1, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_inf_g1.set_title("Grp 1 inf. burden", fontweight="bold")
+# setup_axes(ax_cb_inf_g1, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_inf_g1, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_vaccinations_g1, cmap = "viridis_r",  ax=ax_cb_vac_g1, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_vac_g1.set_title("Grp 1 vacc. burden", fontweight="bold")
-setup_axes(ax_cb_vac_g1, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_vac_g1, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_vaccinations_g1, cmap = "viridis_r",  ax=ax_cb_vac_g1, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_vac_g1.set_title("Grp 1 vacc. burden", fontweight="bold")
+# setup_axes(ax_cb_vac_g1, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_vac_g1, opt_vacc_strat)
 
 
 # ....................................................................
@@ -443,19 +453,19 @@ ax_inf_g2.set_title("Grp 2 infections", fontweight="bold")
 setup_axes(ax_inf_g2, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_inf_g2, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_infections_g2, cmap = "viridis_r",  ax=ax_cb_inf_g2, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_inf_g2.set_title("Grp 2 inf. burden", fontweight="bold")
-setup_axes(ax_cb_inf_g2, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_inf_g2, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_infections_g2, cmap = "viridis_r",  ax=ax_cb_inf_g2, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_inf_g2.set_title("Grp 2 inf. burden", fontweight="bold")
+# setup_axes(ax_cb_inf_g2, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_inf_g2, opt_vacc_strat)
 # ....................................................................
-im = sns.heatmap(mtx_cb_vaccinations_g2, cmap = "viridis_r",  ax=ax_cb_vac_g2, 
-                 cbar_kws=dict(location='bottom'), norm=LogNorm())
-im.invert_yaxis()
-ax_cb_vac_g2.set_title("Grp 2 vacc. burden", fontweight="bold")
-setup_axes(ax_cb_vac_g2, g2_vac_nums, g1_vac_nums)
-annotate_vacc_opt_choice(ax_cb_vac_g2, opt_vacc_strat)
+# im = sns.heatmap(mtx_cb_vaccinations_g2, cmap = "viridis_r",  ax=ax_cb_vac_g2, 
+#                  cbar_kws=dict(location='bottom'), norm=LogNorm())
+# im.invert_yaxis()
+# ax_cb_vac_g2.set_title("Grp 2 vacc. burden", fontweight="bold")
+# setup_axes(ax_cb_vac_g2, g2_vac_nums, g1_vac_nums)
+# annotate_vacc_opt_choice(ax_cb_vac_g2, opt_vacc_strat)
 
 
 

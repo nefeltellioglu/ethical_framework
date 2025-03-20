@@ -6,19 +6,19 @@
             "contact_per_capita_21": 0.14,
             "contact_per_capita_22": 0.34,
             "gamma": 0.096,
-            "R0": 3.4
+            "R0": 1.5
     },
     "population_parameters":
     {
-	"pop_size_1": 4395000,
-	"pop_size_2": 605000
+	"pop_size_1": 4999000,
+	"pop_size_2": 1000
     },
     "grid_search_step":
     {
-	"grid_step": 0.05,
-	"a_b_grid_num_points": 11,
-	"a_b_grid_max": 1,
-	"a_b_grid_min": 0
+    "grid_step": 0.02,
+    "a_b_grid_num_points": 21,
+    "a_b_grid_max": 1,
+    "a_b_grid_min": 0
     },
     "burden_parameters":
     {
@@ -46,9 +46,9 @@
         "r0_2_vu" : 0
     },
     "time_parameters": {
-	"start_time": 0.0,
-	"finish_time": 1000.0,
-	"num_points": 5000
+    "start_time": 0.0,
+    "finish_time": 20000.0,
+    "num_points": 20000
     },
-    "database_file": "out/grid_database-2024-10-14_manuscript_CZ_test_II.pkl"
+    "database_file": "out/grid_database-2025-03-12_unlimited_low_R0.pkl"
 }
