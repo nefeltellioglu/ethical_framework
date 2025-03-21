@@ -6,12 +6,12 @@
             "contact_per_capita_21": 0.14,
             "contact_per_capita_22": 0.34,
             "gamma": 0.096,
-            "R0": 1.5
+            "R0": 3.4
     },
     "population_parameters":
     {
-	"pop_size_1": 4395000,
-	"pop_size_2": 605000
+    "pop_size_1": 4395000,
+    "pop_size_2": 605000
     },
     "grid_search_step":
     {
@@ -47,8 +47,8 @@
     },
     "time_parameters": {
     "start_time": 0.0,
-    "finish_time": 10000.0,
-    "num_points": 20000
+    "finish_time": 5000.0,
+    "num_points": 10000
     },
-    "database_file": "out/grid_database-2025-03-12_unlimited_low_R0.pkl"
+    "database_file": "out/grid_database-2025-03-21_test_unlimited_R0_3p4.pkl"
 }

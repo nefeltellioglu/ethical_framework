@@ -30,7 +30,8 @@ else:
     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
     # config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
-     config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    #config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    config_file = "config/config-2025-03-21_test_unlimited_R0_3p4.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -74,18 +75,13 @@ p2 = (N2 / (N1 + N2))
 #                           )**(0.5))
 
 #--another try
-# denom = c_11 * p1 + c_22 * p2 + ((c_11*p1 - c_22*p2)**2 +
-#                                   4 * c_21*p2*c_12*p1)**0.5
-# beta = 2 * R0 * gamma / denom
+denom = c_11*N1 + c_22*N2 + ((c_11*N1 - c_22*N2)**2 + 4 * c_21*N1*c_12*N2)**0.5
+#denom = c_11 + c_22 + ((c_11 - c_22)**2 + 4 * c_21*c_12)**0.5
+beta = 2 * R0 * gamma / denom
 
 
 # --- another try: 
-beta = R0 * 2 * gamma / (c_11 + c_22 +
-                         (c_11**2
-                          - 2 * c_22 * c_11
-                          + c_22 ** 2
-                          + 4 * c_12 * c_21
-                          )**(0.5))
+#beta = R0 * 2 * gamma / (c_11 + c_22 + (c_11**2 - 2 * c_22 * c_11 + c_22 ** 2 + 4 * c_12 * c_21)**(0.5))
 
 # model_parameters = [
 #     {

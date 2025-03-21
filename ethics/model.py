@@ -318,29 +318,53 @@ def sir_vacc(params: SIRParams, sir_0: SIRInitialCondition, ts) -> [SIRSolution]
             r_2_vu,
         ) = y
 
+        # # unvaccinated  I infect unvaccinated S
+        # inf_11 = params.beta_11 * i_1 * s_1 / pop_size_1
+        # inf_12 = params.beta_12 * i_1 * s_2 / pop_size_2
+        # inf_21 = params.beta_21 * i_2 * s_1 / pop_size_1
+        # inf_22 = params.beta_22 * i_2 * s_2 / pop_size_2
+
+        # # vaccinated unprotected I (Ivu) infect unvaccinated S (S)
+        # inf_1vu1 = params.beta_11 * i_1_vu * s_1 / pop_size_1
+        # inf_1vu2 = params.beta_12 * i_1_vu * s_2 / pop_size_2
+        # inf_2vu1 = params.beta_21 * i_2_vu * s_1 / pop_size_1
+        # inf_2vu2 = params.beta_22 * i_2_vu * s_2 / pop_size_2
+
+        # # unvaccinated I infect vaccinated unprotected S (Svu)
+        # inf_11vu = params.beta_11 * i_1 * s_1_vu / pop_size_1
+        # inf_12vu = params.beta_12 * i_1 * s_2_vu / pop_size_2
+        # inf_21vu = params.beta_21 * i_2 * s_1_vu / pop_size_1
+        # inf_22vu = params.beta_22 * i_2 * s_2_vu / pop_size_2
+
+        # # vaccinated unprotected I (Ivu) infect vaccinated unprotected S (Svu)
+        # inf_1vu1vu = params.beta_11 * i_1_vu * s_1_vu / pop_size_1
+        # inf_1vu2vu = params.beta_12 * i_1_vu * s_2_vu / pop_size_2
+        # inf_2vu1vu = params.beta_21 * i_2_vu * s_1_vu / pop_size_1
+        # inf_2vu2vu = params.beta_22 * i_2_vu * s_2_vu / pop_size_2
+
         # unvaccinated  I infect unvaccinated S
-        inf_11 = params.beta_11 * i_1 * s_1 / pop_size_1
-        inf_12 = params.beta_12 * i_1 * s_2 / pop_size_2
-        inf_21 = params.beta_21 * i_2 * s_1 / pop_size_1
-        inf_22 = params.beta_22 * i_2 * s_2 / pop_size_2
+        inf_11 = params.beta_11 * i_1 * s_1 
+        inf_12 = params.beta_12 * i_1 * s_2 
+        inf_21 = params.beta_21 * i_2 * s_1 
+        inf_22 = params.beta_22 * i_2 * s_2 
 
         # vaccinated unprotected I (Ivu) infect unvaccinated S (S)
-        inf_1vu1 = params.beta_11 * i_1_vu * s_1 / pop_size_1
-        inf_1vu2 = params.beta_12 * i_1_vu * s_2 / pop_size_2
-        inf_2vu1 = params.beta_21 * i_2_vu * s_1 / pop_size_1
-        inf_2vu2 = params.beta_22 * i_2_vu * s_2 / pop_size_2
+        inf_1vu1 = params.beta_11 * i_1_vu * s_1 
+        inf_1vu2 = params.beta_12 * i_1_vu * s_2 
+        inf_2vu1 = params.beta_21 * i_2_vu * s_1 
+        inf_2vu2 = params.beta_22 * i_2_vu * s_2 
 
         # unvaccinated I infect vaccinated unprotected S (Svu)
-        inf_11vu = params.beta_11 * i_1 * s_1_vu / pop_size_1
-        inf_12vu = params.beta_12 * i_1 * s_2_vu / pop_size_2
-        inf_21vu = params.beta_21 * i_2 * s_1_vu / pop_size_1
-        inf_22vu = params.beta_22 * i_2 * s_2_vu / pop_size_2
+        inf_11vu = params.beta_11 * i_1 * s_1_vu 
+        inf_12vu = params.beta_12 * i_1 * s_2_vu 
+        inf_21vu = params.beta_21 * i_2 * s_1_vu 
+        inf_22vu = params.beta_22 * i_2 * s_2_vu 
 
         # vaccinated unprotected I (Ivu) infect vaccinated unprotected S (Svu)
-        inf_1vu1vu = params.beta_11 * i_1_vu * s_1_vu / pop_size_1
-        inf_1vu2vu = params.beta_12 * i_1_vu * s_2_vu / pop_size_2
-        inf_2vu1vu = params.beta_21 * i_2_vu * s_1_vu / pop_size_1
-        inf_2vu2vu = params.beta_22 * i_2_vu * s_2_vu / pop_size_2
+        inf_1vu1vu = params.beta_11 * i_1_vu * s_1_vu 
+        inf_1vu2vu = params.beta_12 * i_1_vu * s_2_vu 
+        inf_2vu1vu = params.beta_21 * i_2_vu * s_1_vu 
+        inf_2vu2vu = params.beta_22 * i_2_vu * s_2_vu 
 
         ds_1 = -inf_11 - inf_21 - inf_1vu1 - inf_2vu1
         ds_2 = -inf_12 - inf_22 - inf_1vu2 - inf_2vu2

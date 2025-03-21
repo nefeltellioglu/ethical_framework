@@ -49,28 +49,53 @@ with open(config_file, "r") as f:
 # calculate beta values since the contact_per_capita_ij in the
 # configuration file are the rescaled values.
 # ------------------------------------------------------------------------------
-contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
-contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
-contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
-contact_per_capita_22=CONFIG["model_parameters"]["contact_per_capita_22"]
+# contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
+# contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
+# contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
+# contact_per_capita_22=CONFIG["model_parameters"]["contact_per_capita_22"]
+# gamma=CONFIG["model_parameters"]["gamma"]
+# R0=CONFIG["model_parameters"]["R0"]
+
+# beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
+#                          (contact_per_capita_11**2
+#                           - 2 * contact_per_capita_22 * contact_per_capita_11
+#                           + contact_per_capita_22 ** 2
+#                           + 4 * contact_per_capita_12 * contact_per_capita_21
+#                           )**(0.5))
+
+# model_parameters = [
+#     {
+#         "id": 0,
+#         "parameters": em.SIRParams(
+#             beta_11=beta * contact_per_capita_11,
+#             beta_12=beta * contact_per_capita_12,
+#             beta_21=beta * contact_per_capita_21,
+#             beta_22=beta * contact_per_capita_22,
+#             gamma=CONFIG["model_parameters"]["gamma"],
+#         ),
+#     }
+# ]
+
+c_11=CONFIG["model_parameters"]["contact_per_capita_11"]
+c_12=CONFIG["model_parameters"]["contact_per_capita_12"]
+c_21=CONFIG["model_parameters"]["contact_per_capita_21"]
+c_22=CONFIG["model_parameters"]["contact_per_capita_22"]
+N1 = CONFIG["population_parameters"]["pop_size_1"]
+N2 = CONFIG["population_parameters"]["pop_size_2"]
 gamma=CONFIG["model_parameters"]["gamma"]
 R0=CONFIG["model_parameters"]["R0"]
 
-beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
-                         (contact_per_capita_11**2
-                          - 2 * contact_per_capita_22 * contact_per_capita_11
-                          + contact_per_capita_22 ** 2
-                          + 4 * contact_per_capita_12 * contact_per_capita_21
-                          )**(0.5))
+denom = c_11*N1 + c_22*N2 + ((c_11*N1 - c_22*N2)**2 + 4 * c_21*N1*c_12*N2)**0.5
+beta = 2 * R0 * gamma / denom
 
 model_parameters = [
     {
         "id": 0,
         "parameters": em.SIRParams(
-            beta_11=beta * contact_per_capita_11,
-            beta_12=beta * contact_per_capita_12,
-            beta_21=beta * contact_per_capita_21,
-            beta_22=beta * contact_per_capita_22,
+            beta_11=beta * c_11,
+            beta_12=beta * c_12,
+            beta_21=beta * c_21,
+            beta_22=beta * c_22,
             gamma=CONFIG["model_parameters"]["gamma"],
         ),
     }
