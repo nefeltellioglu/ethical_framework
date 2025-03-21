@@ -92,10 +92,10 @@ model_parameters = [
     {
         "id": 0,
         "parameters": em.SIRParams(
-            beta_11=beta * c_11,
-            beta_12=beta * c_12,
-            beta_21=beta * c_21,
-            beta_22=beta * c_22,
+            beta_11=beta * c_11 * N1,
+            beta_12=beta * c_12 * N2,
+            beta_21=beta * c_21 * N1,
+            beta_22=beta * c_22 * N2,
             gamma=CONFIG["model_parameters"]["gamma"],
         ),
     }

@@ -30,8 +30,8 @@ else:
     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
     # config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
-    #config_file = "config/config-2025-03-12_unlimited_low_R0.json"
-    config_file = "config/config-2025-03-21_test_unlimited_R0_3p4.json"
+    config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    #config_file = "config/config-2025-03-21_test_unlimited_R0_3p4.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -100,10 +100,10 @@ model_parameters = [
     {
         "id": 0,
         "parameters": em.SIRParams(
-            beta_11=beta * c_11,
-            beta_12=beta * c_12,
-            beta_21=beta * c_21,
-            beta_22=beta * c_22,
+            beta_11=beta * c_11 * N1,
+            beta_12=beta * c_12 * N2,
+            beta_21=beta * c_21 * N1,
+            beta_22=beta * c_22 * N2,
             gamma=CONFIG["model_parameters"]["gamma"],
         ),
     }
