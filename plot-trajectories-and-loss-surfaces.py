@@ -21,6 +21,7 @@ else:
     #config_file = "config/config-2024-10-14_manuscript.json"
      #config_file = "config/config-2024-10-28_limited_vaccine.json"
     config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -198,16 +199,15 @@ for ethical_a_b in ethical_a_b_list:
 
 
 # TODO We should really remove this hard-coded value.
-times = 500
-if "low" in config_file:
-   times = int(times * 20)
-elif "high" in config_file:
-   times = int(times * 0.5)
-
+sim_times = np.linspace(
+    CONFIG["time_parameters"]["start_time"],
+    CONFIG["time_parameters"]["finish_time"],
+    num = CONFIG["time_parameters"]["num_points"]
+) 
 # for plotting trajectories 
 solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, 
                           sir_0=initial_conditions[ethical_a_b], 
-                          ts=np.linspace(0, times, times + 1))[0]
+                          ts=sim_times)[0]
              for ethical_a_b in ethical_a_b_list}
 
 # ====================================================================

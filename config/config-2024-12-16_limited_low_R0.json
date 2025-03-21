@@ -51,5 +51,10 @@
         "r0_1_vu" : 0,
         "r0_2_vu" : 0
     },
+     "time_parameters": {
+	"start_time": 0.0,
+	"finish_time": 3000.0,
+	"num_points": 15000
+    },
     "database_file": "out/grid_database-2024-12-16_limited_low_R0.pkl"
 }

@@ -29,7 +29,7 @@ else:
 
     #config_file = "config/config-2024-10-28_limited_vaccine.json"
     # config_file = "config/config-2024-12-02_limited_low_R0.json"
-    config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format
@@ -60,7 +60,7 @@ beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
                          (contact_per_capita_11**2
                           - 2 * contact_per_capita_22 * contact_per_capita_11
                           + contact_per_capita_22 ** 2
-                          + 4 * contact_per_capita_12 * contact_per_capita_22
+                          + 4 * contact_per_capita_12 * contact_per_capita_21
                           )**(0.5))
 
 model_parameters = [
