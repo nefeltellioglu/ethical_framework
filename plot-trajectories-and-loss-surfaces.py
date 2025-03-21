@@ -199,16 +199,15 @@ for ethical_a_b in ethical_a_b_list:
 
 
 # TODO We should really remove this hard-coded value.
-times = 1000
-# if "low" in config_file:
-#    times = int(times * 20)
-# elif "high" in config_file:
-#    times = int(times * 0.5)
-
+sim_times = np.linspace(
+    CONFIG["time_parameters"]["start_time"],
+    CONFIG["time_parameters"]["finish_time"],
+    num = CONFIG["time_parameters"]["num_points"]
+) 
 # for plotting trajectories 
 solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, 
                           sir_0=initial_conditions[ethical_a_b], 
-                          ts=np.linspace(0, times, times + 1))[0]
+                          ts=sim_times)[0]
              for ethical_a_b in ethical_a_b_list}
 
 # ====================================================================
