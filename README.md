@@ -67,37 +67,6 @@ file.
 Consult the [FAQs](#faqs) if you want to modify this configuration.
 There might be helpful information in there.
 
-## `grid-search-opt` branch goals
-
-- TODO Double check that the percentages in the `BurdenParams` class
-  can safely be renamed to proportions as this is what they appear to
-  be.
-- TODO Use grid search as the optimisation strategy
-  + DONE Create a database of the model solutions to store the heavy
-    compute so various optimisation question can be answered quickly
-    be querying the database. See SQL example below.
-  + DONE Rename `ethical_sir_fancy.py` to `ethics/model.py` or
-    whatever allows us to import just the modelling code as
-    `ethics.model`. Then there can be a `ethics.optimisation` for the
-    optimisation.
-  + DONE Configure the database construction with a file. This will
-    provide a nicer alternative to having hard-coded parameters in the
-    code. This should live in `config/`.
-  + DONE Write an optimisation method that searches the database for
-    the best initial condition.
-  + DONE Generate plots to check that the optimal vaccination strategy
-    (i.e. the initial condition) is (practically) identifiable.
-  + DONE Implement a normalisation strategy so that all of the
-    objectives are on a comparable scale. We could do this by looking
-    at the vertices of the a/b simplex and then scaling each loss term
-    to take values form 0 to 1.
-  + TODO Get the database construction working with the stochastic
-    simulator.
-  + TODO Get the optimisation process working with the stochastic
-    model.
-  + TODO Generate plots to check that we are using a suitable number
-    of replicates to get the average value.
-
 The `create-grid-database.py` script iterates over a large combination
 of parameters and initial conditions and computes multiple simulations
 per pair. This information can be queried to work out what is the
