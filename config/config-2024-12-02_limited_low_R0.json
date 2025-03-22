@@ -7,7 +7,7 @@
             "contact_per_capita_22": 0.34,
             "gamma": 0.096,
             "R0": 1.5
-            
+
 
     },
     "population_parameters":
@@ -52,9 +52,9 @@
         "r0_2_vu" : 0
     },
     "time_parameters": {
-    "start_time": 0.0,
-    "finish_time": 3000.0,
-	"num_points": 15000
+	"start_time": 0.0,
+	"finish_time": 500.0,
+	"num_points": 1000
     },
     "database_file": "out/grid_database-2024-12-02_limited_low_R0.pkl"
 }
