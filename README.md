@@ -2,10 +2,13 @@
 
 ## Usage
 
-### Environment
+### Virtual environment
 
 ```
-conda env create -f environment.yaml
+python3 -m venv venv
+source venv/bin/activate
+pip install -U pip   # update pip
+pip install -r requirements.txt
 ```
 
 ### Snakemake pipeline
