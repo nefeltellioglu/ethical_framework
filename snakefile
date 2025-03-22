@@ -1,36 +1,23 @@
 
 rule all:
     input:
+        # Simulation database files
         "out/grid_database-2024-10-14_manuscript.pkl",
         "out/grid_database-2024-10-28_limited_vaccine.pkl",
-        #"out/2024-10-14_manuscript/hm_inf_vacc.png",
-        #"out/2024-10-28_limited_vaccine/hm_inf_vacc.png",
         "out/grid_database-2024-12-02_limited_low_R0.pkl",
         "out/grid_database-2024-12-02_limited_high_R0.pkl",
         "out/grid_database-2024-12-02_unlimited_low_R0.pkl",
         "out/grid_database-2024-12-02_unlimited_high_R0.pkl",
-        #"out/2024-12-02_limited_low_R0/hm_inf_vacc.png",
-        #"out/2024-12-02_limited_high_R0/hm_inf_vacc.png",
-        #"out/2024-12-02_unlimited_high_R0/hm_inf_vacc.png",
-        #"out/2024-12-02_unlimited_low_R0/hm_inf_vacc.png",
-        #"out/2024-10-14_manuscript/trajectories.png",
-        #"out/2024-10-28_limited_vaccine/trajectories.png",
-        #"out/2024-12-02_limited_low_R0/trajectories.png",
-        #"out/2024-12-02_limited_high_R0/trajectories.png",
-        #"out/2024-12-02_unlimited_high_R0/trajectories.png",
-        #"out/2024-12-02_unlimited_low_R0/trajectories.png",
 
-        # New plots added by AEZ on 2025-01-08
+        # Plots for the unlimited vaccination model in the main text
         "out/2024-10-14_manuscript/glamorous-trajectories.png",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
-
-        # New plots added by AEZ on 2025-01-09
         "out/2024-10-14_manuscript/ab-heatmap-data.csv",
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png",
         "out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png",
 
-        # New plots added by NT on 2025-03-17
+        # Plots for the limited vaccination model in the main text
         "out/2024-10-28_limited_vaccine/glamorous-trajectories.png",
         "out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-data.csv",
@@ -38,34 +25,36 @@ rule all:
         "out/2024-10-28_limited_vaccine/ab-heatmap-group-vaccination.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-clinical-burden.png",
 
-
+        # Additional results included in the supplementary information.
+        #   Unlimited vaccine high R0
         "out/2024-12-02_unlimited_high_R0/glamorous-trajectories.png",
         "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-clinical-burden.png",
-
+        #   Limited vaccine high R0
         "out/2024-12-02_limited_high_R0/glamorous-trajectories.png",
         "out/2024-12-02_limited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-clinical-burden.png",
-
+        #   Unlimited vaccine low R0
         "out/2024-12-02_unlimited_low_R0/glamorous-trajectories.png",
         "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-clinical-burden.png",
-
+        #   Limited vaccine low R0
         "out/2024-12-02_limited_low_R0/glamorous-trajectories.png",
         "out/2024-12-02_limited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-clinical-burden.png",
+
 
 rule make_grid_database_ode:
     input:
