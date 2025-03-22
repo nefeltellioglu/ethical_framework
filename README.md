@@ -2,15 +2,6 @@
 
 ## Usage
 
-### Virtual environment
-
-```
-python3 -m venv venv
-source venv/bin/activate
-pip install -U pip   # update pip
-pip install -r requirements.txt
-```
-
 ### Snakemake pipeline
 
 There is a `snakefile` to configure building the grid-search database
@@ -143,6 +134,18 @@ def optimal_initial_condition(model_param_id: int,
 ```
 
 ## FAQs
+
+#### How do I set up the computational environment?
+
+There is a `requirements.txt` file that you can use to set up a Python
+virtual environment to run the code in this repository.
+
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -U pip   # update pip
+pip install -r requirements.txt
+```
 
 #### How do I make things run quicker during development?
 
