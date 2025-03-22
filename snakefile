@@ -19,7 +19,7 @@ rule all:
         #"out/2024-12-02_limited_high_R0/trajectories.png",
         #"out/2024-12-02_unlimited_high_R0/trajectories.png",
         #"out/2024-12-02_unlimited_low_R0/trajectories.png",
-	
+
         # New plots added by AEZ on 2025-01-08
         "out/2024-10-14_manuscript/glamorous-trajectories.png",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
@@ -29,39 +29,39 @@ rule all:
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png",
         "out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png",
-        
+
         # New plots added by NT on 2025-03-17
         "out/2024-10-28_limited_vaccine/glamorous-trajectories.png",
-    	"out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png",
+        "out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-data.csv",
         "out/2024-10-28_limited_vaccine/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-group-vaccination.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-clinical-burden.png",
-        
-        
-    	"out/2024-12-02_unlimited_high_R0/glamorous-trajectories.png",
-    	"out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces.png",
+
+
+        "out/2024-12-02_unlimited_high_R0/glamorous-trajectories.png",
+        "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-clinical-burden.png",
-        
-    	"out/2024-12-02_limited_high_R0/glamorous-trajectories.png",
-    	"out/2024-12-02_limited_high_R0/glamorous-loss_surfaces.png",
+
+        "out/2024-12-02_limited_high_R0/glamorous-trajectories.png",
+        "out/2024-12-02_limited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-clinical-burden.png",
 
-    	"out/2024-12-02_unlimited_low_R0/glamorous-trajectories.png",
-    	"out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces.png",
+        "out/2024-12-02_unlimited_low_R0/glamorous-trajectories.png",
+        "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-clinical-burden.png",
-        
-    	"out/2024-12-02_limited_low_R0/glamorous-trajectories.png",
-    	"out/2024-12-02_limited_low_R0/glamorous-loss_surfaces.png",
+
+        "out/2024-12-02_limited_low_R0/glamorous-trajectories.png",
+        "out/2024-12-02_limited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-group-vaccination.png",
@@ -91,7 +91,7 @@ rule plot_all_optimization_results_2:
     output:
         "out/{config_date_name}/hm_inf_vacc.png",
         "out/{config_date_name}/hm_all_burdens.png",
-	"out/{config_date_name}/hm_total_vacc_across_all.png"
+    "out/{config_date_name}/hm_total_vacc_across_all.png"
 
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
@@ -110,9 +110,9 @@ rule plot_selected_trajectories:
     output:
         "out/{config_date_name}/trajectories.png",
         "out/{config_date_name}/example-optimisation-Burden.png",
-	"out/{config_date_name}/example-optimisation-Individual_loss.png",
-	"out/{config_date_name}/example-optimisation-Normalized_individual_loss.png",
-	"out/{config_date_name}/example-optimisation-Aggregated_loss.png"
+    "out/{config_date_name}/example-optimisation-Individual_loss.png",
+    "out/{config_date_name}/example-optimisation-Normalized_individual_loss.png",
+    "out/{config_date_name}/example-optimisation-Aggregated_loss.png"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
@@ -154,7 +154,7 @@ rule make_ab_heatmap_data:
         """
         python {input.py} {input.config}
         """
-        
+
 
 
 rule plot_ab_heatmaps_vaccination_and_clinical_burden:
