@@ -37,24 +37,31 @@ $ bash housekeeping.sh
 
 ## Gallery
 
-[Foobar plot](./plot-glamorous-trajectories-and-loss-surfaces.py)
+### Trajectories and loss surfaces for fixed ethical parameters
 
-![plot (demo I)](./out/2024-10-14_manuscript/glamorous-trajectories.png)
-![plot (demo II)](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
+[Plotting script](./plot-trajectories-and-loss-surfaces.py)
 
-[Clinical burden heatmap](./plot-ab-heatmaps-clinical-burden-at-optimal.py)
+Trajectories of the epidemic under the optimal vaccination strategy in
+the case of unlimited vaccine availability and the associated loss
+surface for selecting this strategy.
 
-Plots the clinical burden when using the optimal vaccination strategy
-while at various values of a/b.
+![trajectories with unlimited vaccine](./out/2024-10-14_manuscript/glamorous-trajectories.png)
+![loss surface with unlimited vaccine](./out/2024-10-14_manuscript/glamorous-loss_surfaces.png)
 
-![plot (demo III)](./out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png)
+The corresponding plots for the case of limited vaccination
 
-[Group vaccination heatmap](./plot-ab-heatmaps-group-vaccination.py)
+![trajectories with limited vaccine](./out/2024-10-28_limited_vaccine/glamorous-trajectories.png)
+![loss surface with limited vaccine](./out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png)
 
-Plots the vaccination level in each group when using the optimal
-vaccination strategy while at various values of a/b.
+### Optimal strategies for variable ethical parameters
 
-![plot (demo IV)](./out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png)
+[Plotting script](./plot-ab-heatmaps-vaccination-and-clinical-burden.py)
+
+Plots the burden and optimal strategy for different values of the
+ethical parameters a/b.
+
+![optimal strategy unlimited vaccine](./out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png)
+![optimal strategy limited vaccine](./out/2024-10-28_limited_vaccine/ab-heatmap-vaccination-and-clinical-burden.png)
 
 ## Configuration
 
