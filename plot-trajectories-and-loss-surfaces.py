@@ -13,6 +13,10 @@ import seaborn as sns
 
 from matplotlib.colors import LogNorm
 
+IMG_WIDTH_SCALING=1.25
+IMG_TEXT_SIZE=12
+IMG_TICK_TEXT_SIZE=10
+IMG_PANEL_LABEL_SIZE=14
 
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
@@ -45,8 +49,8 @@ with open(CONFIG["database_file"], "rb") as f:
     db = pickle.load(f)
     assert len(db["model_parameters"]) == 1
 
-# at this point, db contains only a placeholder id and the set of model 
-# parameters specified in the config file. 
+# at this point, db contains only a placeholder id and the set of model
+# parameters specified in the config file.
 
 
 # ====================================================================
@@ -92,14 +96,14 @@ db = {
     "burden_parameters": db["burden_parameters"]
 }
 
-# db now contains the following lists: 
+# db now contains the following lists:
 # - model parameters : from the config file
 # - initial conditions : for each vaccination strategy in grid search (proportions vaccinated)
-# - configurations : specifying the indices of the configurations 
+# - configurations : specifying the indices of the configurations
 #       which do not exceed the max number of vaccines
-# - outcomes specitying : how the numbers of infected individuals from the SIR simulations 
-# - burden parameters : a single-element list specifying parameters 
-#       used for calculating clinical burdens, given an SIR outcome (prop. hospitalised etc.). 
+# - outcomes specitying : how the numbers of infected individuals from the SIR simulations
+# - burden parameters : a single-element list specifying parameters
+#       used for calculating clinical burdens, given an SIR outcome (prop. hospitalised etc.).
 
 
 
@@ -152,7 +156,7 @@ for (ethical_a, ethical_b) in ethical_a_b_list:
     )
 
     _optimal_config = [c for c in db["configurations"] if c["initial_condition_id"] == best_ic_id]
-    
+
     _optimal_outcome = [
         o for o in db["outcomes"] if o["configuration_id"] == _optimal_config[0]["id"]
     ]
@@ -180,7 +184,7 @@ for ethical_a_b in ethical_a_b_list:
     )
     s0_1_vp = int(num_vac_1 * vac_protection_from_inf)
     s0_2_vp = int(num_vac_2 * vac_protection_from_inf)
-    
+
     initial_conditions[ethical_a_b] = em.SIRInitialCondition(
         s0_1=pop_size_1 - num_vac_1 - 1,
         s0_2=pop_size_2 - num_vac_2 - 1,
@@ -204,10 +208,10 @@ sim_times = np.linspace(
     CONFIG["time_parameters"]["start_time"],
     CONFIG["time_parameters"]["finish_time"],
     num = CONFIG["time_parameters"]["num_points"]
-) 
-# for plotting trajectories 
-solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param, 
-                          sir_0=initial_conditions[ethical_a_b], 
+)
+# for plotting trajectories
+solutions = {ethical_a_b: em.sir_vacc(params=unique_model_param,
+                          sir_0=initial_conditions[ethical_a_b],
                           ts=sim_times)[0]
              for ethical_a_b in ethical_a_b_list}
 
@@ -220,7 +224,10 @@ print(70 * "=")
 print("plotting optimal trajectories for (a, b) examples")
 print(70 * "=")
 
-fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
+# The width of an A4 sheet (portrait) is 8.3 inches which is a
+# sensible starting width for a large image in a single column layout.
+fig, axs = plt.subplots(1, 3, figsize=(IMG_WIDTH_SCALING*8.3,
+                                       IMG_WIDTH_SCALING*2.4))
 trajectory_panel_labels = ['A', 'B', 'C']
 # trajectory_panel_labels = ['', '', '']
 
@@ -234,7 +241,8 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
     a, b = ethical_a_b
     ax = axs[ix]
     ax.text(-0.25, 1.15, trajectory_panel_labels[ix], transform=ax.transAxes,
-            fontsize=12, fontweight='bold', va='top', ha='right')
+            fontsize=IMG_PANEL_LABEL_SIZE,
+            fontweight='bold', va='top', ha='right')
 
     sol = solutions[ethical_a_b]
 
@@ -250,14 +258,8 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 
     vacc = [int(100 * x/y) for (x, y) in zip(opt_vacc_strat[ethical_a_b], (pop_size_1, pop_size_2))]
 
-# r'$\mathcal{L}(w_{EI} = $' + \
-#              str(ethical_a_b_list[0][0]) + \
-#              r', $w_{EV} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
-
     title_text = r'$w_{\text{EI}} =$' +  str(a) + r', $w_{\text{EV}} = $' + str(b)
-
-    ax.set_title(title_text, size = 12
-                 )
+    ax.set_title(title_text, size = IMG_TEXT_SIZE)
 
     textstr = '\n'.join((
         'Optimal vaccination',
@@ -267,29 +269,29 @@ for ix, ethical_a_b in enumerate(ethical_a_b_list):
 
     props = {"facecolor":"white", "alpha":1.0}
     if (total_s1[-1] > 60) or (total_s2[-1] > 60):
-        ax.text(0.315, 0.5, textstr, transform=ax.transAxes, #fontsize=14,
+        ax.text(0.315, 0.5, textstr, transform=ax.transAxes,
             verticalalignment='top', horizontalalignment='left', bbox=props)
     else:
         # place a text box in upper left in axes coords
-        ax.text(0.315, 0.97, textstr, transform=ax.transAxes, #fontsize=14,
+        ax.text(0.315, 0.97, textstr, transform=ax.transAxes,
             verticalalignment='top', horizontalalignment='left', bbox=props)
 
-    ax.set_xlabel('Day')
-    ax.set_ylabel('Group percentage (%)')
+    ax.set_xlabel('Day', size=IMG_TEXT_SIZE)
+    ax.set_ylabel('Group percentage (%)', size=IMG_TEXT_SIZE)
     ax.legend().set_visible(False)
 
-ax.legend().set_visible(True)
-ax.legend(loc= "lower center", bbox_to_anchor=(-0.9,-0.55), ncol= 2)
-plt.subplots_adjust(left=0.1,
-            bottom=0.1,
-            right=0.9,
-            top=0.9,
-            wspace=0.4,
-            hspace=0.4)
-
+fig.tight_layout()
 fig.savefig(f"{output_dir}/glamorous-trajectories.png", bbox_inches='tight', dpi=300)
 fig.savefig(f"{output_dir}/glamorous-trajectories.svg", bbox_inches='tight')
 
+
+# Make another copy of the figure that has the legend in it.
+axs[2].legend().set_visible(True)
+axs[2].legend(loc= "lower center",
+              bbox_to_anchor=(-0.9,-0.55),
+              ncol= 2)
+fig.savefig(f"{output_dir}/glamorous-trajectories-with-legend.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/glamorous-trajectories-with-legend.svg", bbox_inches='tight')
 
 # ====================================================================
 # Plot the loss surfaces for each of the different components along
@@ -338,10 +340,10 @@ v2 = np.zeros((num_rows))
 loss_cb = np.zeros((num_rows))
 loss_ei = np.zeros((num_rows))
 loss_ev = np.zeros((num_rows))
-# TODO: these need to be taken from the valid configurations. 
+# TODO: these need to be taken from the valid configurations.
 iter = -1
 
-# populations are constant: 
+# populations are constant:
 pop_1 = em.pop_1(ics_objs[(0, 0)])
 pop_2 = em.pop_2(ics_objs[(0, 0)])
 
@@ -370,15 +372,15 @@ for ix, g1_vac_num in enumerate(g1_vac_nums):
             loss_cb[iter] = l_cb
             loss_ei[iter] = l_ei
             loss_ev[iter] = l_ev
-        else: 
+        else:
 
             loss_cb[iter] = float("nan")
             loss_ei[iter] = float("nan")
             loss_ev[iter] = float("nan")
 
-loss_components = {'v1':v1, 
-                   'v2':v2, 
-                   'loss_cb':loss_cb, 
+loss_components = {'v1':v1,
+                   'v2':v2,
+                   'loss_cb':loss_cb,
                    'loss_ei':loss_ei,
                    'loss_ev':loss_ev}
 
@@ -408,13 +410,13 @@ def setup_axes(my_ax, g2_vac_nums, g1_vac_nums):
     y_tick_space = int(round(len(g1_vac_nums)/n_ticks))
     y_ticks_thinned = range(0, len(g1_vac_nums), y_tick_space)
 
-    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned] 
+    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned]
 
     my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = 16)
     my_ax.set_ylabel("% vaccinated (group 1, 0-69)", size=20)
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
-    #colorbar font size: 
+    #colorbar font size:
     my_ax.figure.axes[-1].xaxis.label.set_size(25)
     my_ax.figure.axes[-1].tick_params(labelsize = 16)
     my_ax.figure.axes[-1].xaxis.set_label_coords(0.5, 3.0)
@@ -433,7 +435,7 @@ ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
 # ....................................................................
-im = sns.heatmap(loss_mtx_cb, cmap = "viridis_r",  ax=ax_cb, 
+im = sns.heatmap(loss_mtx_cb, cmap = "viridis_r",  ax=ax_cb,
                  cbar_kws=dict(location='bottom'), norm=LogNorm())
 im.invert_yaxis()
 ax_cb.set_title("Total clinical burden", fontweight="bold")
@@ -441,7 +443,7 @@ setup_axes(ax_cb, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_cb, opt_vacc_strat)
 #annotate_global_opt(ax_cb, loss_mtx_cb)
 # ....................................................................
-im = sns.heatmap(loss_mtx_ei, cmap = "viridis_r",  ax=ax_ei, 
+im = sns.heatmap(loss_mtx_ei, cmap = "viridis_r",  ax=ax_ei,
                  cbar_kws=dict(location='bottom'), norm=LogNorm())
 im.invert_yaxis()
 ax_ei.set_title("Inequity of infection burden", fontweight="bold")
@@ -449,7 +451,7 @@ setup_axes(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_vacc_opt_choice(ax_ei, opt_vacc_strat)
 #annotate_global_opt(ax_ei, loss_mtx_ei)
 # ....................................................................
-im = sns.heatmap(loss_mtx_ev, cmap = "viridis_r",  ax=ax_ev, 
+im = sns.heatmap(loss_mtx_ev, cmap = "viridis_r",  ax=ax_ev,
                  cbar_kws=dict(location='bottom'), norm=LogNorm())
 im.invert_yaxis()
 ax_ev.set_title("Inequity of vaccination burden", fontweight="bold")
@@ -477,7 +479,7 @@ print(70 * "=")
 # the outcomes given these initial conditions so that it is easy to
 # get the data into a plottable format.
 
-# for seaborne heatmap, use a matrix. 
+# for seaborne heatmap, use a matrix.
 
 loss_mtxs_ab = {}
 
@@ -511,14 +513,14 @@ for i_ab, (a, b) in enumerate(ethical_a_b_list):
 
                 loss_ab[iter] = em.global_loss(l_cb, l_ei, l_ev, a, b)
             else:
-                loss_ab[iter] = float("nan") 
+                loss_ab[iter] = float("nan")
 
     loss_ab_df = pd.DataFrame({'loss':loss_ab, 'v1':v1, 'v2':v2})
     loss_mtxs_ab[(a, b)] = loss_ab_df.pivot(index='v1', columns='v2',values='loss')
 
 
 
-# TODO: matrices of global loss terms over (v1, v2) for each (a, b) combo. 
+# TODO: matrices of global loss terms over (v1, v2) for each (a, b) combo.
 
 # --------------------------------------------------------------------
 # Draw the actual figure
@@ -532,22 +534,22 @@ def setup_axes_g(my_ax, g2_vac_nums, g1_vac_nums):
     x_ticks_thinned = range(0, len(g2_vac_nums), x_tick_space)
 
     x_labels_thinned = [round(g2_vac_nums[i]/pop_2 * 100) for i in x_ticks_thinned]
-    
-    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45, size = 16)
-    my_ax.set_xlabel("% vaccinated (group 2, 70+)",size=20)
+
+    my_ax.set_xticks(x_ticks_thinned, labels=x_labels_thinned, rotation=45, size = IMG_TICK_TEXT_SIZE)
+    my_ax.set_xlabel("% vaccinated (group 2, 70+)",size=IMG_TEXT_SIZE)
 
     y_tick_space = int(round(len(g1_vac_nums)/n_ticks))
     y_ticks_thinned = range(0, len(g1_vac_nums), y_tick_space)
 
-    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned] 
+    y_labels_thinned = [round(g1_vac_nums[i]/pop_1 * 100) for i in y_ticks_thinned]
 
-    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = 16)
-    my_ax.set_ylabel("% vaccinated (group 1, 0-69)", size=20)
+    my_ax.set_yticks(y_ticks_thinned, labels=y_labels_thinned, size = IMG_TICK_TEXT_SIZE)
+    my_ax.set_ylabel("% vaccinated (group 1, 0-69)", size=IMG_TEXT_SIZE)
     my_ax.set_aspect(len(g2_vac_nums) / len(g1_vac_nums))
     #my_ax.figure.colorbar(im, ax=my_ax)
-    #colorbar font size: 
-    my_ax.figure.axes[-1].xaxis.label.set_size(25)
-    my_ax.figure.axes[-1].tick_params(labelsize = 16)
+    #colorbar font size:
+    my_ax.figure.axes[-1].xaxis.label.set_size(IMG_TEXT_SIZE)
+    my_ax.figure.axes[-1].tick_params(labelsize = IMG_TICK_TEXT_SIZE)
     my_ax.figure.axes[-1].xaxis.set_label_coords(0.5, 3.0)
 
 
@@ -568,7 +570,10 @@ def find_vmin(loss_mtx)->float:
     return vmin
 
 # ....................................................................
-fig, ax = plt.subplots(1, 3, figsize=(16, 9))
+# The width of an A4 sheet (portrait) is 8.3 inches which is a
+# sensible starting width for a large image in a single column layout.
+fig, ax = plt.subplots(1, 3, figsize=(IMG_WIDTH_SCALING*8.3,
+                                      IMG_WIDTH_SCALING*4.7))
 ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
@@ -576,23 +581,28 @@ ax_ev = ax[2]
 # Include the panel labels on the heatmap panels
 heatmap_panel_labels = ['D', 'E', 'F']
 for p_lab, axis in zip(heatmap_panel_labels, [ax_cb, ax_ei, ax_ev]):
-    axis.text(-0.15, 1.30, p_lab, transform=axis.transAxes,
-              fontsize=20, fontweight='bold', va='top', ha='right')
+    axis.text(-0.15, 1.35, p_lab, transform=axis.transAxes,
+              fontsize=IMG_PANEL_LABEL_SIZE, fontweight='bold', va='top', ha='right')
 
 # ....................................................................
-#im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
+# "cbar" stands for Colour Bar which is matplotlib terminology.
 cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
              str(ethical_a_b_list[0][0]) + \
              r', $w_{\text{EV}} = $' + str(ethical_a_b_list[0][1]) + r'$)$'
-
 vmin_ab = find_vmin(loss_mtx)
-
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb, 
-                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb,
+                 cbar = False,
                  norm=LogNorm(vmin = vmin_ab, vmax=1, clip=True))
-#im.figure.axes[-1].tick_params(labelsize = 14)
-#im.figure.axes[-1].set_xlabel(cbar_label, fontsize=30)
+cbar = im.figure.colorbar(im.collections[0],
+                          ax=ax_cb,
+                          orientation='horizontal',
+                          location = "top",
+                          pad=0.06)
+cbar.set_label(cbar_label, fontsize=IMG_TEXT_SIZE)
+cbar.ax.xaxis.set_label_position('top')
+cbar.ax.xaxis.set_ticks_position('bottom')
+cbar.ax.tick_params(labelsize=IMG_TICK_TEXT_SIZE)
 
 im.invert_yaxis()
 setup_axes_g(ax_cb, g2_vac_nums, g1_vac_nums)
@@ -608,9 +618,19 @@ cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
 
 vmin_ab = find_vmin(loss_mtx)
 
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei, 
-                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ei,
+                 cbar = False,
                  norm=LogNorm(vmin = vmin_ab, vmax=1, clip=True ))
+cbar = im.figure.colorbar(im.collections[0],
+                          ax=ax_ei,
+                          orientation='horizontal',
+                          location = "top",
+                          pad=0.06)
+cbar.set_label(cbar_label, fontsize=IMG_TEXT_SIZE)
+cbar.ax.xaxis.set_label_position('top')
+cbar.ax.xaxis.set_ticks_position('bottom')
+cbar.ax.tick_params(labelsize=IMG_TICK_TEXT_SIZE)
+
 im.invert_yaxis()
 setup_axes_g(ax_ei, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ei, loss_mtx)
@@ -624,9 +644,19 @@ cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
              r', $w_{\text{EV}} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
 
 vmin_ab = find_vmin(loss_mtx)
-im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev, 
-                 cbar_kws=dict(location='top', label=cbar_label, pad=0.025),
+im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev,
+                 cbar = False,
                  norm=LogNorm(vmin = vmin_ab, vmax = 1, clip=True))
+cbar = im.figure.colorbar(im.collections[0],
+                          ax=ax_ev,
+                          orientation='horizontal',
+                          location = "top",
+                          pad=0.06)
+cbar.set_label(cbar_label, fontsize=IMG_TEXT_SIZE)
+cbar.ax.xaxis.set_label_position('top')
+cbar.ax.xaxis.set_ticks_position('bottom')
+cbar.ax.tick_params(labelsize=IMG_TICK_TEXT_SIZE)
+
 im.invert_yaxis()
 setup_axes_g(ax_ev, g2_vac_nums, g1_vac_nums)
 annotate_global_opt(ax_ev, loss_mtx)
@@ -635,5 +665,3 @@ fig.tight_layout()
 fig.savefig(f"{output_dir}/glamorous-loss_surfaces_global.png", bbox_inches='tight', dpi=300)
 fig.savefig(f"{output_dir}/glamorous-loss_surfaces_global.svg", bbox_inches='tight')
 # --------------------------------------------------------------------
-
-
