@@ -221,8 +221,8 @@ print("plotting optimal trajectories for (a, b) examples")
 print(70 * "=")
 
 fig, axs = plt.subplots(1, 3, figsize=(10, 2.5))
-#subplot_labels = ['(a)', '(b)', '(c)']
-subplot_labels = ['', '', '']
+trajectory_panel_labels = ['A', 'B', 'C']
+# trajectory_panel_labels = ['', '', '']
 
 # TODO These colour codes should not be hard-coded, but they are just
 # colorbrewer2 8-class Dark2 values so they shouldn't be too
@@ -233,9 +233,9 @@ orange_hex = "#d95f02"
 for ix, ethical_a_b in enumerate(ethical_a_b_list):
     a, b = ethical_a_b
     ax = axs[ix]
-    ax.text(-0.25, 1.15, subplot_labels[ix], transform=ax.transAxes,
+    ax.text(-0.25, 1.15, trajectory_panel_labels[ix], transform=ax.transAxes,
             fontsize=12, fontweight='bold', va='top', ha='right')
-    
+
     sol = solutions[ethical_a_b]
 
     total_s1 = 100 * (sol.s1 + sol.s1_vp + sol.s1_vu) / pop_size_1
@@ -573,6 +573,11 @@ ax_cb = ax[0]
 ax_ei = ax[1]
 ax_ev = ax[2]
 
+# Include the panel labels on the heatmap panels
+heatmap_panel_labels = ['D', 'E', 'F']
+for p_lab, axis in zip(heatmap_panel_labels, [ax_cb, ax_ei, ax_ev]):
+    axis.text(-0.15, 1.30, p_lab, transform=axis.transAxes,
+              fontsize=20, fontweight='bold', va='top', ha='right')
 
 # ....................................................................
 #im = ax_cb.imshow(loss_mtx_cb, cmap="viridis_r", aspect="auto", origin="lower")
