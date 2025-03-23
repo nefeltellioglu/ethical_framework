@@ -10,50 +10,62 @@ rule all:
         "out/grid_database-2024-12-02_unlimited_high_R0.pkl",
 
         # Plots for the unlimited vaccination model in the main text
-        "out/2024-10-14_manuscript/glamorous-trajectories.png",
+        "out/2024-10-14_manuscript/glamorous-trajectories-with-legend.svg",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
         "out/2024-10-14_manuscript/ab-heatmap-data.csv",
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png",
         "out/2024-10-14_manuscript/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-10-14_manuscript-trajectories-heatmaps.png",
+        "out/manuscript/2024-10-14_manuscript-triangles.png",
 
         # Plots for the limited vaccination model in the main text
-        "out/2024-10-28_limited_vaccine/glamorous-trajectories.png",
+        "out/2024-10-28_limited_vaccine/glamorous-trajectories-with-legend.svg",
         "out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-data.csv",
         "out/2024-10-28_limited_vaccine/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-group-vaccination.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-10-28_limited_vaccine-trajectories-heatmaps.png",
+        "out/manuscript/2024-10-28_limited_vaccine-triangles.png",
 
         # Additional results included in the supplementary information.
         #   Unlimited vaccine high R0
-        "out/2024-12-02_unlimited_high_R0/glamorous-trajectories.png",
+        "out/2024-12-02_unlimited_high_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-12-02_unlimited_high_R0-trajectories-heatmaps.png",
+        "out/manuscript/2024-12-02_unlimited_high_R0-triangles.png",
         #   Limited vaccine high R0
-        "out/2024-12-02_limited_high_R0/glamorous-trajectories.png",
+        "out/2024-12-02_limited_high_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_limited_high_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-12-02_limited_high_R0-trajectories-heatmaps.png",
+        "out/manuscript/2024-12-02_limited_high_R0-triangles.png",
         #   Unlimited vaccine low R0
-        "out/2024-12-02_unlimited_low_R0/glamorous-trajectories.png",
+        "out/2024-12-02_unlimited_low_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-12-02_unlimited_low_R0-trajectories-heatmaps.png",
+        "out/manuscript/2024-12-02_unlimited_low_R0-triangles.png",
         #   Limited vaccine low R0
-        "out/2024-12-02_limited_low_R0/glamorous-trajectories.png",
+        "out/2024-12-02_limited_low_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_limited_low_R0/glamorous-loss_surfaces.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-clinical-burden.png",
+        "out/manuscript/2024-12-02_limited_low_R0-trajectories-heatmaps.png",
+        "out/manuscript/2024-12-02_limited_low_R0-triangles.png",
 
 
 rule make_grid_database_ode:
@@ -116,7 +128,7 @@ rule plot_glamorous_trajectories_and_loss:
         py = "plot-trajectories-and-loss-surfaces.py",
         config = "config/config-{config_date_name}.json",
     output:
-        "out/{config_date_name}/glamorous-trajectories.png",
+        "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
         "out/{config_date_name}/glamorous-loss_surfaces.png",
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
@@ -197,4 +209,28 @@ rule plot_ab_heatmaps_clinical_burden:
     shell:
         """
         python {input.py} {input.config}
+        """
+
+rule plot_manuscript_figure_1:
+    input:
+        traj = "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
+    output:
+        "out/manuscript/{config_date_name}-trajectories-heatmaps.{ext}"
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+    shell:
+        """
+        convert \\( {input.traj} out/{wildcards.config_date_name}/glamorous-loss_surfaces_global.svg -append \\) -background white -gravity center {output}
+        """
+
+rule plot_manuscript_figure_2:
+    input:
+        tris = "out/{config_date_name}/ab-heatmap-vaccination-and-clinical-burden.png",
+    output:
+        out = "out/manuscript/{config_date_name}-triangles.png"
+    wildcard_constraints:
+        config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
+    shell:
+        """
+        cp {input.tris} {output.out}
         """
