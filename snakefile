@@ -211,6 +211,12 @@ rule plot_ab_heatmaps_clinical_burden:
         python {input.py} {input.config}
         """
 
+# NOTE This may look a little weird, but because of the dependency,
+# you should be able to edit the SVG component file and it will
+# recognise that it needs to update the image. This provides an easy
+# way to edit the trajectory legend position and then recompile the
+# final versions with a command rather than needing to combine things
+# manually in inkscape.
 rule plot_manuscript_figure_1:
     input:
         traj = "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
