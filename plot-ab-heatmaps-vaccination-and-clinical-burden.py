@@ -48,7 +48,7 @@ with open(CONFIG["database_file"], "rb") as f:
 plot_df = pd.read_csv(f"{output_dir}/ab-heatmap-data.csv")
 
 figsize=(7,8)
-labels = ('', '', '', '', '', '')
+labels = ('A', 'B', 'C', 'D', '', '')
 j = 0
 fig = plt.figure(figsize=figsize)
 variables = ["cli_burden", "total_vacc_perc", "vac_1", "vac_2"]
@@ -65,7 +65,7 @@ for var, title, color in zip(variables, titles, colors):
     ax = fig.add_subplot(no)
     ax.text(-0.3, 1.05, labels[j], transform=ax.transAxes,
       fontsize=12, fontweight='bold', va='top', ha='right')
-    
+
     j += 1
 
     if var in ["cli_burden", "total_vacc_perc", "total_vacc",
@@ -89,7 +89,7 @@ for var, title, color in zip(variables, titles, colors):
 
 
 
-    # set up tick positions and labels: 
+    # set up tick positions and labels:
     n_ticks = 5
 
     ax = sns.heatmap(data, linewidth=0.5,
@@ -99,7 +99,7 @@ for var, title, color in zip(variables, titles, colors):
                      cbar_kws={'label': title,"location":'bottom',
                                "pad":0.2},
                      cmap=color,annot=False, fmt='.0f')
-    
+
     if var in [ "vac_1", "vac_2", "total_vacc_perc"]:
         plt.gca().collections[0].set_clim(0,100)
     # colorbar
@@ -111,7 +111,7 @@ for var, title, color in zip(variables, titles, colors):
     ax.set_xlabel("$w_{\\text{EI}}$")
     ax.set_ylabel("$w_{\\text{EV}}$")
 
-    
+
 
     x_lims = ax.get_xlim()
     y_lims = ax.get_ylim()
@@ -138,3 +138,4 @@ plt.subplots_adjust(left=0.1,
                     hspace=0.1)
 
 fig.savefig(f"{output_dir}/ab-heatmap-vaccination-and-clinical-burden.png", bbox_inches='tight', dpi=300)
+fig.savefig(f"{output_dir}/ab-heatmap-vaccination-and-clinical-burden.svg", bbox_inches='tight')
