@@ -72,6 +72,9 @@ rule all:
         "out/2024-12-02_limited_low_R0/ab-heatmap-clinical-burden.png",
         "out/manuscript/2024-12-02_limited_low_R0-trajectories-heatmaps.png",
         "out/manuscript/2024-12-02_limited_low_R0-triangles.png",
+        # Additional heatmap comparison figure
+        "out/manuscript/unlimited_high_low_R0_comparison-trajectories.png",
+        "out/manuscript/unlimited_high_low_R0_comparison-heatmaps.png",
 
 
 rule make_grid_database_ode:
@@ -247,4 +250,25 @@ rule plot_manuscript_figure_2:
     shell:
         """
         cp {input.tris} {output.out}
+        """
+
+
+# NOTE This code is very very brittle! You need to run snakemake a
+# second time after editing the component files by hand in inkscape to
+# get this to generate properly. But since you only ever want to do
+# this once for the manuscript that isn't too bad and even if you
+# forget, the result is fine it just has broken panel labels.
+rule plot_manuscript_figure_3:
+    input:
+        high_surf = "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces_global.svg",
+        high_traj = "out/2024-12-02_unlimited_high_R0/glamorous-trajectories-with-legend.svg",
+        low_surf = "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces_global.svg",
+        low_traj = "out/2024-12-02_unlimited_low_R0/glamorous-trajectories-with-legend.svg",
+    output:
+        traj = "out/manuscript/unlimited_high_low_R0_comparison-trajectories.png",
+        surf = "out/manuscript/unlimited_high_low_R0_comparison-heatmaps.png",
+    shell:
+        """
+        convert \\( {input.high_surf} {input.low_surf} -append \\) -background white -gravity center {output.surf}
+        convert \\( {input.high_traj} {input.low_traj} -append \\) -background white -gravity center {output.traj}
         """
