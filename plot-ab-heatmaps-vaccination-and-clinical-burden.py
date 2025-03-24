@@ -48,7 +48,7 @@ with open(CONFIG["database_file"], "rb") as f:
 plot_df = pd.read_csv(f"{output_dir}/ab-heatmap-data.csv")
 
 figsize=(7,8)
-labels = ('A', 'B', 'C', 'D', '', '')
+labels = ('(a)', '(b)', '(c)', '(d)', '', '')
 j = 0
 fig = plt.figure(figsize=figsize)
 variables = ["cli_burden", "total_vacc_perc", "vac_1", "vac_2"]
