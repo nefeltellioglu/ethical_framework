@@ -228,7 +228,7 @@ print(70 * "=")
 # sensible starting width for a large image in a single column layout.
 fig, axs = plt.subplots(1, 3, figsize=(IMG_WIDTH_SCALING*8.3,
                                        IMG_WIDTH_SCALING*2.4))
-trajectory_panel_labels = ['A', 'B', 'C']
+trajectory_panel_labels = ['(a)', '(b)', '(c)']
 # trajectory_panel_labels = ['', '', '']
 
 # TODO These colour codes should not be hard-coded, but they are just
@@ -579,7 +579,8 @@ ax_ei = ax[1]
 ax_ev = ax[2]
 
 # Include the panel labels on the heatmap panels
-heatmap_panel_labels = ['D', 'E', 'F']
+heatmap_panel_labels = ['(d)', '(e)', '(f)']
+
 for p_lab, axis in zip(heatmap_panel_labels, [ax_cb, ax_ei, ax_ev]):
     axis.text(-0.15, 1.35, p_lab, transform=axis.transAxes,
               fontsize=IMG_PANEL_LABEL_SIZE, fontweight='bold', va='top', ha='right')

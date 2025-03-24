@@ -219,14 +219,14 @@ rule plot_ab_heatmaps_clinical_burden:
 # manually in inkscape.
 rule plot_manuscript_figure_1:
     input:
-        traj = "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
+        traj = "out/{config_date_name}/glamorous-trajectories-with-legend.png",
     output:
         "out/manuscript/{config_date_name}-trajectories-heatmaps.{ext}"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
-        convert \\( {input.traj} out/{wildcards.config_date_name}/glamorous-loss_surfaces_global.svg -append \\) -background white -gravity center {output}
+        convert \\( {input.traj} out/{wildcards.config_date_name}/glamorous-loss_surfaces_global.png -append \\) -background white -gravity center {output}
         """
 
 rule plot_manuscript_figure_2:
