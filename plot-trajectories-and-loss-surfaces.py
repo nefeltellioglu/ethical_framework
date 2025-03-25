@@ -588,9 +588,8 @@ for p_lab, axis in zip(heatmap_panel_labels, [ax_cb, ax_ei, ax_ev]):
 # ....................................................................
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[0]]
 # "cbar" stands for Colour Bar which is matplotlib terminology.
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
-             str(ethical_a_b_list[0][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[0][1]) + r'$)$'
+cbar_label = r'$w_{\text{EI}} = $' + str(ethical_a_b_list[0][0]) + r', $w_{\text{EV}} = $' + str(ethical_a_b_list[0][1])
+
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_cb,
                  cbar = False,
@@ -613,9 +612,7 @@ annotate_global_opt(ax_cb, loss_mtx)
 # ....................................................................
 #im = ax_ei.imshow(loss_mtx_ei, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[1]]
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
-             str(ethical_a_b_list[1][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[1][1]) + r'$)$'
+cbar_label = r'$w_{\text{EI}} = $' + str(ethical_a_b_list[1][0]) + r', $w_{\text{EV}} = $' + str(ethical_a_b_list[1][1])
 
 vmin_ab = find_vmin(loss_mtx)
 
@@ -638,11 +635,8 @@ annotate_global_opt(ax_ei, loss_mtx)
 
 
 # ....................................................................
-#im = ax_ev.imshow(loss_mtx_ev, cmap="viridis_r", aspect="auto", origin="lower")
 loss_mtx = loss_mtxs_ab[ethical_a_b_list[2]]
-cbar_label = r'$\mathcal{L}(w_{\text{EI}} = $' + \
-             str(ethical_a_b_list[2][0]) + \
-             r', $w_{\text{EV}} = $' + str(ethical_a_b_list[2][1]) + r'$)$'
+cbar_label = r'$w_{\text{EI}} = $' + str(ethical_a_b_list[2][0]) + r', $w_{\text{EV}} = $' + str(ethical_a_b_list[2][1])
 
 vmin_ab = find_vmin(loss_mtx)
 im = sns.heatmap(loss_mtx, cmap = "viridis_r",  ax=ax_ev,
