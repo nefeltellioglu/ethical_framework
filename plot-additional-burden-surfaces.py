@@ -23,7 +23,7 @@ else:
     # config_file = "config/config-2025-03-12_unlimited_low_R0.json"
     #config_file = "config/config-2024-12-02_unlimited_low_R0.json"
     # config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
-    config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    config_file = "config/config-2025-03-25_test_unlimited_low_R0.json"
     #config_file = "config/config-2025-03-21_test_unlimited_R0_3p4.json"
 assert os.path.exists(config_file)
 

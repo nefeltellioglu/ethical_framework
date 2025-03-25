@@ -47,8 +47,8 @@
     },
     "time_parameters": {
     "start_time": 0.0,
-    "finish_time": 10000.0,
-    "num_points": 50000
+    "finish_time": 500.0,
+    "num_points": 2500
     },
-    "database_file": "out/grid_database-2025-03-21_test_unlimited_low_R0.pkl"
+    "database_file": "out/grid_database-2025-03-25_unlimited_low_R0.pkl"
 }

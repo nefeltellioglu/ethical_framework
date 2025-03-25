@@ -20,9 +20,10 @@ else:
     #config_file = "config/config-2024-10-14_manuscript_CZ_test_II.json"
     #config_file = "config/config-2024-10-14_manuscript.json"
      #config_file = "config/config-2024-10-28_limited_vaccine.json"
-    config_file = "config/config-2025-03-12_unlimited_low_R0.json"
+    #config_file = "config/config-2025-03-12_unlimited_low_R0.json"
     #config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
     #config_file = "config/config-2025-03-21_test_unlimited_R0_3p4.json"
+    config_file = "config/config-2025-03-21_test_unlimited_low_R0.json"
 assert os.path.exists(config_file)
 
 # NOTE This assumes the configuration file is named with the format

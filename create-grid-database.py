@@ -49,32 +49,7 @@ with open(config_file, "r") as f:
 # calculate beta values since the contact_per_capita_ij in the
 # configuration file are the rescaled values.
 # ------------------------------------------------------------------------------
-# contact_per_capita_11=CONFIG["model_parameters"]["contact_per_capita_11"]
-# contact_per_capita_12=CONFIG["model_parameters"]["contact_per_capita_12"]
-# contact_per_capita_21=CONFIG["model_parameters"]["contact_per_capita_21"]
-# contact_per_capita_22=CONFIG["model_parameters"]["contact_per_capita_22"]
-# gamma=CONFIG["model_parameters"]["gamma"]
-# R0=CONFIG["model_parameters"]["R0"]
 
-# beta = R0 * 2 * gamma / (contact_per_capita_11 + contact_per_capita_22 +
-#                          (contact_per_capita_11**2
-#                           - 2 * contact_per_capita_22 * contact_per_capita_11
-#                           + contact_per_capita_22 ** 2
-#                           + 4 * contact_per_capita_12 * contact_per_capita_21
-#                           )**(0.5))
-
-# model_parameters = [
-#     {
-#         "id": 0,
-#         "parameters": em.SIRParams(
-#             beta_11=beta * contact_per_capita_11,
-#             beta_12=beta * contact_per_capita_12,
-#             beta_21=beta * contact_per_capita_21,
-#             beta_22=beta * contact_per_capita_22,
-#             gamma=CONFIG["model_parameters"]["gamma"],
-#         ),
-#     }
-# ]
 
 N1 = CONFIG["population_parameters"]["pop_size_1"]
 N2 = CONFIG["population_parameters"]["pop_size_2"]
@@ -216,12 +191,12 @@ outcomes = [
         "configuration_id": c["id"],
         "seed": 0,
         "outcome": em.SIROutcome(
-            inf_1_no_vac=sol.r1[-1],
-            inf_1_vu=sol.r1_vu[-1],
+            inf_1_no_vac=sol.r1[-1] + sol.i1[-1],
+            inf_1_vu=sol.r1_vu[-1] + sol.i1_vu[-1],
             inf_1_vp=0,
             total_vac_1=sol.s1_vu[0] + sol.s1_vp[0],
-            inf_2_no_vac=sol.r2[-1],
-            inf_2_vu=sol.r2_vu[-1],
+            inf_2_no_vac=sol.r2[-1] + sol.i2[-1],
+            inf_2_vu=sol.r2_vu[-1] + sol.i2_vu[-1],
             inf_2_vp=0,
             total_vac_2=sol.s2_vu[0] + sol.s2_vp[0],
         ),
