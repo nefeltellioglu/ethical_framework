@@ -401,7 +401,6 @@ ax_inf_g2 = ax[2]
 im = sns.heatmap(mtx_infections_tot, cmap = "viridis_r",  ax=ax_inf_tot, 
                  cbar_kws=dict(location='bottom'), norm=LogNorm())
 cntr = ax_inf_tot.contour(mtx_infections_tot, levels = (10, 100, 1000, 10000), colors = 'black')
-cntr_crit = ax_inf_tot.contour(mtx_infections_tot, [15], colors = 'red')
 ax_inf_tot.clabel(cntr, cntr.levels)
 ax_inf_tot.clabel(cntr_crit, cntr_crit.levels)
 im.invert_yaxis()
