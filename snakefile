@@ -139,7 +139,7 @@ rule plot_glamorous_trajectories_and_loss:
     output:
         "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
         "out/{config_date_name}/glamorous-loss_surfaces.png",
-        "out/{config_date_name}/glamorous-loss_surfaces_global.png",
+        "out/{config_date_name}/glamorous-loss_surfaces_global.svg",
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
         #config_date_name = "2024-10-14_manuscript"
