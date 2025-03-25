@@ -12,6 +12,7 @@ rule all:
         # Plots for the unlimited vaccination model in the main text
         "out/2024-10-14_manuscript/glamorous-trajectories-with-legend.svg",
         "out/2024-10-14_manuscript/glamorous-loss_surfaces.png",
+        "out/2024-10-14_manuscript/glamorous-loss_surfaces_global.svg",
         "out/2024-10-14_manuscript/ab-heatmap-data.csv",
         "out/2024-10-14_manuscript/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-14_manuscript/ab-heatmap-group-vaccination.png",
@@ -22,6 +23,7 @@ rule all:
         # Plots for the limited vaccination model in the main text
         "out/2024-10-28_limited_vaccine/glamorous-trajectories-with-legend.svg",
         "out/2024-10-28_limited_vaccine/glamorous-loss_surfaces.png",
+        "out/2024-10-28_limited_vaccine/glamorous-loss_surfaces_global.svg",
         "out/2024-10-28_limited_vaccine/ab-heatmap-data.csv",
         "out/2024-10-28_limited_vaccine/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-10-28_limited_vaccine/ab-heatmap-group-vaccination.png",
@@ -33,6 +35,7 @@ rule all:
         #   Unlimited vaccine high R0
         "out/2024-12-02_unlimited_high_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces.png",
+        "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces_global.svg",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_high_R0/ab-heatmap-group-vaccination.png",
@@ -42,6 +45,7 @@ rule all:
         #   Limited vaccine high R0
         "out/2024-12-02_limited_high_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_limited_high_R0/glamorous-loss_surfaces.png",
+        "out/2024-12-02_limited_high_R0/glamorous-loss_surfaces_global.svg",
         "out/2024-12-02_limited_high_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_high_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_high_R0/ab-heatmap-group-vaccination.png",
@@ -51,6 +55,7 @@ rule all:
         #   Unlimited vaccine low R0
         "out/2024-12-02_unlimited_low_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces.png",
+        "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces_global.svg",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_unlimited_low_R0/ab-heatmap-group-vaccination.png",
@@ -60,12 +65,16 @@ rule all:
         #   Limited vaccine low R0
         "out/2024-12-02_limited_low_R0/glamorous-trajectories-with-legend.svg",
         "out/2024-12-02_limited_low_R0/glamorous-loss_surfaces.png",
+        "out/2024-12-02_limited_low_R0/glamorous-loss_surfaces_global.svg",
         "out/2024-12-02_limited_low_R0/ab-heatmap-data.csv",
         "out/2024-12-02_limited_low_R0/ab-heatmap-vaccination-and-clinical-burden.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-group-vaccination.png",
         "out/2024-12-02_limited_low_R0/ab-heatmap-clinical-burden.png",
         "out/manuscript/2024-12-02_limited_low_R0-trajectories-heatmaps.png",
         "out/manuscript/2024-12-02_limited_low_R0-triangles.png",
+        # Additional heatmap comparison figure
+        "out/manuscript/unlimited_high_low_R0_comparison-trajectories.png",
+        "out/manuscript/unlimited_high_low_R0_comparison-heatmaps.png",
 
 
 rule make_grid_database_ode:
@@ -130,6 +139,7 @@ rule plot_glamorous_trajectories_and_loss:
     output:
         "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
         "out/{config_date_name}/glamorous-loss_surfaces.png",
+        "out/{config_date_name}/glamorous-loss_surfaces_global.png",
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
         #config_date_name = "2024-10-14_manuscript"
@@ -219,14 +229,15 @@ rule plot_ab_heatmaps_clinical_burden:
 # manually in inkscape.
 rule plot_manuscript_figure_1:
     input:
-        traj = "out/{config_date_name}/glamorous-trajectories-with-legend.png",
+        traj = "out/{config_date_name}/glamorous-trajectories-with-legend.svg",
+        surf = "out/{config_date_name}/glamorous-loss_surfaces_global.svg",
     output:
         "out/manuscript/{config_date_name}-trajectories-heatmaps.{ext}"
     wildcard_constraints:
         config_date_name = "2024-10-14_manuscript|2024-10-28_limited_vaccine|2024-12-02_limited_low_R0|2024-12-02_limited_high_R0|2024-12-02_unlimited_low_R0|2024-12-02_unlimited_high_R0"
     shell:
         """
-        convert \\( {input.traj} out/{wildcards.config_date_name}/glamorous-loss_surfaces_global.png -append \\) -background white -gravity center {output}
+        convert \\( {input.traj} {input.surf} -append \\) -background white -gravity center {output}
         """
 
 rule plot_manuscript_figure_2:
@@ -239,4 +250,25 @@ rule plot_manuscript_figure_2:
     shell:
         """
         cp {input.tris} {output.out}
+        """
+
+
+# NOTE This code is very very brittle! You need to run snakemake a
+# second time after editing the component files by hand in inkscape to
+# get this to generate properly. But since you only ever want to do
+# this once for the manuscript that isn't too bad and even if you
+# forget, the result is fine it just has broken panel labels.
+rule plot_manuscript_figure_3:
+    input:
+        high_surf = "out/2024-12-02_unlimited_high_R0/glamorous-loss_surfaces_global.svg",
+        high_traj = "out/2024-12-02_unlimited_high_R0/glamorous-trajectories-with-legend.svg",
+        low_surf = "out/2024-12-02_unlimited_low_R0/glamorous-loss_surfaces_global.svg",
+        low_traj = "out/2024-12-02_unlimited_low_R0/glamorous-trajectories-with-legend.svg",
+    output:
+        traj = "out/manuscript/unlimited_high_low_R0_comparison-trajectories.png",
+        surf = "out/manuscript/unlimited_high_low_R0_comparison-heatmaps.png",
+    shell:
+        """
+        convert \\( {input.high_surf} {input.low_surf} -append \\) -background white -gravity center {output.surf}
+        convert \\( {input.high_traj} {input.low_traj} -append \\) -background white -gravity center {output.traj}
         """
